@@ -1,153 +1,193 @@
-# Deployment and Operations
+# Product Vision
 
-The complete portfolio must be deployable on a Linux VPS.
+This document is the primary product source of truth for the portfolio.
 
-## Containerization
+## Product
 
-The application consists of at least:
+The product is a bilingual personal portfolio for Baptiste Wetterwald, a graduated Engineer in Computer Science and Networks.
 
-* Angular frontend;
-* Spring Boot backend;
-* PostgreSQL database.
+The portfolio should present Baptiste as:
 
-The Angular application and Spring Boot application must each have their own production Docker image.
+- Software Engineer;
+- Backend / Full-stack oriented;
+- comfortable with professional backend, enterprise, and web application work.
 
-PostgreSQL should use an official PostgreSQL image rather than a custom image unless a genuine requirement appears.
+The portfolio must not primarily position Baptiste as:
 
-The production environment should be orchestrated using Docker Compose unless a better solution becomes justified later.
+- frontend-only;
+- UI/UX;
+- SAP/ABAP specialist;
+- low-code-only developer.
 
-The architecture must remain simple and appropriate for a personal portfolio. Kubernetes or microservice orchestration is not required.
+## Professional Positioning
 
-## Reverse proxy
-
-The public website should preferably expose a single origin.
-
-Conceptually:
-
-```text
-Internet
-   |
-   v
-Reverse proxy / HTTPS
-   |
-   +---- /        ---> Frontend
-   |
-   +---- /api/*   ---> Spring Boot
-                         |
-                         v
-                     PostgreSQL
-```
-
-The exact reverse-proxy implementation should be decided during architecture design.
-
-## CI/CD
-
-Changes merged or pushed to the `main` branch should automatically trigger the production delivery pipeline.
-
-The intended workflow is approximately:
+Primary positioning:
 
 ```text
-push main
-    |
-    v
-CI
-    |
-    +-- frontend checks/tests/build
-    |
-    +-- backend checks/tests/build
-    |
-    +-- Docker image builds
-    |
-    v
-Container registry
-    |
-    v
-VPS deployment
-    |
-    +-- pull versioned images
-    +-- apply controlled database migrations
-    +-- restart/update services
-    +-- verify health
+Software Engineer - Backend / Full-stack
 ```
 
-A container registry such as GitHub Container Registry may be used.
+Primary technologies to emphasize:
 
-Production images should be immutable and versioned, preferably using the Git commit SHA or another traceable version identifier.
+- Java / Spring;
+- C# / .NET;
+- TypeScript / Node.js;
+- Angular.
 
-Avoid relying only on mutable `latest` tags.
+Complementary Microsoft and enterprise application experience is relevant:
 
-## Deployment principles
+- Microsoft Power Platform;
+- Power Apps;
+- Power Automate;
+- Dataverse;
+- Microsoft 365;
+- Custom Connectors where genuinely used;
+- PCF where genuinely used;
+- .NET integrations.
 
-Deployment should be:
+PostgreSQL is part of this portfolio project architecture. It must not be described as previous professional PostgreSQL experience unless such experience is later confirmed.
 
-* automated;
-* reproducible;
-* observable enough to diagnose failures;
-* reasonably rollback-friendly;
-* secure;
-* simple enough for a single VPS.
+## Audience
 
-The VPS should not need the complete development toolchain merely to compile the application on every deployment.
+The portfolio should serve:
 
-Prefer building and validating production artifacts in CI and deploying already-built images.
+- recruiters and hiring managers evaluating software engineering fit;
+- technical leads looking for backend/full-stack evidence;
+- professional contacts who need a concise view of experience, skills, and projects.
 
-## Secrets
+The first impression should be competent, modern, precise, and personal without becoming theatrical.
 
-Secrets must never be committed to Git.
+## Visual Identity
 
-Configuration should distinguish between:
+The visual identity is:
 
-* non-secret application configuration;
-* development configuration;
-* production configuration;
-* secrets.
+```text
+modern software engineering portfolio x French naval / maritime inspiration
+```
 
-Provide safe templates such as `.env.example` where useful.
+Approximate balance:
 
-Potential secrets may eventually include:
+- 70% clean modern interface;
+- 20% maritime visual language;
+- 10% signature effects.
 
-* PostgreSQL credentials;
-* external API tokens;
-* email credentials;
-* deployment credentials.
+Important maritime concepts:
 
-## Database
+- sonar / compass / rose des vents as the primary visual navigation concept;
+- nautical route / waypoints for Education and Experience timelines;
+- porthole for portrait treatment;
+- lighthouse for light/dark theme toggle;
+- lighthouse beam as an optional dark-mode ambient effect;
+- bathymetric / nautical chart graphics as subtle backgrounds;
+- waves as possible transitions;
+- sonar ping as restrained interaction feedback.
 
-PostgreSQL data must live on persistent storage independent from the lifecycle of the PostgreSQL container.
+The maritime concept should support orientation and identity. It must not become a fake control system.
 
-Database migrations must be version-controlled.
+Avoid:
 
-Production schema changes must be performed through an explicit migration mechanism such as Flyway.
+- submarine operating system styling;
+- cyberpunk;
+- videogame HUD;
+- fake telemetry;
+- fake military roleplay;
+- excessive neon.
 
-The production database must never depend on Hibernate automatically recreating or mutating the schema.
+## Home Page Product Requirements
 
-## Health checks
+The home page must explicitly account for:
 
-Production deployment should eventually provide enough health information to determine whether:
+- hero with identity and professional positioning;
+- portrait with future porthole treatment;
+- GitHub and LinkedIn links when URLs are approved;
+- sonar/compass primary visual navigation enhancing real semantic links;
+- short About content;
+- core technologies;
+- featured projects;
+- optional GitHub activity;
+- contact call to action.
 
-* the frontend is serving requests;
-* the backend is operational;
-* required backend dependencies are available.
+The sonar/compass navigation is a major product concept, not only a later animation. It must enhance accessible navigation links rather than replace them.
 
-Spring Boot Actuator may be considered where appropriate.
+## Primary Sections
 
-Health endpoints must not unnecessarily expose sensitive application information.
+The portfolio must include:
 
-## Rollback
+- Home;
+- Education;
+- Experience;
+- Projects;
+- Project details;
+- Contact.
 
-The architecture should make application rollback reasonably straightforward by retaining or identifying previous container image versions.
+French and English must be supported from the beginning with localized routes, content, and metadata.
 
-Database migrations require additional care because application rollback does not automatically imply database rollback.
+## Content Principles
 
-Prefer backward-compatible migrations when reasonably possible.
+- Use confirmed personal information only.
+- Do not invent responsibilities, metrics, project outcomes, links, or media.
+- Keep French and English copy natural in each language rather than mechanically mirrored.
+- Distinguish primary software engineering skills from complementary enterprise/Microsoft experience.
+- Treat SAP-related experience accurately: the Plansee internship occurred inside an SAP-related team but did not involve ABAP development.
 
-## Local development
+## Project Domain
 
-Containerization must not unnecessarily degrade developer experience.
+Projects are backend-managed Spring Boot / PostgreSQL entities.
 
-The architecture may support both:
+Project statuses:
 
-* native development servers with hot reload;
-* Docker Compose for reproducible full-stack integration environments.
+| Status | Meaning |
+| --- | --- |
+| `DRAFT` | Private, not publicly visible. |
+| `PUBLISHED` | Publicly visible and eligible to be featured. |
+| `ARCHIVED` | Publicly visible but belongs to an older or secondary archive. |
 
-The exact local development workflow should be documented once the frontend and backend architecture are finalized.
+Featured projects may have richer detail pages. Smaller archived projects may have only a title and short description.
+
+Do not introduce a generic CMS for V1.
+
+## Technical Product Requirements
+
+The intended application consists of:
+
+- Angular frontend;
+- Spring Boot backend;
+- PostgreSQL database.
+
+Approved frontend direction:
+
+- canonical `/fr/...` and `/en/...` routes;
+- localized static route segments;
+- shared project slugs across locales in V1;
+- runtime UI translations in Angular;
+- localized project content from the backend;
+- Angular request-time SSR as the main runtime model.
+
+Dynamic project pages must not require a frontend rebuild simply to become crawlable after project data changes.
+
+## Deployment Product Requirements
+
+The production domain is assumed to be:
+
+```text
+bwetterwald.fr
+```
+
+Use one public origin:
+
+```text
+/      -> Angular frontend
+/api/* -> Spring Boot backend
+```
+
+Production deployment target:
+
+- Linux VPS;
+- Nginx on the VPS host as reverse proxy / HTTPS layer unless a concrete blocker appears;
+- Docker Compose managing frontend, backend, and PostgreSQL;
+- separate production images for frontend and backend;
+- persistent PostgreSQL storage;
+- GitHub Actions eventually validating, testing, building, publishing immutable GHCR images, deploying on `main`, and verifying health.
+
+Do not design Kubernetes, microservices, or multi-server infrastructure without a new explicit requirement.
+
