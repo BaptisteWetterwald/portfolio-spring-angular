@@ -82,8 +82,8 @@ Known confidentiality limits:
 ## Copy Requirements
 
 - Every public content item must have an explicit locale strategy: translated, locale-specific, shared, or intentionally hidden in one locale.
-- French and English pages should be written naturally, not mechanically mirrored sentence by sentence.
+- English is the primary authoring language for future source copy.
+- French pages should be written as natural localized adaptations, not mechanically mirrored sentence by sentence.
 - Missing content must remain visibly tracked as TODO in documentation until supplied.
 - Public copy should avoid unsupported claims, invented metrics, unverified dates, and private client information.
 - PostgreSQL may be described as part of the portfolio implementation, not as prior professional database experience.
-

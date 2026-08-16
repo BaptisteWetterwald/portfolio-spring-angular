@@ -139,8 +139,11 @@ Project detail metadata should be generated from `ProjectTranslation.title` and 
 | `DRAFT` project slug | 404 for public users. |
 | Old public route | 301 redirect after a route has existed publicly. |
 
+## Content Authoring
+
+- English is the primary authoring language for future portfolio source copy.
+- French content should be written as a natural localized adaptation, not a literal sentence-by-sentence translation.
+
 ## Remaining Decisions
 
-- Whether French or English is the primary authoring language for source copy.
 - Whether localized project slugs are worth adding after V1.
-

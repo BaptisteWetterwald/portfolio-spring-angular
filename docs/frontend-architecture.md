@@ -239,3 +239,12 @@ When bootstrapped later, frontend validation should include:
 - SSR smoke tests for project pages;
 - production build validation.
 
+## Milestone 1 Bootstrap Decisions
+
+- Angular 22 is the frontend baseline. Angular 21 was used only during the initial scaffold because the then-selected local Node runtime did not satisfy Angular 22's engine requirement.
+- Angular 22 requires Node.js `^22.22.3 || ^24.15.0 || >=26.0.0` and TypeScript `>=6.0.0 <6.1.0`.
+- The scaffold uses Angular's standalone component architecture, Angular Router, and request-time SSR support.
+- Tailwind CSS 4 and DaisyUI 5 are installed for the approved future styling direction, but final design tokens and portfolio UI are not implemented yet.
+- Angular ESLint and Prettier provide the frontend linting and formatting baseline.
+- The generated demo UI was replaced with a neutral scaffold placeholder.
+- Angular SSR allowed hosts include `localhost`, `127.0.0.1`, `bwetterwald.fr`, and `www.bwetterwald.fr` so local SSR validation and the approved production host are accepted.

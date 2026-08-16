@@ -126,7 +126,8 @@ French and English must be supported from the beginning with localized routes, c
 
 - Use confirmed personal information only.
 - Do not invent responsibilities, metrics, project outcomes, links, or media.
-- Keep French and English copy natural in each language rather than mechanically mirrored.
+- English is the primary authoring language for future portfolio source copy.
+- French content should be written as a natural localized adaptation, not a literal sentence-by-sentence translation.
 - Distinguish primary software engineering skills from complementary enterprise/Microsoft experience.
 - Treat SAP-related experience accurately: the Plansee internship occurred inside an SAP-related team but did not involve ABAP development.
 
@@ -190,4 +191,3 @@ Production deployment target:
 - GitHub Actions eventually validating, testing, building, publishing immutable GHCR images, deploying on `main`, and verifying health.
 
 Do not design Kubernetes, microservices, or multi-server infrastructure without a new explicit requirement.
-

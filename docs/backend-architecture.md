@@ -40,6 +40,18 @@ fr.bwetterwald.portfolio
 
 The exact Java package can be finalized during bootstrap, but it should align with `bwetterwald.fr` if practical.
 
+## Build System
+
+Milestone 1 uses Maven with the Maven Wrapper.
+
+Rationale:
+
+- Spring Initializr generated a standard Maven Spring Boot project;
+- the wrapper avoids requiring a global Maven installation;
+- Maven is sufficient for the current single Spring Boot backend without adding Gradle-specific complexity.
+
+Windows bootstrap note: Apache Maven Wrapper 3.3.4's script-only `mvnw.cmd` still indexes `(Get-Item $MAVEN_M2_PATH).Target[0]` when invoked directly from PowerShell. That fails for normal Maven user homes because plain directories do not have a `Target` value. A small Windows-only compatibility patch keeps both normal directories and junction/symlink Maven homes working without machine-specific paths.
+
 ## REST API
 
 Use a versioned API prefix:
@@ -98,6 +110,8 @@ Use:
 Production Hibernate schema generation must remain disabled. Use `validate` or an equivalent production-safe schema mode once migrations exist.
 
 PostgreSQL is used for this portfolio project and should not be represented as previous professional PostgreSQL experience in content.
+
+Milestone 1 bootstrap decision: persistence dependencies may be present while database, JPA, and Flyway auto-configuration are disabled in the default application configuration. This keeps the scaffold startable before PostgreSQL and migrations exist. The exclusion must be removed or replaced with real datasource configuration when the PostgreSQL/Flyway milestone begins.
 
 ## Migrations
 
@@ -235,4 +249,3 @@ Nginx and the deployment process should use health endpoints to verify successfu
 - Secrets come from environment variables or mounted secret files.
 - Configure CORS only if frontend and API are split across origins in development.
 - Production should use same-origin `/api/*` behind Nginx and avoid broad CORS.
-
