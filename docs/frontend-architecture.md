@@ -90,6 +90,8 @@ Project metadata must work when `detailedDescription` is absent. `title` and `sh
 
 Use typed Angular services for backend calls.
 
+Milestone 2 decision: centralize backend API URL resolution in Angular and keep browser requests same-origin through `/api`. During SSR, the same resolver may use `BACKEND_INTERNAL_ORIGIN` for an internal backend origin; otherwise it falls back to the incoming request origin. The initial typed service calls Actuator health at `GET /api/health` only.
+
 Initial public endpoints expected:
 
 ```text

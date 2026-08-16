@@ -16,6 +16,13 @@ docs/      Product and architecture documentation
 
 No Docker, PostgreSQL schema, CI/CD, deployment, portfolio UI, project domain, or i18n implementation exists yet.
 
+Milestone 2 adds only Angular to Spring Boot communication plumbing:
+
+- Spring Boot Actuator health is public at `GET /api/health`;
+- Angular calls backend APIs through the same-origin `/api` path;
+- `ng serve` proxies `/api` to `http://localhost:8080` for native development;
+- SSR can use `BACKEND_INTERNAL_ORIGIN` for server-side backend calls when the backend is reachable through an internal origin.
+
 ## Frontend
 
 Prerequisites:
@@ -37,6 +44,8 @@ npm run serve:ssr
 
 `npm run serve:ssr` serves the built SSR output and should be run after `npm run build`.
 
+For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
+
 ## Backend
 
 Prerequisites:
@@ -55,6 +64,12 @@ cmd /c mvnw.cmd package
 ```
 
 The default bootstrap configuration temporarily disables database, JPA, and Flyway auto-configuration so the backend can start before the PostgreSQL milestone.
+
+The current public connectivity endpoint is:
+
+```text
+GET http://localhost:8080/api/health
+```
 
 ## Documentation
 

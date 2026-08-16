@@ -266,6 +266,8 @@ Use native Angular and Spring development servers when rapid feedback matters:
 - local PostgreSQL through Docker Compose or installed PostgreSQL;
 - frontend proxies `/api` to backend during development.
 
+Milestone 2 implements the native development proxy in `frontend/proxy.conf.json`: `/api` is forwarded to `http://localhost:8080`. Browser-side production requests remain same-origin under `/api`; request-time SSR can use `BACKEND_INTERNAL_ORIGIN` when an internal backend origin is available.
+
 Do not require Docker for every UI or backend edit if it slows normal development.
 
 ### Docker Compose Integration
@@ -286,4 +288,3 @@ This should validate service wiring without replacing hot-reload workflows.
 - HTTPS certificate automation details for host Nginx.
 - Backup schedule and retention.
 - Whether a dedicated migration deployment step becomes necessary after V1.
-

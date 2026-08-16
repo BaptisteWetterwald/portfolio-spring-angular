@@ -233,6 +233,14 @@ Avoid Redis unless a concrete need appears.
 
 Spring Boot Actuator is appropriate if configured narrowly.
 
+Milestone 2 decision: use Spring Boot Actuator directly at:
+
+```text
+GET /api/health
+```
+
+This keeps health public, simple, and aligned with the future same-origin `/api/*` production routing without adding duplicate application health controllers.
+
 Expose:
 
 - liveness;
