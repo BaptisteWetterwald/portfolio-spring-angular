@@ -57,8 +57,8 @@ Avoid building the entire interface from navy and cyan. Signal red should be use
 | Token | Light Theme | Dark Theme |
 | --- | --- | --- |
 | `color-bg` | `off-white` | `navy-950` |
-| `color-surface` | `white` | `navy-900` |
-| `color-surface-subtle` | `mist-100` | `navy-800` |
+| `color-surface` | softened near-white | `navy-900` |
+| `color-surface-subtle` | cool mist surface | `navy-800` |
 | `color-text` | `navy-950` | `#F8FAFC` |
 | `color-text-muted` | `slate-500` | `#CBD5E1` |
 | `color-border` | `#D8E1EA` | `#29435F` |
@@ -76,7 +76,7 @@ Light mode should evoke:
 
 - daytime maritime navigation;
 - nautical charts;
-- off-white and white surfaces;
+- off-white and softened near-white surfaces;
 - navy text and structure;
 - subtle red/blue navigation signals.
 
@@ -180,6 +180,23 @@ Theme source priority:
 
 The theme toggle should use a lighthouse concept visually, but the underlying control must remain a normal accessible button or switch.
 
+### Milestone 6 Token and Theme Baseline
+
+Milestone 6 introduces the first implemented CSS custom properties in `frontend/src/styles.css`:
+
+- semantic color tokens for background, surface, text, muted text, border, link, focus, maritime accent, signal accent, and lighthouse light;
+- spacing tokens from `--space-1` through `--space-8`;
+- radius tokens for small, medium, and round controls;
+- small and medium shadow tokens;
+- global visible focus styling;
+- global reduced-motion defaults.
+
+The implementation uses Tailwind and DaisyUI infrastructure, but the visible identity comes from portfolio-level CSS variables and component styles rather than default DaisyUI themes.
+
+Light mode uses the off-white nautical chart background with navy text. Large surfaces should avoid pure clinical white; use softened near-white, cool mist, or very lightly warm surfaces while preserving strong contrast and clear separation between page background, header/footer, and navigation instruments. Dark mode uses deep navy surfaces with restrained cyan illumination. Signal red is limited to active navigation and orientation markers. Brass/gold remains unused as a major brand color.
+
+The lighthouse theme control is a simple button with a CSS lighthouse icon. Dark mode illuminates the lantern, but the moving beam is deferred to the motion milestone.
+
 ## Maritime Motifs
 
 Required or likely motifs:
@@ -195,6 +212,13 @@ Required or likely motifs:
 
 These motifs should be sparse, slow, and secondary to content.
 
+Milestone 6 implements only the structural motifs:
+
+- static sonar/compass navigation rings and waypoint markers in a compact radial geometry;
+- a simple lighthouse theme toggle.
+
+Advanced sonar sweeps, pings, lighthouse beams, waves, bathymetric textures, porthole portrait treatment, and nautical timelines remain deferred to Milestones 9 and 10.
+
 ## Anti-Patterns
 
 Avoid:
@@ -209,4 +233,3 @@ Avoid:
 - dense cockpit panels;
 - decorative charts with no real meaning;
 - animations that block reading or navigation.
-

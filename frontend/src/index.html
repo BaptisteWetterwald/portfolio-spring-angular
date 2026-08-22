@@ -5,6 +5,82 @@
     <title>Portfolio Scaffold</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        var storageKey = 'portfolio.theme';
+        var cookieName = 'portfolio_theme';
+        var theme = readStorageTheme() || readCookieTheme() || readSystemTheme();
+
+        try {
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+        } catch {
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.style.colorScheme = 'light';
+        }
+
+        function toTheme(value) {
+          if (typeof value !== 'string') {
+            return null;
+          }
+
+          var normalized = value.trim().toLowerCase();
+
+          return normalized === 'light' || normalized === 'dark' ? normalized : null;
+        }
+
+        function readStorageTheme() {
+          try {
+            return toTheme(globalThis.localStorage && globalThis.localStorage.getItem(storageKey));
+          } catch {
+            return null;
+          }
+        }
+
+        function readCookieTheme() {
+          try {
+            var cookies = document.cookie ? document.cookie.split(';') : [];
+
+            for (var index = 0; index < cookies.length; index += 1) {
+              var rawCookie = cookies[index];
+              var separatorIndex = rawCookie.indexOf('=');
+
+              if (
+                separatorIndex === -1 ||
+                rawCookie.slice(0, separatorIndex).trim() !== cookieName
+              ) {
+                continue;
+              }
+
+              return toTheme(decodeCookie(rawCookie.slice(separatorIndex + 1).trim()));
+            }
+          } catch {
+            return null;
+          }
+
+          return null;
+        }
+
+        function decodeCookie(value) {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        }
+
+        function readSystemTheme() {
+          try {
+            return globalThis.matchMedia &&
+              globalThis.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+          } catch {
+            return 'light';
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>

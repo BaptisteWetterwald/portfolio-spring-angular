@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-The backend now contains the first PostgreSQL-backed project persistence domain. The frontend now has the Milestone 5 localized routing, runtime i18n, metadata, SSR, and 404 foundation. CI/CD, production deployment, final portfolio UI, public project APIs, and real project pages are still future milestones.
+The backend now contains the first PostgreSQL-backed project persistence domain. The frontend now has the Milestone 6 localized public shell, semantic navigation, locale switching, light/dark theme foundation, and static sonar/compass navigation enhancement. CI/CD, production deployment, final portfolio content, public project APIs, and real project pages are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -45,6 +45,16 @@ Milestone 5 adds the Angular public routing and SSR foundation:
 - localized `<title>`, descriptions, canonical URLs, `hreflang`, OpenGraph URL/title/description, and `html lang` during SSR;
 - localized 404 pages with SSR HTTP 404 status where Angular server routes match a wildcard;
 - a minimal accessible routing shell and placeholder pages only.
+
+Milestone 6 adds the first real public application shell:
+
+- a reusable localized shell with skip link, header, shell-owned main outlet, and footer;
+- conventional primary navigation for Home, Education, Experience, Projects, and Contact;
+- a responsive mobile menu with `aria-expanded`, Escape close behavior, and route-change closing;
+- the existing locale preference flow integrated into the header;
+- a light/dark theme service using `data-theme`, `localStorage`, and a non-sensitive `portfolio_theme` cookie;
+- a simple lighthouse button for theme switching;
+- a static SVG/CSS sonar/compass navigation enhancement around real router links.
 
 ## Frontend
 
@@ -89,6 +99,8 @@ Representative public frontend routes:
 ```
 
 Project detail URLs remain part of the information architecture, but project pages and API consumption are scheduled for a later milestone. Unknown project-detail-like URLs currently render localized 404 content.
+
+The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls only in this milestone; advanced beams, sonar sweeps, waves, portrait treatment, timelines, and final portfolio content are deferred.
 
 For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
 

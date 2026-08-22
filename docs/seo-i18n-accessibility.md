@@ -213,6 +213,8 @@ Requirements:
 - buttons only for actions, links for navigation;
 - form labels explicitly associated with inputs when contact form exists.
 
+Milestone 6 adds a reusable localized shell with semantic `header`, `nav`, shell-owned `main`, and `footer` landmarks. Page placeholders and localized 404 content render as sections inside the shell main region. The sonar/compass enhancement is built from real Angular router links plus decorative SVG marked `aria-hidden="true"`.
+
 ## Keyboard Navigation
 
 Requirements:
@@ -224,6 +226,16 @@ Requirements:
 - no keyboard trap in mobile navigation or motion components;
 - escape closes menus/dialogs where applicable;
 - carousel-like behavior should be avoided unless explicitly justified.
+
+Milestone 6 keyboard behavior:
+
+- the skip link targets `#main-content`;
+- all conventional, mobile, locale, theme, and compass links/buttons are keyboard reachable;
+- focus indicators use the semantic focus token in both themes;
+- the mobile menu trigger exposes `aria-expanded` and `aria-controls`;
+- Escape closes the mobile menu and returns focus to the trigger when appropriate;
+- route changes and link activation close the mobile menu;
+- no keyboard trap is introduced.
 
 ## Screen Readers
 
@@ -237,6 +249,8 @@ Requirements:
 - polite live regions only for important asynchronous state changes.
 
 Milestone 5 sets `<html lang="">` per localized SSR response through the centralized metadata service. The minimal locale switcher uses visible text labels and accessible names; it does not rely on icons.
+
+Milestone 6 keeps visible language labels in the locale switcher and adds accessible labels/states for the lighthouse theme button. Primary and compass navigation expose `aria-current="page"` only for exact current static routes. Decorative compass SVG and lighthouse visual spans are hidden from assistive technologies.
 
 ## Visible Focus
 
@@ -256,6 +270,8 @@ Reduced motion mode should:
 - disable looping waves, sonar pulses, sweeping beams, and parallax;
 - keep state changes understandable through static visual indicators;
 - preserve all navigation and content access.
+
+Milestone 6 does not add looping motion. Component CSS includes reduced-motion safeguards, and the compass remains usable as static links.
 
 ## Accessible Fallback Navigation
 

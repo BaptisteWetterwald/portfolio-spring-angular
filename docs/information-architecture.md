@@ -91,6 +91,21 @@ The conventional navigation must include:
 - active page indication with `aria-current="page"`;
 - responsive mobile navigation with focus management.
 
+Milestone 6 implementation:
+
+- localized routes are still generated from `frontend/src/app/core/routing/localized-routes.ts`;
+- the public shell is rendered once by the localized `PublicLayoutComponent` parent;
+- the primary header navigation and footer navigation link to Home, Education, Experience, Projects, and Contact;
+- exact active matching sets `aria-current="page"` only on the current static destination;
+- localized 404 routes under `/fr/...` and `/en/...` keep the shell but do not mark a main navigation destination active;
+- the locale switcher preserves equivalent localized paths by using `equivalentLocalizedPath`;
+- the compass navigation is a second semantic nav with the same destinations and exact active state;
+- the desktop compass layout should remain compact and radial, with destinations presented as waypoints around the navigation instrument rather than spread across a wide panel.
+
+The mobile menu is conventional rather than radial. The compass enhancement remains desktop-oriented and is not required for narrow-screen navigation.
+
+Future visual milestones may explore a compact or floating sonar state deeper in page content. Before implementing that, evaluate the full navigation hierarchy: conventional header, large signature sonar, possible compact/floating sonar, and footer navigation. The portfolio should not present three simultaneous navigation systems that all do the same thing.
+
 ## Home Page Structure
 
 The home page should explicitly account for:

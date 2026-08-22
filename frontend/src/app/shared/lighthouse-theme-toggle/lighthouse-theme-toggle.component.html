@@ -1,0 +1,15 @@
+<button
+  class="theme-toggle"
+  type="button"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-pressed]="isDark() ? 'true' : 'false'"
+  [attr.title]="ariaLabel()"
+  (click)="toggleTheme()"
+>
+  <span class="theme-toggle__lighthouse" aria-hidden="true">
+    <span class="theme-toggle__lantern"></span>
+    <span class="theme-toggle__tower"></span>
+    <span class="theme-toggle__base"></span>
+  </span>
+  <span class="sr-only">{{ stateLabel() }}</span>
+</button>

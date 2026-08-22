@@ -197,6 +197,18 @@ Proposed component groups:
 
 Components should remain accessible without motion effects.
 
+### Milestone 6 Shell Implementation
+
+Milestone 6 replaces the minimal route placeholder shell with reusable standalone shell components under the localized route parent:
+
+- `PublicLayoutComponent` owns the localized shell boundary and the single `<main id="main-content">` outlet.
+- `SiteHeaderComponent` renders the skip link, identity/home link, conventional primary navigation, locale switcher, lighthouse theme control, mobile menu, and desktop compass enhancement.
+- `SiteFooterComponent` renders a minimal identity, copyright year, and primary route links. No social links are shown because no real GitHub or LinkedIn URLs are confirmed yet.
+- `SonarNavigationComponent` renders the first compass/rose-des-vents visual navigation treatment as semantic links generated from `localized-routes.ts`. Its desktop geometry is intentionally compact and radial so the five destinations read as waypoints around one navigation instrument.
+- `LighthouseThemeToggleComponent` renders a real button backed by the theme service.
+
+The shell is not duplicated across locale route trees. Localized pages remain minimal placeholder sections for now, and real page content remains deferred.
+
 ## Design Tokens
 
 Expose design foundations through CSS custom properties:
@@ -229,6 +241,17 @@ The lighthouse theme toggle must remain a standard interactive control underneat
 
 Light and dark themes are related but not simple inversions.
 
+Milestone 6 implements this in `ThemePreferenceService`:
+
+- explicit choices are persisted in browser `localStorage` under `portfolio.theme`;
+- explicit choices are mirrored to a non-sensitive `portfolio_theme` cookie so SSR can honor them;
+- browser rendering falls back to `prefers-color-scheme` when no explicit choice exists;
+- SSR falls back to light when there is no explicit cookie because system preference is not request-visible;
+- the resolved theme is applied to `<html data-theme="light|dark">` and `color-scheme`;
+- a small inline bootstrap script in `index.html` applies the stored or system theme before Angular hydrates.
+
+No user-preference backend was introduced.
+
 ## Responsive Navigation
 
 Requirements:
@@ -242,6 +265,10 @@ Requirements:
 - `aria-expanded` and `aria-controls` on menu trigger;
 - route changes close mobile navigation;
 - compass/sonar visuals do not hide actual links from assistive technology.
+
+Milestone 6 implements conventional navigation in the header and footer, plus a mobile menu controlled by a real button with `aria-expanded` and `aria-controls`. The menu closes on Escape, link activation, and Angular `NavigationEnd`. Focus is moved toward the first mobile link when the menu opens and back to the trigger when Escape or the trigger closes it.
+
+The compass navigation is a desktop-oriented enhancement in the header. It uses SVG/CSS rings and real router links with exact `aria-current="page"` state. The desktop frame stays narrower than the main shell width and positions destinations close to the radar circumference so Home, Education, Experience, Projects, and Contact feel connected to one instrument. On narrow screens, the conventional mobile menu remains the primary navigation path.
 
 ## Loading and Error States
 

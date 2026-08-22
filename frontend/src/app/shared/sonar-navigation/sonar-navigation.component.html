@@ -1,0 +1,31 @@
+<nav class="sonar-nav" data-sonar-nav [attr.aria-label]="t('nav.visual')">
+  <div class="sonar-nav__frame">
+    <svg class="sonar-nav__svg" viewBox="0 0 100 60" aria-hidden="true" focusable="false">
+      <circle class="sonar-nav__ring" cx="50" cy="30" r="8"></circle>
+      <circle class="sonar-nav__ring" cx="50" cy="30" r="16"></circle>
+      <circle class="sonar-nav__ring" cx="50" cy="30" r="24"></circle>
+      <circle class="sonar-nav__core" cx="50" cy="30" r="2.2"></circle>
+      <path class="sonar-nav__axis" d="M50 4v52M12 30h76"></path>
+      <path class="sonar-nav__axis sonar-nav__axis--diagonal" d="M28 10l44 40M72 10 28 50"></path>
+    </svg>
+
+    <ul class="sonar-nav__list">
+      @for (pageId of navPages; track pageId) {
+        <li [class]="itemClass(pageId)">
+          <a
+            class="sonar-nav__link"
+            [routerLink]="localizedPath(pageId)"
+            routerLinkActive="sonar-nav__link--active"
+            #activeLink="routerLinkActive"
+            [routerLinkActiveOptions]="exactPageCurrentOptions"
+            [attr.aria-current]="activeLink.isActive ? 'page' : null"
+            [attr.data-active]="activeLink.isActive ? 'true' : null"
+          >
+            <span class="sonar-nav__marker" aria-hidden="true"></span>
+            <span class="sonar-nav__label">{{ navLabel(pageId) }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</nav>

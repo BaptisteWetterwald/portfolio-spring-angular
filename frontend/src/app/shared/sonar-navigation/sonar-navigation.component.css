@@ -1,0 +1,175 @@
+:host {
+  display: block;
+}
+
+.sonar-nav {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-4);
+}
+
+.sonar-nav__frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-maritime)),
+    var(--color-surface)
+  );
+}
+
+.sonar-nav__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--color-accent-maritime);
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+.sonar-nav__ring,
+.sonar-nav__axis {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.sonar-nav__core {
+  fill: var(--color-accent-maritime);
+  opacity: 0.78;
+}
+
+.sonar-nav__axis--diagonal {
+  opacity: 0.52;
+}
+
+.sonar-nav__list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  list-style: none;
+}
+
+.sonar-nav__item--home {
+  grid-column: 1 / -1;
+}
+
+.sonar-nav__link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 120ms ease;
+}
+
+.sonar-nav__link:hover,
+.sonar-nav__link:focus-visible {
+  border-color: var(--color-accent-maritime);
+  background: var(--color-surface);
+}
+
+.sonar-nav__link:hover {
+  transform: translateY(-1px);
+}
+
+.sonar-nav__link--active {
+  border-color: var(--color-accent-signal);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--color-accent-signal) 18%, transparent),
+    var(--shadow-sm);
+  font-weight: 700;
+}
+
+.sonar-nav__marker {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-accent-maritime);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+}
+
+.sonar-nav__link--active .sonar-nav__marker {
+  border-color: var(--color-accent-signal);
+  box-shadow: inset 0 0 0 2px var(--color-surface);
+  background: var(--color-accent-signal);
+}
+
+.sonar-nav__label {
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .sonar-nav__frame {
+    min-height: 260px;
+    aspect-ratio: 8 / 3;
+  }
+
+  .sonar-nav__list {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+  }
+
+  .sonar-nav__item {
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+
+  .sonar-nav__item--home {
+    top: 50%;
+    left: 25%;
+  }
+
+  .sonar-nav__item--education {
+    top: 18%;
+    left: 50%;
+  }
+
+  .sonar-nav__item--experience {
+    top: 50%;
+    left: 75%;
+  }
+
+  .sonar-nav__item--projects {
+    top: 76%;
+    left: 61%;
+  }
+
+  .sonar-nav__item--contact {
+    top: 76%;
+    left: 39%;
+  }
+
+  .sonar-nav__link {
+    justify-content: center;
+    min-width: 112px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sonar-nav__link {
+    transition: none;
+  }
+
+  .sonar-nav__link:hover {
+    transform: none;
+  }
+}

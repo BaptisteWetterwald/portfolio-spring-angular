@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
-import { localeStorageKey } from './core/i18n/locales';
+import { localeCookieName, localeStorageKey } from './core/i18n/locales';
 import { routes } from './app.routes';
 
 describe('localized app routes', () => {
@@ -12,6 +12,8 @@ describe('localized app routes', () => {
     } catch {
       // Browser storage is optional in tests.
     }
+
+    document.cookie = `${localeCookieName}=; Path=/; Max-Age=0; SameSite=Lax`;
   });
 
   it('resolves /fr to the French home placeholder', async () => {
@@ -57,6 +59,39 @@ describe('localized app routes', () => {
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Accueil');
   });
 
+  it('renders the public shell landmarks around localized pages', async () => {
+    const harness = await createHarness('/en');
+    const root = harness.routeNativeElement;
+
+    expect(root?.querySelector('header')).not.toBeNull();
+    expect(root?.querySelector('footer')).not.toBeNull();
+    expect(root?.querySelector('a[href="#main-content"]')?.textContent).toContain(
+      'Skip to content',
+    );
+    expect(root?.querySelector('main#main-content')).not.toBeNull();
+    expect(root?.querySelector('nav[data-primary-nav]')).not.toBeNull();
+  });
+
+  it('renders localized primary navigation links from the shared route model', async () => {
+    const harness = await createHarness('/fr');
+    const links = primaryNavLinks(harness);
+
+    expect(links.map((link) => link.textContent?.trim())).toEqual([
+      'Accueil',
+      'Formation',
+      'Expérience',
+      'Projets',
+      'Contact',
+    ]);
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/fr',
+      '/fr/formation',
+      '/fr/experience',
+      '/fr/projets',
+      '/fr/contact',
+    ]);
+  });
+
   it('uses exact aria-current page semantics for static navigation links', async () => {
     const harness = await createHarness('/fr/projets');
 
@@ -82,10 +117,16 @@ async function createHarness(initialUrl: string): Promise<RouterTestingHarness> 
 }
 
 function navLink(harness: RouterTestingHarness, label: string): HTMLAnchorElement | undefined {
-  return Array.from(harness.routeNativeElement?.querySelectorAll('nav a') ?? []).find(
+  return primaryNavLinks(harness).find(
     (link): link is HTMLAnchorElement =>
       link instanceof HTMLAnchorElement && link.textContent?.trim() === label,
   );
+}
+
+function primaryNavLinks(harness: RouterTestingHarness): HTMLAnchorElement[] {
+  return Array.from(
+    harness.routeNativeElement?.querySelectorAll('nav[data-primary-nav] a') ?? [],
+  ).filter((link): link is HTMLAnchorElement => link instanceof HTMLAnchorElement);
 }
 
 async function settleHarness(harness: RouterTestingHarness): Promise<void> {

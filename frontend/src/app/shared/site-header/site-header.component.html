@@ -1,0 +1,73 @@
+<a class="skip-link" href="#main-content">{{ t('nav.skipToContent') }}</a>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="site-header__bar">
+      <a class="site-header__identity" [routerLink]="localizedPath('home')">
+        {{ t('site.name') }}
+      </a>
+
+      <nav class="site-header__nav" data-primary-nav [attr.aria-label]="t('nav.primary')">
+        @for (pageId of navPages; track pageId) {
+          <a
+            class="site-header__nav-link"
+            [routerLink]="localizedPath(pageId)"
+            routerLinkActive="site-header__nav-link--active"
+            #activeLink="routerLinkActive"
+            [routerLinkActiveOptions]="exactPageCurrentOptions"
+            [attr.aria-current]="activeLink.isActive ? 'page' : null"
+          >
+            {{ navLabel(pageId) }}
+          </a>
+        }
+      </nav>
+
+      <div class="site-header__actions">
+        <app-locale-switcher />
+        <app-lighthouse-theme-toggle />
+        <button
+          #mobileMenuButton
+          class="site-header__menu-button"
+          type="button"
+          [attr.aria-label]="menuButtonLabel()"
+          [attr.aria-expanded]="isMobileMenuOpen() ? 'true' : 'false'"
+          [attr.aria-controls]="mobileMenuId"
+          (click)="toggleMobileMenu()"
+        >
+          <span class="site-header__menu-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    @if (isMobileMenuOpen()) {
+      <nav
+        class="site-header__mobile-menu"
+        [id]="mobileMenuId"
+        [attr.aria-label]="t('nav.primary')"
+      >
+        @for (pageId of navPages; track pageId) {
+          <a
+            #mobileNavLink
+            class="site-header__mobile-link"
+            [routerLink]="localizedPath(pageId)"
+            routerLinkActive="site-header__mobile-link--active"
+            #activeMobileLink="routerLinkActive"
+            [routerLinkActiveOptions]="exactPageCurrentOptions"
+            [attr.aria-current]="activeMobileLink.isActive ? 'page' : null"
+            (click)="closeMobileMenu()"
+          >
+            {{ navLabel(pageId) }}
+          </a>
+        }
+      </nav>
+    }
+  </div>
+
+  <div class="site-header__sonar">
+    <app-sonar-navigation />
+  </div>
+</header>

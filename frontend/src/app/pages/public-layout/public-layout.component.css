@@ -1,0 +1,16 @@
+.public-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.public-shell__main {
+  flex: 1;
+  width: 100%;
+}
+
+.public-shell__main:focus {
+  outline: none;
+}

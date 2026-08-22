@@ -1,0 +1,27 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__identity">
+      <a class="site-footer__home" [routerLink]="localizedPath('home')">
+        {{ t('site.name') }}
+      </a>
+      <p class="site-footer__copyright">
+        © {{ currentYear }} {{ t('site.name') }}. {{ t('footer.copyright') }}
+      </p>
+    </div>
+
+    <nav class="site-footer__nav" [attr.aria-label]="t('nav.footer')">
+      @for (pageId of navPages; track pageId) {
+        <a
+          class="site-footer__link"
+          [routerLink]="localizedPath(pageId)"
+          routerLinkActive="site-footer__link--active"
+          #activeLink="routerLinkActive"
+          [routerLinkActiveOptions]="exactPageCurrentOptions"
+          [attr.aria-current]="activeLink.isActive ? 'page' : null"
+        >
+          {{ navLabel(pageId) }}
+        </a>
+      }
+    </nav>
+  </div>
+</footer>

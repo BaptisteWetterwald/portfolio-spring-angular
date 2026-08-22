@@ -1,5 +1,9 @@
-<main id="main-content" class="mx-auto max-w-3xl px-6 py-12">
-  <p class="mb-3 text-sm font-medium text-base-content/60">{{ t('pages.placeholderLabel') }}</p>
-  <h1 class="text-3xl font-semibold tracking-normal">{{ heading() }}</h1>
-  <p class="mt-4 text-base leading-7 text-base-content/70">{{ placeholder() }}</p>
-</main>
+<section class="mx-auto max-w-3xl px-6 py-12 sm:py-16" aria-labelledby="page-title">
+  <p class="mb-3 text-sm font-medium" style="color: var(--color-text-muted)">
+    {{ t('pages.placeholderLabel') }}
+  </p>
+  <h1 id="page-title" class="text-3xl font-semibold tracking-normal">{{ heading() }}</h1>
+  <p class="mt-4 text-base leading-7" style="color: var(--color-text-muted)">
+    {{ placeholder() }}
+  </p>
+</section>

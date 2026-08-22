@@ -41,6 +41,10 @@ Guidelines:
 - do not simulate targeting, tracking, fake telemetry, or military systems;
 - reduced motion mode should show a static selected marker.
 
+Milestone 6 implements only the static foundation: SVG/CSS compass rings, waypoint markers, exact active state, and real router links. Its desktop geometry should stay compact and radial, with destinations visually associated with the radar circumference rather than spread across a wide rectangular panel. There is no sweep, ping loop, fake targeting, coordinates, or telemetry. Future animation should build on this component without making navigation motion-dependent.
+
+Future M9/M10 exploration: consider whether the large sonar navigation should have an optional compact or floating state once users scroll into page content. A compact control could reuse the same localized route model and active-state semantics, and could expand on hover, click, or focus to reveal the five destinations. This must be evaluated against the conventional header, the large signature sonar, and footer navigation so the site does not present redundant navigation systems with the same purpose at the same time.
+
 ## Lighthouse Theme Toggle
 
 Purpose:
@@ -53,6 +57,8 @@ Guidelines:
 - light/dark transition may use a short beam or aperture effect;
 - the effect should not flash rapidly;
 - state must be clear without animation.
+
+Milestone 6 implements the lighthouse as a simple accessible button. The dark state illuminates the lantern statically. The moving lighthouse beam and transition choreography remain deferred.
 
 ## Lighthouse Beam
 
@@ -170,4 +176,3 @@ Do not add GSAP for simple fades, transforms, hover states, or theme transitions
 - No fake telemetry or military roleplay.
 - No simulated sonar screen as the only navigation.
 - No animation that delays access to content.
-

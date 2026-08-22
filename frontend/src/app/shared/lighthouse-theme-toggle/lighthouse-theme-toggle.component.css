@@ -1,0 +1,73 @@
+:host {
+  display: inline-flex;
+}
+
+.theme-toggle {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 120ms ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent-maritime);
+  background: var(--color-surface-subtle);
+}
+
+.theme-toggle:active {
+  transform: translateY(1px);
+}
+
+.theme-toggle__lighthouse {
+  position: relative;
+  display: grid;
+  width: 18px;
+  height: 25px;
+  place-items: center;
+}
+
+.theme-toggle__lantern,
+.theme-toggle__tower,
+.theme-toggle__base {
+  display: block;
+}
+
+.theme-toggle__lantern {
+  width: 12px;
+  height: 7px;
+  border: 1px solid var(--color-text);
+  border-radius: 3px 3px 1px 1px;
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-lighthouse-light));
+}
+
+.theme-toggle__tower {
+  width: 10px;
+  height: 13px;
+  border-right: 2px solid transparent;
+  border-bottom: 13px solid var(--color-text);
+  border-left: 2px solid transparent;
+}
+
+.theme-toggle__base {
+  width: 18px;
+  height: 3px;
+  border-radius: var(--radius-round);
+  background: var(--color-text);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-toggle__lantern {
+  border-color: var(--color-lighthouse-light);
+  background: var(--color-lighthouse-light);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-lighthouse-light) 20%, transparent),
+    0 0 16px color-mix(in srgb, var(--color-lighthouse-light) 58%, transparent);
+}

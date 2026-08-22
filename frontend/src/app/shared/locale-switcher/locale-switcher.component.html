@@ -1,7 +1,7 @@
-<nav class="flex items-center gap-2 text-sm" [attr.aria-label]="t('localeSwitcher.ariaLabel')">
+<nav class="locale-switcher" [attr.aria-label]="t('localeSwitcher.ariaLabel')">
   @for (locale of locales; track locale) {
     <a
-      class="underline-offset-4 hover:underline focus:outline-2 focus:outline-offset-2"
+      class="locale-switcher__link"
       [routerLink]="localePath(locale)"
       [attr.aria-current]="currentLocale() === locale ? 'page' : null"
       [attr.aria-label]="localeAriaLabel(locale)"

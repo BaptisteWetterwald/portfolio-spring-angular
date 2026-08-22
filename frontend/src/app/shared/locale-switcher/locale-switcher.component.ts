@@ -11,6 +11,7 @@ import { equivalentLocalizedPath } from '../../core/routing/localized-routes';
   selector: 'app-locale-switcher',
   imports: [RouterLink],
   templateUrl: './locale-switcher.component.html',
+  styleUrl: './locale-switcher.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocaleSwitcherComponent {

@@ -2,7 +2,7 @@
 
 Angular SSR frontend for the portfolio.
 
-Milestone 5 currently implements canonical `/fr` and `/en` route trees, localized static route segments, root locale redirects, lightweight runtime translations, localized metadata, request-time SSR, and localized 404 placeholders. Final portfolio content, project API consumption, and the visual system are later milestones.
+Milestone 6 currently implements canonical `/fr` and `/en` route trees, localized static route segments, root locale redirects, lightweight runtime translations, localized metadata, request-time SSR, localized 404 placeholders, and the first public shell with semantic navigation, responsive mobile navigation, locale switching, light/dark theme preference, lighthouse theme control, and static sonar/compass navigation. Final portfolio content, project API consumption, and advanced visual/motion work are later milestones.
 
 ## Commands
 
@@ -18,6 +18,8 @@ npm run smoke:ssr
 ```
 
 Run `npm run serve:ssr` after `npm run build` to start the built SSR server.
+
+The theme preference uses browser `localStorage` key `portfolio.theme` and mirrors explicit choices to a non-sensitive `portfolio_theme` cookie so request-time SSR can render the selected theme when present. Without an explicit choice, the browser uses `prefers-color-scheme`; SSR falls back to light.
 
 `npm run smoke:ssr` expects the built SSR server to already be running. Verified sequence:
 

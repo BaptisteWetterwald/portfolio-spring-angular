@@ -30,13 +30,33 @@ const checks = [
     name: 'French home SSR',
     path: '/fr',
     expectedStatus: 200,
-    expectedBody: ['<html lang="fr"', '>Accueil</h1>', 'https://bwetterwald.fr/fr'],
+    expectedBody: [
+      '<html lang="fr"',
+      '>Accueil</h1>',
+      'https://bwetterwald.fr/fr',
+      'href="#main-content"',
+      'data-primary-nav',
+      'class="locale-switcher"',
+      'class="theme-toggle"',
+      'data-sonar-nav',
+      '<footer',
+    ],
   },
   {
     name: 'English home SSR',
     path: '/en',
     expectedStatus: 200,
-    expectedBody: ['<html lang="en"', '>Home</h1>', 'https://bwetterwald.fr/en'],
+    expectedBody: [
+      '<html lang="en"',
+      '>Home</h1>',
+      'https://bwetterwald.fr/en',
+      'href="#main-content"',
+      'data-primary-nav',
+      'class="locale-switcher"',
+      'class="theme-toggle"',
+      'data-sonar-nav',
+      '<footer',
+    ],
   },
   {
     name: 'French education metadata',
@@ -45,6 +65,8 @@ const checks = [
     expectedBody: [
       '<title>Formation | Baptiste Wetterwald</title>',
       'hreflang="en" href="https://bwetterwald.fr/en/education"',
+      'href="/fr/formation"',
+      'data-primary-nav',
     ],
   },
   {
@@ -54,6 +76,8 @@ const checks = [
     expectedBody: [
       '<title>Projects | Baptiste Wetterwald</title>',
       'hreflang="fr" href="https://bwetterwald.fr/fr/projets"',
+      'href="/en/projects"',
+      'data-sonar-nav',
     ],
   },
   {
@@ -66,7 +90,12 @@ const checks = [
     name: 'localized unknown route returns 404',
     path: '/fr/inconnu',
     expectedStatus: 404,
-    expectedBody: ['Page introuvable', 'noindex,follow'],
+    expectedBody: [
+      'Page introuvable',
+      'noindex,follow',
+      'data-primary-nav',
+      'class="theme-toggle"',
+    ],
   },
 ];
 
