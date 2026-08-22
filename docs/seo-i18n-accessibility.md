@@ -27,6 +27,14 @@ Root `/` redirects using:
 
 The root path is an entry point, not canonical content.
 
+Milestone 5 implements this as a real HTTP 302 in the built Express SSR server. The redirect priority is:
+
+1. explicit preference from the `portfolio_locale` cookie;
+2. `Accept-Language`;
+3. English.
+
+The locale switcher persists explicit browser choices in `localStorage` under `portfolio.locale` and mirrors the value to the cookie so future SSR requests can honor it. No geolocation is used.
+
 ## Localized Routes
 
 Use locale-prefixed canonical routes:
@@ -47,6 +55,23 @@ French and English use localized section slugs:
 
 Project slugs are shared across locales in V1.
 
+Milestone 5 implements the static canonical route set:
+
+```text
+/fr
+/fr/formation
+/fr/experience
+/fr/projets
+/fr/contact
+/en
+/en/education
+/en/experience
+/en/projects
+/en/contact
+```
+
+Unsupported locale prefixes are not normalized to English; they render not-found behavior.
+
 ## Hreflang
 
 Every localized canonical page should output alternate links.
@@ -54,10 +79,20 @@ Every localized canonical page should output alternate links.
 Example for a project:
 
 ```html
-<link rel="alternate" hreflang="fr" href="https://bwetterwald.fr/fr/projets/project-slug">
-<link rel="alternate" hreflang="en" href="https://bwetterwald.fr/en/projects/project-slug">
-<link rel="alternate" hreflang="x-default" href="https://bwetterwald.fr/">
+<link
+  rel="alternate"
+  hreflang="fr"
+  href="https://bwetterwald.fr/fr/projets/project-slug"
+/>
+<link
+  rel="alternate"
+  hreflang="en"
+  href="https://bwetterwald.fr/en/projects/project-slug"
+/>
+<link rel="alternate" hreflang="x-default" href="https://bwetterwald.fr/" />
 ```
+
+Milestone 5 emits `fr`, `en`, and `x-default` alternates for equivalent static pages. `x-default` points to `https://bwetterwald.fr/`, and each localized page canonicalizes to itself.
 
 ## Canonical URLs
 
@@ -78,6 +113,8 @@ Each route needs:
 
 Project metadata should come from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. `detailedDescription` is optional and must not be required for metadata.
 
+Milestone 5 metadata is centralized in `PageMetadataService`. Static placeholder pages receive SSR-rendered localized title, description, canonical URL, OpenGraph title/description/url/type/locale, and alternate locale metadata. Structured data is intentionally deferred until approved personal/project content exists.
+
 ## SSR and Prerendering
 
 Approved main runtime model: Angular request-time SSR.
@@ -92,6 +129,8 @@ Requirements:
 - localized 404 pages rendered server-side;
 - stable routes may be prerendered only if this provides a clear benefit and does not complicate content updates.
 
+Milestone 5 keeps request-time SSR as the runtime model with Angular server routes using `RenderMode.Server`. The production build reports `Prerendered 0 static routes`.
+
 ## Dynamic Project Pages
 
 Dynamic project pages require:
@@ -105,6 +144,8 @@ Dynamic project pages require:
 - sitemap entries only for public projects with required translations.
 
 Archived projects may have compact detail pages when no detailed description exists.
+
+Dynamic project pages are not implemented in Milestone 5 because the public project REST API is a later milestone. Project-detail-like URLs currently return localized not-found content rather than placeholder project data.
 
 ## Sitemap
 
@@ -151,12 +192,12 @@ Project pages should use the optional project logo/media reference when approved
 
 Potential schema types:
 
-| Page | Structured Data |
-| --- | --- |
-| Home | `Person` or `ProfilePage` for Baptiste Wetterwald, limited to approved public details. |
-| Projects index | `CollectionPage`. |
-| Project detail | `CreativeWork` or `SoftwareSourceCode` when appropriate. |
-| Breadcrumbs | `BreadcrumbList`. |
+| Page           | Structured Data                                                                        |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Home           | `Person` or `ProfilePage` for Baptiste Wetterwald, limited to approved public details. |
+| Projects index | `CollectionPage`.                                                                      |
+| Project detail | `CreativeWork` or `SoftwareSourceCode` when appropriate.                               |
+| Breadcrumbs    | `BreadcrumbList`.                                                                      |
 
 Known approved identity details may be used: Baptiste Wetterwald, Software Engineer, graduated Engineer in Computer Science and Networks. Do not publish unapproved location, employer claims beyond the content inventory, social URLs, images, or contact details.
 
@@ -194,6 +235,8 @@ Requirements:
 - decorative graphics hidden from assistive tech;
 - meaningful alt text for content images;
 - polite live regions only for important asynchronous state changes.
+
+Milestone 5 sets `<html lang="">` per localized SSR response through the centralized metadata service. The minimal locale switcher uses visible text labels and accessible names; it does not rely on icons.
 
 ## Visible Focus
 
@@ -234,4 +277,3 @@ When implementation starts, validate with:
 - sitemap and robots inspection;
 - metadata inspection for each locale;
 - Lighthouse or equivalent SEO/performance checks.
-

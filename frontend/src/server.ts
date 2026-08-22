@@ -12,6 +12,10 @@ import {
   isHopByHopHeader,
   proxyBackendApiRequest,
 } from './server-api-proxy';
+import {
+  readLocalePreferenceCookie,
+  resolvePreferredLocale,
+} from './app/core/i18n/locale-resolution';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -23,6 +27,23 @@ const angularApp = new AngularNodeAppEngine();
  */
 app.use('/api', (req, res, next) => {
   proxyApiRequest(req, res).catch(next);
+});
+
+/**
+ * Keep / as a non-canonical entry point and make built SSR redirects true HTTP redirects.
+ */
+app.use((req, res, next) => {
+  if (req.path !== '/' || (req.method !== 'GET' && req.method !== 'HEAD')) {
+    next();
+    return;
+  }
+
+  const locale = resolvePreferredLocale({
+    storedPreference: readLocalePreferenceCookie(req.headers.cookie),
+    acceptLanguageHeader: req.headers['accept-language'],
+  });
+
+  res.redirect(302, `/${locale}`);
 });
 
 /**

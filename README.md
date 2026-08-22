@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-The backend now contains the first PostgreSQL-backed project persistence domain. CI/CD, production deployment, portfolio UI, public project APIs, project pages, and i18n implementation are still future milestones.
+The backend now contains the first PostgreSQL-backed project persistence domain. The frontend now has the Milestone 5 localized routing, runtime i18n, metadata, SSR, and 404 foundation. CI/CD, production deployment, final portfolio UI, public project APIs, and real project pages are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -37,6 +37,15 @@ Milestone 4 adds backend persistence for projects and technologies:
 - Spring Data JPA repositories support the future public project query patterns;
 - PostgreSQL-backed repository tests use isolated temporary schemas and fictional fixture data only.
 
+Milestone 5 adds the Angular public routing and SSR foundation:
+
+- canonical `/fr` and `/en` route trees with localized static segments;
+- `/` redirects by explicit locale preference, `Accept-Language`, then English;
+- runtime UI translations without an external i18n dependency;
+- localized `<title>`, descriptions, canonical URLs, `hreflang`, OpenGraph URL/title/description, and `html lang` during SSR;
+- localized 404 pages with SSR HTTP 404 status where Angular server routes match a wildcard;
+- a minimal accessible routing shell and placeholder pages only.
+
 ## Frontend
 
 Prerequisites:
@@ -57,6 +66,29 @@ npm run serve:ssr
 ```
 
 `npm run serve:ssr` serves the built SSR output and should be run after `npm run build`.
+
+If a local IDE runtime resolves an older Node.js version, invoke Angular through the system Node installation, for example:
+
+```powershell
+& 'C:\Program Files\nodejs\node.exe' .\node_modules\@angular\cli\bin\ng.js build
+```
+
+Representative public frontend routes:
+
+```text
+/fr
+/fr/formation
+/fr/experience
+/fr/projets
+/fr/contact
+/en
+/en/education
+/en/experience
+/en/projects
+/en/contact
+```
+
+Project detail URLs remain part of the information architecture, but project pages and API consumption are scheduled for a later milestone. Unknown project-detail-like URLs currently render localized 404 content.
 
 For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
 
@@ -122,11 +154,11 @@ docker compose down
 
 Compose services:
 
-| Service | Image/runtime | Host binding | Notes |
-| --- | --- | --- | --- |
-| `postgres` | `postgres:18-alpine` | `127.0.0.1:5432` | Data persists in the `postgres-data` named volume. |
-| `backend` | Spring Boot on Eclipse Temurin Java 21 JRE Alpine | `127.0.0.1:8080` | Uses `jdbc:postgresql://postgres:5432/portfolio`, runs Flyway, then validates the schema. |
-| `frontend` | Angular SSR on Node.js 24.19.0 Alpine | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`. |
+| Service    | Image/runtime                                     | Host binding     | Notes                                                                                     |
+| ---------- | ------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------- |
+| `postgres` | `postgres:18-alpine`                              | `127.0.0.1:5432` | Data persists in the `postgres-data` named volume.                                        |
+| `backend`  | Spring Boot on Eclipse Temurin Java 21 JRE Alpine | `127.0.0.1:8080` | Uses `jdbc:postgresql://postgres:5432/portfolio`, runs Flyway, then validates the schema. |
+| `frontend` | Angular SSR on Node.js 24.19.0 Alpine             | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`.                                       |
 
 The local host port bindings are loopback-only and exist for browser testing, native frontend proxy compatibility, native backend database access, and health validation. Production routing through host Nginx is not implemented in this milestone.
 

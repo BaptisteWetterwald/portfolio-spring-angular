@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-This document proposes the Angular architecture. No Angular project has been initialized yet.
+This document describes the Angular architecture and milestone implementation decisions.
 
 ## Objectives
 
@@ -44,6 +44,29 @@ Root `/` redirects using:
 2. `Accept-Language`;
 3. English fallback.
 
+### Milestone 5 Routing Implementation
+
+Milestone 5 implements the static public route tree from a small typed route model in `frontend/src/app/core/routing/localized-routes.ts`. The Angular route config is generated per supported locale so the mapping remains explicit without copy-pasting two full route hierarchies.
+
+Implemented canonical static routes:
+
+```text
+/fr
+/fr/formation
+/fr/experience
+/fr/projets
+/fr/contact
+/en
+/en/education
+/en/experience
+/en/projects
+/en/contact
+```
+
+Only `fr` and `en` are supported locale prefixes. Unsupported prefixes such as `/de` and `/es/projects` fall through to not-found handling instead of rendering English content.
+
+Project detail URL helpers exist for equivalent-locale switching with shared V1 slugs, but real project detail pages and project API consumption remain Milestone 7 work. Until then, project-detail-like requests are handled as not found.
+
 ## SSR and Prerendering
 
 Approved V1 runtime model: Angular request-time SSR.
@@ -58,6 +81,8 @@ Requirements:
 
 This implies the production frontend image should run an SSR-capable Angular server runtime, not only static files.
 
+Milestone 5 keeps `outputMode: "server"` and configures all public routes with `RenderMode.Server`. The production build prerenders zero static routes, so public pages are rendered at request time.
+
 ## I18n
 
 Approved V1 approach:
@@ -69,6 +94,16 @@ Approved V1 approach:
 - shared project slug across locales in V1.
 
 Backend project translations should not be stored in frontend translation files.
+
+Milestone 5 uses a lightweight Angular-native runtime translation layer:
+
+- supported locales are centralized in `core/i18n/locales.ts`;
+- translation dictionaries live in `core/i18n/translations.ts`;
+- components resolve copy through `TranslationService` instead of inline locale conditionals;
+- `LocaleContextService` exposes the current locale as a signal;
+- no external i18n dependency was added.
+
+The initial dictionaries only cover the routing shell, locale switcher, metadata, placeholders, and 404 text. Dynamic backend project translations are deliberately not represented in frontend translation files.
 
 ## Localized SEO Metadata
 
@@ -86,6 +121,10 @@ Metadata should be resolved before SSR completes for SEO-critical routes.
 
 Project metadata must work when `detailedDescription` is absent. `title` and `shortDescription` are the required fields.
 
+Milestone 5 centralizes static page metadata in `PageMetadataService`. It sets localized `<title>`, meta description, robots, canonical URL, `hreflang` alternates for `fr`, `en`, and `x-default`, OpenGraph title/description/type/url/locale, and `<html lang="">` during SSR.
+
+404 pages use localized title/description, `noindex,follow`, OpenGraph URL/locale, and no canonical or `hreflang` links.
+
 ## API Consumption
 
 Use typed Angular services for backend calls.
@@ -99,6 +138,8 @@ BACKEND_INTERNAL_ORIGIN=http://backend:8080
 ```
 
 The built SSR server also proxies browser-facing `/api/*` requests to `BACKEND_INTERNAL_ORIGIN`. This is local integration behavior that preserves browser same-origin API calls and avoids adding production Nginx configuration before the deployment milestone. Native `ng serve` development continues to use `frontend/proxy.conf.json` and is unchanged.
+
+Milestone 5 does not add project API consumption. Existing `/api` proxy behavior and the health service remain available.
 
 Initial public endpoints expected:
 
@@ -144,15 +185,15 @@ Reconsider a state library only if the app develops complex cross-page editing, 
 
 Proposed component groups:
 
-| Group | Examples |
-| --- | --- |
-| App shell | Header, footer, skip link, locale switcher, lighthouse theme toggle. |
-| Navigation | Semantic nav links, sonar/compass visual navigation, mobile nav. |
-| Content | Page heading, section heading, nautical timeline, content block. |
-| Home | Hero, portrait/porthole slot, technology highlights, featured work, contact CTA. |
-| Projects | Project card, logo/media display, technology list, project link set. |
-| Feedback | Loading state, empty state, error state, not-found view. |
-| SEO | Metadata helpers, structured data helpers. |
+| Group      | Examples                                                                         |
+| ---------- | -------------------------------------------------------------------------------- |
+| App shell  | Header, footer, skip link, locale switcher, lighthouse theme toggle.             |
+| Navigation | Semantic nav links, sonar/compass visual navigation, mobile nav.                 |
+| Content    | Page heading, section heading, nautical timeline, content block.                 |
+| Home       | Hero, portrait/porthole slot, technology highlights, featured work, contact CTA. |
+| Projects   | Project card, logo/media display, technology list, project link set.             |
+| Feedback   | Loading state, empty state, error state, not-found view.                         |
+| SEO        | Metadata helpers, structured data helpers.                                       |
 
 Components should remain accessible without motion effects.
 

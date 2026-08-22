@@ -13,10 +13,10 @@ This document defines the routing, page hierarchy, and navigation model for the 
 
 Use locale-prefixed canonical routes for all public content.
 
-| Locale | Prefix | Notes |
-| --- | --- | --- |
-| French | `/fr` | French content and metadata. |
-| English | `/en` | English content and metadata. |
+| Locale  | Prefix | Notes                         |
+| ------- | ------ | ----------------------------- |
+| French  | `/fr`  | French content and metadata.  |
+| English | `/en`  | English content and metadata. |
 
 The root path `/` should redirect to a locale using this approved priority:
 
@@ -38,14 +38,16 @@ Canonical URL examples should use this domain.
 
 ## Route Hierarchy
 
-| Page | French URL | English URL | Purpose |
-| --- | --- | --- | --- |
-| Home | `/fr` | `/en` | Identity, positioning, navigation, featured work, contact entry. |
-| Education | `/fr/formation` | `/en/education` | Education and semester abroad. |
-| Experience | `/fr/experience` | `/en/experience` | Professional timeline and roles. |
-| Projects | `/fr/projets` | `/en/projects` | Published and archived project listing. |
-| Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail. |
-| Contact | `/fr/contact` | `/en/contact` | Contact options, social links, downloadable CV. |
+| Page           | French URL          | English URL          | Purpose                                                          |
+| -------------- | ------------------- | -------------------- | ---------------------------------------------------------------- |
+| Home           | `/fr`               | `/en`                | Identity, positioning, navigation, featured work, contact entry. |
+| Education      | `/fr/formation`     | `/en/education`      | Education and semester abroad.                                   |
+| Experience     | `/fr/experience`    | `/en/experience`     | Professional timeline and roles.                                 |
+| Projects       | `/fr/projets`       | `/en/projects`       | Published and archived project listing.                          |
+| Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail.                                        |
+| Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                  |
+
+Milestone 5 implements the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Project detail URLs remain part of the information architecture, but real project detail routing, data loading, and metadata are scheduled for Milestone 7. Until then, project-detail-like URLs render not-found content.
 
 ## Project URL Strategy
 
@@ -67,14 +69,16 @@ Rationale:
 
 Localized project slugs can be introduced later with redirect mapping if there is a strong SEO reason.
 
+The Milestone 5 locale-switching helper already preserves shared slugs when computing equivalent project-detail paths. No project slug translation is attempted in V1.
+
 ## Navigation Model
 
 The site has two coordinated navigation layers:
 
-| Layer | Role | Requirement |
-| --- | --- | --- |
-| Semantic navigation | Real, accessible links for all primary routes. | Must work with keyboard, screen readers, SSR HTML, reduced motion, and no visual effects. |
-| Sonar/compass/rose des vents navigation | Primary visual navigation concept. | Must enhance the semantic links, not replace them. |
+| Layer                                   | Role                                           | Requirement                                                                               |
+| --------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Semantic navigation                     | Real, accessible links for all primary routes. | Must work with keyboard, screen readers, SSR HTML, reduced motion, and no visual effects. |
+| Sonar/compass/rose des vents navigation | Primary visual navigation concept.             | Must enhance the semantic links, not replace them.                                        |
 
 The sonar/compass navigation should be treated as part of the application shell design, not only as a future animation. Its markup should still expose normal links and active states.
 
@@ -106,14 +110,14 @@ This is a content and hierarchy specification, not a complete page design.
 
 ## Page Composition
 
-| Page | Primary Content Blocks |
-| --- | --- |
-| Home | Hero, portrait, visual navigation, short About, core technologies, featured projects, optional GitHub activity, contact CTA. |
-| Education | Nautical route/waypoint timeline, ENSISA engineering degree, DUT, UQAC semester abroad, optional credentials. |
-| Experience | Nautical route/waypoint timeline, confirmed roles, technology/context summaries, confidentiality-aware details. |
-| Projects | Featured published projects, full published list, archived/secondary project area, technology filters if useful. |
+| Page           | Primary Content Blocks                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home           | Hero, portrait, visual navigation, short About, core technologies, featured projects, optional GitHub activity, contact CTA.                |
+| Education      | Nautical route/waypoint timeline, ENSISA engineering degree, DUT, UQAC semester abroad, optional credentials.                               |
+| Experience     | Nautical route/waypoint timeline, confirmed roles, technology/context summaries, confidentiality-aware details.                             |
+| Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |
 | Project detail | Title, short description, optional detailed description, logo/media reference, technologies, GitHub/demo links, related projects if useful. |
-| Contact | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form. |
+| Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                       |
 
 ## Metadata Requirements
 
@@ -130,14 +134,27 @@ Project detail metadata should be generated from `ProjectTranslation.title` and 
 
 ## Error and Redirect Routes
 
-| Route Type | Behavior |
-| --- | --- |
-| `/` | Locale redirect using stored preference, `Accept-Language`, then English. |
-| Unknown locale | Return 404 unless a clear redirect rule exists. |
-| Unknown page | Localized 404 with semantic navigation. |
-| Unknown project slug | Localized 404 with link back to Projects. |
-| `DRAFT` project slug | 404 for public users. |
-| Old public route | 301 redirect after a route has existed publicly. |
+| Route Type           | Behavior                                                                  |
+| -------------------- | ------------------------------------------------------------------------- |
+| `/`                  | Locale redirect using stored preference, `Accept-Language`, then English. |
+| Unknown locale       | Return 404 unless a clear redirect rule exists.                           |
+| Unknown page         | Localized 404 with semantic navigation.                                   |
+| Unknown project slug | Localized 404 with link back to Projects.                                 |
+| `DRAFT` project slug | 404 for public users.                                                     |
+| Old public route     | 301 redirect after a route has existed publicly.                          |
+
+Milestone 5 root redirect implementation:
+
+- browser locale choices are stored in `localStorage` under `portfolio.locale`;
+- the same explicit choice is mirrored to a non-sensitive `portfolio_locale` cookie so request-time SSR can honor it;
+- the built Express SSR server returns a real HTTP 302 from `/` to `/fr` or `/en`;
+- the Angular root guard provides the same behavior for client-side and development-server navigation.
+
+Milestone 5 404 implementation:
+
+- unknown routes under `/fr/...` and `/en/...` render localized not-found pages;
+- unsupported locale prefixes render a not-found page selected from stored preference, `Accept-Language`, or English fallback, and never render canonical portfolio content;
+- Angular server routes plus `RESPONSE_INIT.status` set HTTP 404 for SSR wildcard routes.
 
 ## Content Authoring
 

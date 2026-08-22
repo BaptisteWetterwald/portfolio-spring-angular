@@ -1,0 +1,33 @@
+<a
+  class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:bg-base-100 focus:p-3"
+  href="#main-content"
+>
+  {{ t('nav.skipToContent') }}
+</a>
+
+<header class="border-b border-base-300 px-6 py-4">
+  <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
+    <a class="font-medium underline-offset-4 hover:underline" [routerLink]="localizedPath('home')">
+      {{ t('site.name') }}
+    </a>
+
+    <nav class="flex flex-wrap items-center gap-4 text-sm" [attr.aria-label]="t('nav.primary')">
+      @for (pageId of navPages; track pageId) {
+        <a
+          class="underline-offset-4 hover:underline focus:outline-2 focus:outline-offset-2"
+          [routerLink]="localizedPath(pageId)"
+          routerLinkActive="font-semibold"
+          #activeLink="routerLinkActive"
+          [routerLinkActiveOptions]="exactPageCurrentOptions"
+          [attr.aria-current]="activeLink.isActive ? 'page' : null"
+        >
+          {{ navLabel(pageId) }}
+        </a>
+      }
+    </nav>
+
+    <app-locale-switcher />
+  </div>
+</header>
+
+<router-outlet />
