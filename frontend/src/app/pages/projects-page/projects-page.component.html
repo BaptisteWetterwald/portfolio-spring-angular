@@ -1,0 +1,56 @@
+<section class="projects-page" aria-labelledby="page-title">
+  <header class="projects-page__header">
+    <h1 id="page-title">{{ t('pages.projects.heading') }}</h1>
+    <p>{{ t('pages.projects.introduction') }}</p>
+  </header>
+
+  @switch (state().kind) {
+    @case ('error') {
+      <section class="projects-page__notice" aria-labelledby="projects-error-title">
+        <h2 id="projects-error-title">{{ t('projects.error.heading') }}</h2>
+        <p>{{ t('projects.error.message') }}</p>
+      </section>
+    }
+    @case ('loaded') {
+      @if (projectCount() === 0) {
+        <section class="projects-page__notice" aria-labelledby="projects-empty-title">
+          <h2 id="projects-empty-title">{{ t('projects.empty.heading') }}</h2>
+          <p>{{ t('projects.empty.message') }}</p>
+        </section>
+      } @else {
+        @if (featuredProjects().length > 0) {
+          <section class="projects-page__group" aria-labelledby="featured-projects-title">
+            <h2 id="featured-projects-title">{{ t('projects.section.featured') }}</h2>
+            <div class="projects-page__grid">
+              @for (project of featuredProjects(); track project.slug) {
+                <app-project-card [project]="project" [locale]="locale" />
+              }
+            </div>
+          </section>
+        }
+
+        @if (publishedProjects().length > 0) {
+          <section class="projects-page__group" aria-labelledby="published-projects-title">
+            <h2 id="published-projects-title">{{ t('projects.section.published') }}</h2>
+            <div class="projects-page__grid">
+              @for (project of publishedProjects(); track project.slug) {
+                <app-project-card [project]="project" [locale]="locale" />
+              }
+            </div>
+          </section>
+        }
+
+        @if (archivedProjects().length > 0) {
+          <section class="projects-page__group" aria-labelledby="archived-projects-title">
+            <h2 id="archived-projects-title">{{ t('projects.section.archived') }}</h2>
+            <div class="projects-page__grid">
+              @for (project of archivedProjects(); track project.slug) {
+                <app-project-card [project]="project" [locale]="locale" />
+              }
+            </div>
+          </section>
+        }
+      }
+    }
+  }
+</section>

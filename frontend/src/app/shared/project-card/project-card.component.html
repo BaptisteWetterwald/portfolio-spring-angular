@@ -1,0 +1,60 @@
+<article class="project-card">
+  @if (mediaSrc(); as src) {
+    <img
+      class="project-card__media"
+      [src]="src"
+      width="88"
+      height="88"
+      loading="lazy"
+      [alt]="project().title"
+    />
+  }
+
+  <div class="project-card__body">
+    <div class="project-card__heading-row">
+      <h3 class="project-card__title">
+        <a [routerLink]="detailPath()" [attr.aria-label]="detailsAriaLabel()">
+          {{ project().title }}
+        </a>
+      </h3>
+      <span class="project-card__status">
+        {{ t('projects.status.' + project().status) }}
+      </span>
+    </div>
+
+    <p class="project-card__description">{{ project().shortDescription }}</p>
+
+    @if (project().technologies.length > 0) {
+      <ul class="project-card__technologies" [attr.aria-label]="t('projects.technologies')">
+        @for (technology of project().technologies; track technology.slug) {
+          <li>{{ technology.name }}</li>
+        }
+      </ul>
+    }
+
+    @if (project().githubUrl || project().demoUrl) {
+      <nav class="project-card__links" [attr.aria-label]="t('projects.links')">
+        @if (project().githubUrl; as githubUrl) {
+          <a
+            [href]="githubUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="externalLinkAria('github')"
+          >
+            {{ externalLinkLabel('github') }}
+          </a>
+        }
+        @if (project().demoUrl; as demoUrl) {
+          <a
+            [href]="demoUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="externalLinkAria('demo')"
+          >
+            {{ externalLinkLabel('demo') }}
+          </a>
+        }
+      </nav>
+    }
+  </div>
+</article>

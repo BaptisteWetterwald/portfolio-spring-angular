@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-The backend now contains the first PostgreSQL-backed project persistence domain. The frontend now has the Milestone 6 localized public shell, semantic navigation, locale switching, light/dark theme foundation, and static sonar/compass navigation enhancement. CI/CD, production deployment, final portfolio content, public project APIs, and real project pages are still future milestones.
+The backend now contains the PostgreSQL-backed project persistence domain and the first public localized project API. The frontend now has the localized public shell, semantic navigation, locale switching, light/dark theme foundation, static sonar/compass navigation enhancement, and API-backed project listing/detail pages. CI/CD, production deployment, final personal content, contact handling, GitHub integration, media management, and final visual polish are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -56,6 +56,15 @@ Milestone 6 adds the first real public application shell:
 - a simple lighthouse button for theme switching;
 - a static SVG/CSS sonar/compass navigation enhancement around real router links.
 
+Milestone 7 adds public project API and page rendering:
+
+- `GET /api/v1/projects?locale=fr|en` lists public `PUBLISHED` and `ARCHIVED` projects with the requested translation;
+- `GET /api/v1/projects?locale=fr|en&status=PUBLISHED|ARCHIVED` filters the public project list;
+- `GET /api/v1/projects/featured?locale=fr|en` lists featured `PUBLISHED` projects only;
+- `GET /api/v1/projects/{slug}?locale=fr|en` returns localized detail for a public project;
+- `DRAFT`, unknown, and untranslated project detail requests return 404;
+- Angular Projects and project detail routes resolve project data during request-time SSR and render empty/error/not-found states without inventing portfolio content.
+
 ## Frontend
 
 Prerequisites:
@@ -95,10 +104,16 @@ Representative public frontend routes:
 /en/education
 /en/experience
 /en/projects
+/en/projects/:slug
 /en/contact
 ```
 
-Project detail URLs remain part of the information architecture, but project pages and API consumption are scheduled for a later milestone. Unknown project-detail-like URLs currently render localized 404 content.
+Project detail URLs use shared slugs across locales:
+
+```text
+/fr/projets/:slug
+/en/projects/:slug
+```
 
 The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls only in this milestone; advanced beams, sonar sweeps, waves, portrait treatment, timelines, and final portfolio content are deferred.
 
@@ -145,6 +160,16 @@ The current public connectivity endpoint is:
 
 ```text
 GET http://localhost:8080/api/health
+```
+
+The current public project API endpoints are:
+
+```text
+GET http://localhost:8080/api/v1/projects?locale=en
+GET http://localhost:8080/api/v1/projects?locale=en&status=PUBLISHED
+GET http://localhost:8080/api/v1/projects?locale=en&status=ARCHIVED
+GET http://localhost:8080/api/v1/projects/featured?locale=en
+GET http://localhost:8080/api/v1/projects/{slug}?locale=en
 ```
 
 For native backend development, provide a local PostgreSQL database matching those values. The Compose `postgres` service exposes PostgreSQL on `127.0.0.1:5432` by default for this purpose.

@@ -1,8 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 
 import { localeCookieName, localeStorageKey } from './core/i18n/locales';
+import { ProjectApiService } from './core/projects/project-api.service';
+import { ProjectDetailDto, ProjectSummaryDto } from './core/projects/project.models';
 import { routes } from './app.routes';
 
 describe('localized app routes', () => {
@@ -40,6 +44,27 @@ describe('localized app routes', () => {
     expect(
       harness.routeNativeElement?.querySelector('app-localized-page h1')?.textContent,
     ).toContain('Education');
+  });
+
+  it('resolves localized projects routes to the API-backed projects page', async () => {
+    const harness = await createHarness('/en/projects', {
+      listProjects: () => of([summaryProject()]),
+    });
+
+    expect(
+      harness.routeNativeElement?.querySelector('app-projects-page h1')?.textContent,
+    ).toContain('Projects');
+    expect(harness.routeNativeElement?.textContent).toContain('Portfolio API');
+  });
+
+  it('resolves localized project detail routes with shared slugs', async () => {
+    const harness = await createHarness('/fr/projets/portfolio-api', {
+      getProject: () => of(detailProject()),
+    });
+
+    expect(
+      harness.routeNativeElement?.querySelector('app-project-detail-page h1')?.textContent,
+    ).toContain('Portfolio API');
   });
 
   it('does not silently render supported content for unsupported locale prefixes', async () => {
@@ -104,16 +129,40 @@ describe('localized app routes', () => {
     expect(
       harness.routeNativeElement?.querySelector('app-not-found-page h1')?.textContent,
     ).toContain('Page introuvable');
+    expect(
+      harness.routeNativeElement
+        ?.querySelector<HTMLAnchorElement>('app-not-found-page a')
+        ?.getAttribute('href'),
+    ).toBe('/fr/projets');
     expect(navLink(harness, 'Projets')?.getAttribute('aria-current')).toBeNull();
   });
 });
 
-async function createHarness(initialUrl: string): Promise<RouterTestingHarness> {
+async function createHarness(
+  initialUrl: string,
+  projectApiOverrides: Partial<ProjectApiService> = {},
+): Promise<RouterTestingHarness> {
   TestBed.configureTestingModule({
-    providers: [provideRouter(routes)],
+    providers: [
+      provideRouter(routes),
+      {
+        provide: ProjectApiService,
+        useValue: projectApiStub(projectApiOverrides),
+      },
+    ],
   });
 
   return RouterTestingHarness.create(initialUrl);
+}
+
+function projectApiStub(overrides: Partial<ProjectApiService>) {
+  return {
+    listProjects: () => of([]),
+    listFeaturedProjects: () => of([]),
+    getProject: () =>
+      throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' })),
+    ...overrides,
+  };
 }
 
 function navLink(harness: RouterTestingHarness, label: string): HTMLAnchorElement | undefined {
@@ -133,4 +182,27 @@ async function settleHarness(harness: RouterTestingHarness): Promise<void> {
   harness.detectChanges();
   await harness.fixture.whenStable();
   harness.detectChanges();
+}
+
+function summaryProject(): ProjectSummaryDto {
+  return {
+    slug: 'portfolio-api',
+    title: 'Portfolio API',
+    shortDescription: 'Public API fixture.',
+    logoMediaRef: null,
+    githubUrl: null,
+    demoUrl: null,
+    featured: true,
+    status: 'PUBLISHED',
+    displayOrder: 10,
+    technologies: [],
+  };
+}
+
+function detailProject(): ProjectDetailDto {
+  return {
+    ...summaryProject(),
+    detailedDescription: null,
+    availableLocales: ['fr', 'en'],
+  };
 }

@@ -145,7 +145,16 @@ Dynamic project pages require:
 
 Archived projects may have compact detail pages when no detailed description exists.
 
-Dynamic project pages are not implemented in Milestone 5 because the public project REST API is a later milestone. Project-detail-like URLs currently return localized not-found content rather than placeholder project data.
+Dynamic project pages were not implemented in Milestone 5 because the public project REST API was a later milestone. At that stage, project-detail-like URLs returned localized not-found content rather than placeholder project data.
+
+Milestone 7 implements dynamic project pages through request-time SSR:
+
+- `/fr/projets/:slug` and `/en/projects/:slug` load project detail data from the backend API before rendering;
+- `PUBLISHED` and `ARCHIVED` projects are crawlable when the requested translation exists;
+- unknown, `DRAFT`, non-public, and untranslated project detail requests render localized not-found content and set SSR HTTP 404 where Angular SSR handles the request;
+- project detail metadata comes from the localized project title and short description;
+- project detail `hreflang` alternates are emitted only for locales returned by the API in `availableLocales`;
+- `detailedDescription` is optional and is not required for rendering or metadata.
 
 ## Sitemap
 

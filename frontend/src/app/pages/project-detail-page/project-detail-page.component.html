@@ -1,0 +1,81 @@
+@switch (state().kind) {
+  @case ('error') {
+    <section class="project-detail project-detail--narrow" aria-labelledby="project-error-title">
+      <h1 id="project-error-title">{{ t('projectDetail.error.heading') }}</h1>
+      <p>{{ t('projectDetail.error.message') }}</p>
+      <a [routerLink]="projectsPath">{{ t('projects.backToProjects') }}</a>
+    </section>
+  }
+  @case ('notFound') {
+    <app-not-found-page />
+  }
+  @case ('loaded') {
+    @if (project(); as project) {
+      <article class="project-detail" aria-labelledby="project-title">
+        <a class="project-detail__back-link" [routerLink]="projectsPath">
+          {{ t('projects.backToProjects') }}
+        </a>
+
+        <header class="project-detail__header">
+          @if (mediaSrc(); as src) {
+            <img
+              class="project-detail__media"
+              [src]="src"
+              width="112"
+              height="112"
+              [alt]="project.title"
+            />
+          }
+
+          <div class="project-detail__intro">
+            <p class="project-detail__status">{{ t('projects.status.' + project.status) }}</p>
+            <h1 id="project-title">{{ project.title }}</h1>
+            <p>{{ project.shortDescription }}</p>
+          </div>
+        </header>
+
+        @if (project.technologies.length > 0) {
+          <section class="project-detail__section" aria-labelledby="project-technologies-title">
+            <h2 id="project-technologies-title">{{ t('projects.technologies') }}</h2>
+            <ul class="project-detail__technologies">
+              @for (technology of project.technologies; track technology.slug) {
+                <li>{{ technology.name }}</li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (project.githubUrl || project.demoUrl) {
+          <nav class="project-detail__links" [attr.aria-label]="t('projects.links')">
+            @if (project.githubUrl; as githubUrl) {
+              <a
+                [href]="githubUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                [attr.aria-label]="externalLinkAria('github')"
+              >
+                {{ externalLinkLabel('github') }}
+              </a>
+            }
+            @if (project.demoUrl; as demoUrl) {
+              <a
+                [href]="demoUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                [attr.aria-label]="externalLinkAria('demo')"
+              >
+                {{ externalLinkLabel('demo') }}
+              </a>
+            }
+          </nav>
+        }
+
+        @if (project.detailedDescription) {
+          <section class="project-detail__section">
+            <p class="project-detail__description">{{ project.detailedDescription }}</p>
+          </section>
+        }
+      </article>
+    }
+  }
+}

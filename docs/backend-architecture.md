@@ -76,6 +76,42 @@ Initial public endpoints:
 
 Locale should be explicit. The API may inspect `Accept-Language` as a fallback, but frontend SSR should pass locale explicitly.
 
+### Milestone 7 Project API Implementation
+
+Milestone 7 implements the project endpoints above except the standalone technologies endpoint, which remains deferred until a frontend use case needs it.
+
+Implemented classes follow the documented feature-oriented structure:
+
+```text
+project
+  api
+    PublicProjectController
+    ProjectSummaryDto
+    ProjectDetailDto
+    TechnologyDto
+  application
+    PublicProjectService
+    ProjectApiMapper
+    ProjectNotFoundException
+    UnsupportedProjectLocaleException
+    UnsupportedPublicProjectStatusException
+  persistence
+    ProjectTranslationRepository
+    ProjectTechnologyRepository
+common
+  error
+    ApiErrorDto
+    ApiExceptionHandler
+```
+
+`PublicProjectController` only handles HTTP routing and parameter binding. `PublicProjectService` owns public visibility, locale parsing, status-filter validation, missing-translation behavior, and transactional mapping. The public API never exposes JPA entities.
+
+The list endpoint returns public projects with the requested translation only. Public projects missing the requested translation are omitted from localized lists. Detail lookup for an unknown slug, `DRAFT` slug, non-public project, or missing requested translation returns 404.
+
+The service accepts only `fr` and `en` locale query values and only `PUBLISHED` or `ARCHIVED` status filters. `DRAFT` is rejected as an invalid public filter and is never returned by public queries.
+
+The featured endpoint returns only projects where `status = PUBLISHED`, `featured = true`, and the requested translation exists.
+
 ## DTOs
 
 Do not expose JPA entities directly.
@@ -92,11 +128,47 @@ DTOs should include already-localized fields for the requested locale.
 
 `ProjectDetailDto.detailedDescription` should be nullable or omitted when not present.
 
+Milestone 7 DTO contracts:
+
+```text
+ProjectSummaryDto
+  slug: string
+  title: string
+  shortDescription: string
+  logoMediaRef: string | null
+  githubUrl: string | null
+  demoUrl: string | null
+  featured: boolean
+  status: "PUBLISHED" | "ARCHIVED"
+  displayOrder: number
+  technologies: TechnologyDto[]
+
+ProjectDetailDto
+  all ProjectSummaryDto fields
+  detailedDescription: string | null
+  availableLocales: ("fr" | "en")[]
+
+TechnologyDto
+  slug: string
+  name: string
+  iconRef: string | null
+  category: string | null
+
+ApiErrorDto
+  status: number
+  code: string
+  message: string
+```
+
+`availableLocales` is included on detail responses so the frontend can emit `hreflang` alternates only for localized detail pages that actually exist.
+
 ## Mapping
 
 Manual mapping is acceptable for V1 because the domain is small.
 
 Introduce MapStruct or another mapper only if mapping logic becomes repetitive enough to justify the dependency.
+
+Milestone 7 uses manual mapping in `ProjectApiMapper`. Mapping runs inside `PublicProjectService` read-only transactions because Hibernate open-in-view is disabled.
 
 ## Persistence
 
@@ -181,6 +253,18 @@ Expected responses:
 
 API errors should be structured and avoid exposing stack traces.
 
+Milestone 7 centralizes public API errors in `ApiExceptionHandler` and returns compact JSON bodies such as:
+
+```json
+{
+  "status": 404,
+  "code": "project_not_found",
+  "message": "Project not found."
+}
+```
+
+Unsupported locales return `400` with `unsupported_locale`; unsupported status filters return `400` with `invalid_project_status`.
+
 ## Project Domain
 
 Project records should separate locale-neutral fields from translated content.
@@ -227,6 +311,14 @@ technology
 `ProjectStatus` is persisted as a string enum. `ProjectLocale` is a small enum persisted through an attribute converter as `fr` or `en`. The project-to-technology relationship is an explicit association entity because the join table owns `display_order`.
 
 Entity timestamps use a small JPA lifecycle callback superclass that sets `created_at` and `updated_at` on persist and updates `updated_at` on update. The migration also defines database defaults as a fallback for non-JPA inserts.
+
+Milestone 7 public API query strategy:
+
+- list queries select `ProjectTranslationEntity` for the requested locale and `join fetch` the owning project;
+- detail queries select the requested translation for a public slug and `join fetch` the owning project;
+- technologies are loaded in display order through `ProjectTechnologyRepository`;
+- list endpoints batch-load technologies for all returned project IDs in one query to avoid one query per project;
+- no collection fetch join is used for project technologies, avoiding `MultipleBagFetchException` and duplicate project rows.
 
 ## Future Contact Handling
 

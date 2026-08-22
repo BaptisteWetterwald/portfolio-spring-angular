@@ -4,6 +4,8 @@ import {
   localizedSegment,
   localizedStaticRouteSegments,
   localizedPath,
+  localizedProjectDetailAlternates,
+  localizedProjectDetailPath,
   matchLocalizedPath,
   staticPageIds,
 } from './localized-routes';
@@ -49,9 +51,19 @@ describe('localized route model', () => {
   });
 
   it('keeps V1 project slugs shared when switching locales', () => {
+    expect(localizedProjectDetailPath('fr', 'portfolio-spring-angular')).toBe(
+      '/fr/projets/portfolio-spring-angular',
+    );
     expect(equivalentLocalizedPath('/fr/projets/portfolio-spring-angular', 'en')).toBe(
       '/en/projects/portfolio-spring-angular',
     );
+    expect(
+      equivalentLocalizedPath('/en/projects/portfolio-spring-angular', 'fr', ['fr', 'en']),
+    ).toBe('/fr/projets/portfolio-spring-angular');
+  });
+
+  it('uses the projects index when project detail translation is known unavailable', () => {
+    expect(equivalentLocalizedPath('/en/projects/english-only', 'fr', ['en'])).toBe('/fr/projets');
   });
 
   it('falls back to the selected locale home for unknown routes', () => {
@@ -62,6 +74,9 @@ describe('localized route model', () => {
     expect(localizedAlternates('projects')).toEqual({
       fr: '/fr/projets',
       en: '/en/projects',
+    });
+    expect(localizedProjectDetailAlternates('portfolio-spring-angular', ['fr'])).toEqual({
+      fr: '/fr/projets/portfolio-spring-angular',
     });
   });
 });

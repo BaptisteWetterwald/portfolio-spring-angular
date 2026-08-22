@@ -184,19 +184,19 @@ Recommended indexes:
 Public project listing:
 
 ```text
-Find projects where status in (PUBLISHED, ARCHIVED), join translation for requested locale, order by status grouping/display_order/published_at.
+Find projects where status in (PUBLISHED, ARCHIVED), join translation for requested locale, order deterministically by display_order, published_at descending, then project id.
 ```
 
 Published featured projects:
 
 ```text
-Find projects where status = PUBLISHED and featured = true, join translation for requested locale, order by display_order/published_at.
+Find projects where status = PUBLISHED and featured = true, join translation for requested locale, order deterministically by display_order, published_at descending, then project id.
 ```
 
 Archived projects:
 
 ```text
-Find projects where status = ARCHIVED, join translation for requested locale, order by display_order/published_at.
+Find projects where status = ARCHIVED, join translation for requested locale, order deterministically by display_order, published_at descending, then project id.
 ```
 
 Project detail:
@@ -206,6 +206,27 @@ Find project by slug where status in (PUBLISHED, ARCHIVED), join requested trans
 ```
 
 Missing translation policy must be explicit. For SEO, returning a localized 404 is cleaner than silently showing the wrong language unless a fallback is approved.
+
+Milestone 7 policy:
+
+- localized list endpoints join the requested translation and omit public projects that do not have that translation;
+- localized detail endpoints return 404 for missing requested translations;
+- no API or frontend fallback renders another language silently;
+- detail responses include `availableLocales` so the frontend can publish `hreflang` alternates only for detail pages with existing translations.
+
+Milestone 7 fetch strategy:
+
+- project list/detail APIs query through `ProjectTranslationEntity` for the requested locale;
+- list/detail translation queries `join fetch` the owning `ProjectEntity`;
+- public API ordering stays deterministic and does not group by status in the backend;
+- technologies are fetched through the explicit `project_technologies` association and ordered by `display_order`, then technology name and ID;
+- list APIs batch-load technologies for all returned project IDs instead of issuing one technology query per project.
+
+Milestone 7 frontend grouping:
+
+- Angular receives the deterministically ordered public project list and groups it for presentation into featured published, non-featured published, and archived sections;
+- featured published projects are not rendered a second time in the non-featured published section;
+- this grouping is a Projects page presentation concern, not a separate backend ordering contract.
 
 ## Richer Case Studies Later
 

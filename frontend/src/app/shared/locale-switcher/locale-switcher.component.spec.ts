@@ -1,9 +1,13 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
 import { localeCookieName, localeStorageKey } from '../../core/i18n/locales';
+import { ProjectApiService } from '../../core/projects/project-api.service';
+import { ProjectDetailDto, ProjectSummaryDto } from '../../core/projects/project.models';
 
 describe('LocaleSwitcherComponent integration', () => {
   afterEach(() => {
@@ -41,14 +45,64 @@ describe('LocaleSwitcherComponent integration', () => {
     expect(globalThis.localStorage?.getItem(localeStorageKey)).toBe('en');
     expect(document.cookie).toContain('portfolio_locale=en');
   });
+
+  it('preserves the shared project slug when switching locale on detail pages', async () => {
+    const harness = await createHarness('/fr/projets/portfolio-api', {
+      getProject: () => of(detailProject()),
+    });
+    const englishLink = localeLink(harness, 'en');
+
+    expect(englishLink?.getAttribute('href')).toBe('/en/projects/portfolio-api');
+  });
+
+  it('links to the target projects index when the project translation is unavailable', async () => {
+    const harness = await createHarness('/en/projects/portfolio-api', {
+      getProject: () => of(detailProject({ availableLocales: ['en'] })),
+    });
+    const frenchLink = localeLink(harness, 'fr');
+
+    expect(frenchLink?.getAttribute('href')).toBe('/fr/projets');
+  });
+
+  it('clears project-specific locale behavior after navigating away from detail', async () => {
+    const harness = await createHarness('/en/projects/portfolio-api', {
+      getProject: () => of(detailProject({ availableLocales: ['en'] })),
+    });
+
+    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr/projets');
+
+    await harness.navigateByUrl('/en/education');
+    await settleHarness(harness);
+
+    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr/formation');
+  });
 });
 
-async function createHarness(initialUrl: string): Promise<RouterTestingHarness> {
+async function createHarness(
+  initialUrl: string,
+  projectApiOverrides: Partial<ProjectApiService> = {},
+): Promise<RouterTestingHarness> {
   TestBed.configureTestingModule({
-    providers: [provideRouter(routes)],
+    providers: [
+      provideRouter(routes),
+      {
+        provide: ProjectApiService,
+        useValue: projectApiStub(projectApiOverrides),
+      },
+    ],
   });
 
   return RouterTestingHarness.create(initialUrl);
+}
+
+function projectApiStub(overrides: Partial<ProjectApiService>) {
+  return {
+    listProjects: () => of([]),
+    listFeaturedProjects: () => of([]),
+    getProject: () =>
+      throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' })),
+    ...overrides,
+  };
 }
 
 function localeLink(
@@ -67,4 +121,28 @@ async function settleHarness(harness: RouterTestingHarness): Promise<void> {
   harness.detectChanges();
   await harness.fixture.whenStable();
   harness.detectChanges();
+}
+
+function summaryProject(): ProjectSummaryDto {
+  return {
+    slug: 'portfolio-api',
+    title: 'Portfolio API',
+    shortDescription: 'Public API fixture.',
+    logoMediaRef: null,
+    githubUrl: null,
+    demoUrl: null,
+    featured: true,
+    status: 'PUBLISHED',
+    displayOrder: 10,
+    technologies: [],
+  };
+}
+
+function detailProject(overrides: Partial<ProjectDetailDto> = {}): ProjectDetailDto {
+  return {
+    ...summaryProject(),
+    detailedDescription: null,
+    availableLocales: ['fr', 'en'],
+    ...overrides,
+  };
 }

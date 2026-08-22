@@ -5,7 +5,7 @@
   <p class="mt-4 text-base leading-7" style="color: var(--color-text-muted)">
     {{ t('pages.notFound.message') }}
   </p>
-  <a class="mt-6 inline-block underline-offset-4 hover:underline" [routerLink]="homePath()">
-    {{ t('pages.notFound.homeLink') }}
+  <a class="mt-6 inline-block underline-offset-4 hover:underline" [routerLink]="recoveryPath">
+    {{ t(recoveryLabelKey) }}
   </a>
 </section>

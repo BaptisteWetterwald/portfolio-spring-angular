@@ -65,7 +65,7 @@ Implemented canonical static routes:
 
 Only `fr` and `en` are supported locale prefixes. Unsupported prefixes such as `/de` and `/es/projects` fall through to not-found handling instead of rendering English content.
 
-Project detail URL helpers exist for equivalent-locale switching with shared V1 slugs, but real project detail pages and project API consumption remain Milestone 7 work. Until then, project-detail-like requests are handled as not found.
+Project detail URL helpers preserve equivalent-locale switching with shared V1 slugs. Milestone 7 wires those helpers into real project detail routes and API-backed data loading.
 
 ## SSR and Prerendering
 
@@ -115,7 +115,7 @@ Create a metadata service responsible for:
 - `hreflang` alternates;
 - OpenGraph metadata;
 - project detail metadata from API data;
-- fallback metadata for loading/error states.
+- fallback metadata for error and not-found states.
 
 Metadata should be resolved before SSR completes for SEO-critical routes.
 
@@ -124,6 +124,15 @@ Project metadata must work when `detailedDescription` is absent. `title` and `sh
 Milestone 5 centralizes static page metadata in `PageMetadataService`. It sets localized `<title>`, meta description, robots, canonical URL, `hreflang` alternates for `fr`, `en`, and `x-default`, OpenGraph title/description/type/url/locale, and `<html lang="">` during SSR.
 
 404 pages use localized title/description, `noindex,follow`, OpenGraph URL/locale, and no canonical or `hreflang` links.
+
+Milestone 7 extends `PageMetadataService` for project details:
+
+- localized detail title uses the project title plus site name;
+- meta description and OpenGraph description use `ProjectDetailDto.shortDescription`;
+- canonical URL uses the localized project detail route and shared slug;
+- `hreflang` alternates are emitted only for locales present in `ProjectDetailDto.availableLocales`;
+- OpenGraph type is `article` for project detail pages;
+- `og:image` is emitted only when `logoMediaRef` is present.
 
 ## API Consumption
 
@@ -139,7 +148,7 @@ BACKEND_INTERNAL_ORIGIN=http://backend:8080
 
 The built SSR server also proxies browser-facing `/api/*` requests to `BACKEND_INTERNAL_ORIGIN`. This is local integration behavior that preserves browser same-origin API calls and avoids adding production Nginx configuration before the deployment milestone. Native `ng serve` development continues to use `frontend/proxy.conf.json` and is unchanged.
 
-Milestone 5 does not add project API consumption. Existing `/api` proxy behavior and the health service remain available.
+Milestone 5 did not add project API consumption. Milestone 7 adds typed project API consumption while keeping the existing `/api` proxy behavior and health service available.
 
 Initial public endpoints expected:
 
@@ -164,8 +173,33 @@ Frontend services should:
 - centralize base API URL configuration;
 - return typed DTOs;
 - handle 404 project responses cleanly;
-- expose loading and error state to page components;
+- expose resolved loaded, error, and not-found state to page components;
 - avoid leaking server-only secrets into the client bundle.
+
+### Milestone 7 Project API Consumption
+
+Milestone 7 adds a typed project client in `core/projects/project-api.service.ts`.
+
+Implemented methods:
+
+```text
+listProjects(locale, status?)
+listFeaturedProjects(locale)
+getProject(locale, slug)
+```
+
+The client reuses `BackendApiUrlService`, so browser requests remain same-origin under `/api` and SSR requests can use `BACKEND_INTERNAL_ORIGIN`. Components do not hard-code backend origins.
+
+Project DTO interfaces live in `core/projects/project.models.ts` and mirror the public backend contracts:
+
+- `ProjectSummaryDto`;
+- `ProjectDetailDto`;
+- `TechnologyDto`;
+- `ProjectStatus = "PUBLISHED" | "ARCHIVED"`.
+
+Route resolvers in `core/projects/project-resolvers.ts` load project data before route activation. Listing resolvers return real post-resolution `loaded` or `error` states. Detail resolvers return `loaded`, `notFound`, or `error` states. They do not synthesize a `loading` state because normal routed rendering waits for resolver completion before activation. Detail 404 responses become a localized not-found state; non-404 failures become a generic API failure state.
+
+Angular HTTP transfer cache is enabled for project GET requests through the normal Angular SSR/hydration path, avoiding a second client fetch after server rendering when Angular can reuse the SSR response.
 
 ## State Management
 
@@ -207,7 +241,35 @@ Milestone 6 replaces the minimal route placeholder shell with reusable standalon
 - `SonarNavigationComponent` renders the first compass/rose-des-vents visual navigation treatment as semantic links generated from `localized-routes.ts`. Its desktop geometry is intentionally compact and radial so the five destinations read as waypoints around one navigation instrument.
 - `LighthouseThemeToggleComponent` renders a real button backed by the theme service.
 
-The shell is not duplicated across locale route trees. Localized pages remain minimal placeholder sections for now, and real page content remains deferred.
+The shell is not duplicated across locale route trees. Home, Education, Experience, and Contact remain minimal placeholder sections until approved content is supplied; Projects is API-backed as of Milestone 7.
+
+### Milestone 7 Project Pages
+
+Milestone 7 replaces the Projects placeholder with `ProjectsPageComponent` and adds `ProjectDetailPageComponent`.
+
+Implemented localized routes:
+
+```text
+/fr/projets
+/en/projects
+/fr/projets/:slug
+/en/projects/:slug
+```
+
+The Projects page renders:
+
+- localized heading and short introduction;
+- featured `PUBLISHED` projects;
+- non-featured `PUBLISHED` projects;
+- `ARCHIVED` projects;
+- an empty state when no localized public projects exist;
+- a generic API failure state if project data cannot be loaded.
+
+Project cards are reusable semantic `article` elements with a title link, short description, status, ordered technology labels, and optional GitHub/demo links only when URLs exist.
+
+The detail page renders only fields present in `ProjectDetailDto`: title, short description, optional detailed description, optional media reference, technologies, and optional external links. `detailedDescription` is rendered as plain text with preserved line breaks; Markdown, unsafe HTML, page-builder blocks, and media galleries remain deferred.
+
+Project detail not-found states reuse the localized not-found foundation and set SSR response status 404 through `RESPONSE_INIT` when Angular SSR is handling the request. The generic not-found page links to Home, while project-detail misses link back to the localized Projects page.
 
 ## Design Tokens
 
@@ -275,12 +337,12 @@ The compass navigation is a desktop-oriented enhancement in the header. It uses 
 For project pages:
 
 - SSR should return complete content when possible.
-- Client navigation can show skeleton or stable loading state.
+- Client navigation loading, if added later, should live in the shell/router layer rather than in project resolver result types.
 - 404 project responses should render localized not-found content.
 - API failures should provide a localized retry path and link to Projects.
 - Archived projects without detailed descriptions should render a complete compact page rather than an error.
 
-Do not let loading labels resize cards or navigation controls.
+Do not let any future loading labels resize cards or navigation controls.
 
 ## Image and Media Handling
 

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PageMetadataService, absoluteUrl } from './page-metadata.service';
+import { PageMetadataService, absoluteMediaUrl, absoluteUrl } from './page-metadata.service';
 
 describe('PageMetadataService', () => {
   afterEach(() => {
@@ -72,7 +72,61 @@ describe('PageMetadataService', () => {
     expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
   });
 
+  it('applies localized project detail metadata and available hreflang alternates', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyProjectDetail('en', {
+      slug: 'portfolio-api',
+      title: 'Portfolio API',
+      shortDescription: 'Public project API.',
+      logoMediaRef: '/media/projects/portfolio-api.png',
+      availableLocales: ['en', 'fr'],
+    });
+
+    expect(document.documentElement.getAttribute('lang')).toBe('en');
+    expect(document.title).toBe('Portfolio API | Baptiste Wetterwald');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
+      'Public project API.',
+    );
+    expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+      'https://bwetterwald.fr/en/projects/portfolio-api',
+    );
+    expect(
+      document.querySelector('link[rel="alternate"][hreflang="fr"]')?.getAttribute('href'),
+    ).toBe('https://bwetterwald.fr/fr/projets/portfolio-api');
+    expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
+      'article',
+    );
+    expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
+      'https://bwetterwald.fr/media/projects/portfolio-api.png',
+    );
+    expect(
+      document.querySelector('meta[property="og:locale:alternate"]')?.getAttribute('content'),
+    ).toBe('fr_FR');
+  });
+
+  it('omits project detail hreflang and OpenGraph alternates for unavailable translations', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyProjectDetail('en', {
+      slug: 'english-only',
+      title: 'English only',
+      shortDescription: 'Only English is available.',
+      availableLocales: ['en'],
+    });
+
+    expect(
+      document.querySelector('link[rel="alternate"][hreflang="en"]')?.getAttribute('href'),
+    ).toBe('https://bwetterwald.fr/en/projects/english-only');
+    expect(document.querySelector('link[rel="alternate"][hreflang="fr"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
+  });
+
   it('builds production absolute URLs', () => {
     expect(absoluteUrl('/en/projects')).toBe('https://bwetterwald.fr/en/projects');
+    expect(absoluteMediaUrl('/media/projects/logo.svg')).toBe(
+      'https://bwetterwald.fr/media/projects/logo.svg',
+    );
+    expect(absoluteMediaUrl('//cdn.example.test/logo.svg')).toBeUndefined();
   });
 });

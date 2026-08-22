@@ -48,7 +48,24 @@ export function localizedProjectDetailPath(locale: SupportedLocale, slug: string
   return `${localizedPath(locale, 'projects')}/${encodeURIComponent(slug)}`;
 }
 
-export function equivalentLocalizedPath(currentUrl: string, targetLocale: SupportedLocale): string {
+export function localizedProjectDetailAlternates(
+  slug: string,
+  locales: readonly SupportedLocale[] = supportedLocales,
+): Partial<Record<SupportedLocale, string>> {
+  return locales.reduce(
+    (alternates, locale) => ({
+      ...alternates,
+      [locale]: localizedProjectDetailPath(locale, slug),
+    }),
+    {} as Partial<Record<SupportedLocale, string>>,
+  );
+}
+
+export function equivalentLocalizedPath(
+  currentUrl: string,
+  targetLocale: SupportedLocale,
+  projectDetailAvailableLocales?: readonly SupportedLocale[],
+): string {
   const match = matchLocalizedPath(currentUrl);
 
   if (!match) {
@@ -56,6 +73,10 @@ export function equivalentLocalizedPath(currentUrl: string, targetLocale: Suppor
   }
 
   if (match.pageId === 'projectDetail') {
+    if (projectDetailAvailableLocales && !projectDetailAvailableLocales.includes(targetLocale)) {
+      return localizedPath(targetLocale, 'projects');
+    }
+
     return match.slug
       ? localizedProjectDetailPath(targetLocale, match.slug)
       : localizedPath(targetLocale, 'home');

@@ -14,6 +14,10 @@ export const serverRoutes: ServerRoute[] = [
       renderMode: RenderMode.Server,
     })),
     {
+      path: toServerRoutePath(`${localizedPath(locale, 'projects')}/:slug`),
+      renderMode: RenderMode.Server,
+    },
+    {
       path: `${locale}/**`,
       renderMode: RenderMode.Server,
       status: 404,

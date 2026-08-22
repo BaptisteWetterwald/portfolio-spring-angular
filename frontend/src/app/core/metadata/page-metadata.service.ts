@@ -3,10 +3,17 @@ import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { LocaleContextService } from '../i18n/locale-context.service';
-import { SupportedLocale, supportedLocales } from '../i18n/locales';
+import { isSupportedLocale, SupportedLocale, supportedLocales } from '../i18n/locales';
 import { TranslationService } from '../i18n/translation.service';
 import { TranslationKey } from '../i18n/translations';
-import { localizedAlternates, localizedPath, StaticPageId } from '../routing/localized-routes';
+import { absoluteProjectMediaUrl } from '../projects/project-media';
+import {
+  localizedAlternates,
+  localizedPath,
+  localizedProjectDetailAlternates,
+  localizedProjectDetailPath,
+  StaticPageId,
+} from '../routing/localized-routes';
 
 const productionOrigin = 'https://bwetterwald.fr';
 const managedAttribute = 'data-managed-by';
@@ -41,6 +48,14 @@ const ogLocales: Record<SupportedLocale, string> = {
   en: 'en_US',
 };
 
+export interface ProjectPageMetadata {
+  readonly slug: string;
+  readonly title: string;
+  readonly shortDescription: string;
+  readonly logoMediaRef?: string | null;
+  readonly availableLocales?: readonly string[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -74,6 +89,34 @@ export class PageMetadataService {
     this.#setAlternates(alternates);
   }
 
+  applyProjectDetail(locale: SupportedLocale, project: ProjectPageMetadata): void {
+    this.#localeContext.setLocale(locale);
+    this.#setHtmlLang(locale);
+
+    const title = `${project.title} | Baptiste Wetterwald`;
+    const description = project.shortDescription;
+    const canonicalUrl = absoluteUrl(localizedProjectDetailPath(locale, project.slug));
+    const availableLocales = availableProjectLocales(project.availableLocales, locale);
+    const alternates = localizedProjectDetailAlternates(project.slug, availableLocales);
+
+    this.#removeManagedLinks();
+    this.#applyMetadata({
+      title,
+      description,
+      url: canonicalUrl,
+      locale,
+      robots: 'index,follow',
+      includeOpenGraphAlternateLocales: true,
+      openGraphAlternateLocales: availableLocales.filter(
+        (availableLocale) => availableLocale !== locale,
+      ),
+      openGraphType: 'article',
+      imageUrl: absoluteProjectMediaUrl(project.logoMediaRef),
+    });
+    this.#setCanonical(canonicalUrl);
+    this.#setAlternates(alternates);
+  }
+
   applyNotFound(locale: SupportedLocale, currentPath: string): void {
     this.#localeContext.setLocale(locale);
     this.#setHtmlLang(locale);
@@ -88,6 +131,7 @@ export class PageMetadataService {
       locale,
       robots: 'noindex,follow',
       includeOpenGraphAlternateLocales: false,
+      openGraphType: 'website',
     });
     this.#removeManagedLinks();
   }
@@ -99,6 +143,9 @@ export class PageMetadataService {
     readonly locale: SupportedLocale;
     readonly robots: string;
     readonly includeOpenGraphAlternateLocales: boolean;
+    readonly openGraphAlternateLocales?: readonly SupportedLocale[];
+    readonly openGraphType?: 'website' | 'article';
+    readonly imageUrl?: string;
   }): void {
     this.#title.setTitle(metadata.title);
     this.#meta.updateTag(
@@ -111,16 +158,32 @@ export class PageMetadataService {
       { property: 'og:description', content: metadata.description },
       'property="og:description"',
     );
-    this.#meta.updateTag({ property: 'og:type', content: 'website' }, 'property="og:type"');
+    this.#meta.updateTag(
+      { property: 'og:type', content: metadata.openGraphType ?? 'website' },
+      'property="og:type"',
+    );
     this.#meta.updateTag({ property: 'og:url', content: metadata.url }, 'property="og:url"');
     this.#meta.updateTag(
       { property: 'og:locale', content: ogLocales[metadata.locale] },
       'property="og:locale"',
     );
     if (metadata.includeOpenGraphAlternateLocales) {
-      this.#setOpenGraphAlternateLocales(metadata.locale);
+      this.#setOpenGraphAlternateLocales(
+        metadata.openGraphAlternateLocales ??
+          supportedLocales.filter((supportedLocale) => supportedLocale !== metadata.locale),
+      );
     } else {
       this.#removeManagedOpenGraphAlternateLocales();
+    }
+    if (metadata.imageUrl) {
+      const imageMeta = this.#meta.updateTag(
+        { property: 'og:image', content: metadata.imageUrl },
+        'property="og:image"',
+      );
+
+      imageMeta?.setAttribute(managedAttribute, `${managedAttributeValue}:og-image`);
+    } else {
+      this.#removeManagedImage();
     }
   }
 
@@ -132,13 +195,19 @@ export class PageMetadataService {
     this.#document.head.appendChild(link);
   }
 
-  #setAlternates(alternates: Record<SupportedLocale, string>): void {
+  #setAlternates(alternates: Partial<Record<SupportedLocale, string>>): void {
     for (const locale of supportedLocales) {
+      const alternate = alternates[locale];
+
+      if (!alternate) {
+        continue;
+      }
+
       const link = this.#createManagedLink();
 
       link.setAttribute('rel', 'alternate');
       link.setAttribute('hreflang', locale);
-      link.setAttribute('href', absoluteUrl(alternates[locale]));
+      link.setAttribute('href', absoluteUrl(alternate));
       this.#document.head.appendChild(link);
     }
 
@@ -150,12 +219,10 @@ export class PageMetadataService {
     this.#document.head.appendChild(defaultLink);
   }
 
-  #setOpenGraphAlternateLocales(locale: SupportedLocale): void {
+  #setOpenGraphAlternateLocales(alternateLocales: readonly SupportedLocale[]): void {
     this.#removeManagedOpenGraphAlternateLocales();
 
-    for (const alternateLocale of supportedLocales.filter(
-      (supportedLocale) => supportedLocale !== locale,
-    )) {
+    for (const alternateLocale of alternateLocales) {
       const meta = this.#document.createElement('meta');
 
       meta.setAttribute('property', 'og:locale:alternate');
@@ -185,6 +252,12 @@ export class PageMetadataService {
       .forEach((element) => element.remove());
   }
 
+  #removeManagedImage(): void {
+    this.#document
+      .querySelectorAll(`meta[${managedAttribute}="${managedAttributeValue}:og-image"]`)
+      .forEach((element) => element.remove());
+  }
+
   #setHtmlLang(locale: SupportedLocale): void {
     this.#document.documentElement.setAttribute('lang', locale);
   }
@@ -194,6 +267,23 @@ export function absoluteUrl(path: string): string {
   return `${productionOrigin}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+export function absoluteMediaUrl(mediaRef: string | null | undefined): string | undefined {
+  return absoluteProjectMediaUrl(mediaRef);
+}
+
 function stripQueryAndFragment(path: string): string {
   return path.split(/[?#]/)[0] || '/';
+}
+
+function availableProjectLocales(
+  locales: readonly string[] | undefined,
+  currentLocale: SupportedLocale,
+): readonly SupportedLocale[] {
+  const normalizedLocales = (locales ?? [])
+    .filter(isSupportedLocale)
+    .filter((locale, index, allLocales) => allLocales.indexOf(locale) === index);
+
+  return normalizedLocales.includes(currentLocale)
+    ? normalizedLocales
+    : [currentLocale, ...normalizedLocales];
 }

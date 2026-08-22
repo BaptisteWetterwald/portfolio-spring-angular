@@ -47,7 +47,7 @@ Canonical URL examples should use this domain.
 | Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail.                                        |
 | Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                  |
 
-Milestone 5 implements the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Project detail URLs remain part of the information architecture, but real project detail routing, data loading, and metadata are scheduled for Milestone 7. Until then, project-detail-like URLs render not-found content.
+Milestone 5 implemented the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Milestone 7 replaces the Projects placeholder with an API-backed listing and implements project detail routing, data loading, and metadata for shared V1 slugs.
 
 ## Project URL Strategy
 
@@ -70,6 +70,15 @@ Rationale:
 Localized project slugs can be introduced later with redirect mapping if there is a strong SEO reason.
 
 The Milestone 5 locale-switching helper already preserves shared slugs when computing equivalent project-detail paths. No project slug translation is attempted in V1.
+
+Milestone 7 wires those detail paths into the Angular route table:
+
+```text
+/fr/projets/:slug
+/en/projects/:slug
+```
+
+If a slug is unknown, private, non-public, or missing the requested translation, the localized project route renders the not-found foundation and links back to the localized Projects page. Locale switching preserves the same slug; if the target locale has no translation, that target route follows the same not-found behavior rather than showing fallback-language content.
 
 ## Navigation Model
 
@@ -170,6 +179,12 @@ Milestone 5 404 implementation:
 - unknown routes under `/fr/...` and `/en/...` render localized not-found pages;
 - unsupported locale prefixes render a not-found page selected from stored preference, `Accept-Language`, or English fallback, and never render canonical portfolio content;
 - Angular server routes plus `RESPONSE_INIT.status` set HTTP 404 for SSR wildcard routes.
+
+Milestone 7 update:
+
+- unknown project slugs, `DRAFT` slugs, non-public projects, and missing requested translations are normalized to localized project not-found behavior;
+- project detail not-found responses set SSR HTTP 404 through `RESPONSE_INIT` where Angular SSR handles the request;
+- project-specific not-found pages recover to `/fr/projets` or `/en/projects` instead of Home.
 
 ## Content Authoring
 
