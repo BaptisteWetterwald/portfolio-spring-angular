@@ -121,6 +121,28 @@ Expected networking:
 - PostgreSQL reachable only by backend over the Docker network;
 - PostgreSQL port not exposed publicly.
 
+## Milestone 3 Local Compose Implementation
+
+The local integration environment is implemented in `compose.yaml` with exactly these services:
+
+- `postgres`;
+- `backend`;
+- `frontend`.
+
+No local Nginx, Caddy, Traefik, Kubernetes, or production proxy container is used for this milestone.
+
+Local service behavior:
+
+| Service | Local image/runtime | Host binding | Internal connectivity |
+| --- | --- | --- | --- |
+| `postgres` | `postgres:18-alpine` | `127.0.0.1:${POSTGRES_HOST_PORT:-5432}` | Backend uses `postgres:5432`. |
+| `backend` | `portfolio-backend:local`, Java 21 JRE | `127.0.0.1:${BACKEND_HOST_PORT:-8080}` | Frontend and host health checks use port `8080`. |
+| `frontend` | `portfolio-frontend:local`, Node.js 24.19.0 | `127.0.0.1:${FRONTEND_HOST_PORT:-4000}` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`. |
+
+PostgreSQL data persists in the `postgres-data` named volume mounted at `/var/lib/postgresql`, which matches the PostgreSQL 18 image layout. The local PostgreSQL host binding is loopback-only so native Spring Boot runs and local database tools can use the same non-production database without exposing it to the LAN.
+
+Dockerized browser `/api/*` requests are handled by the frontend SSR server and proxied to `BACKEND_INTERNAL_ORIGIN`. This validates the future same-origin browser model locally without adding a production Nginx configuration ahead of its milestone.
+
 ## Configuration
 
 Use environment variables and safe example files.
@@ -135,6 +157,18 @@ Potential variables:
 | Nginx/host | domain name, upstream ports, certificate path/automation settings. |
 
 No production secrets may be committed.
+
+Milestone 3 local variables:
+
+| Variable | Used by | Local default |
+| --- | --- | --- |
+| `POSTGRES_DB` | Compose PostgreSQL and backend JDBC URL | `portfolio` |
+| `POSTGRES_USER` | Compose PostgreSQL and backend datasource username | `portfolio` |
+| `POSTGRES_PASSWORD` | Compose PostgreSQL and backend datasource password | `portfolio-local-password` |
+| `POSTGRES_HOST_PORT` | Local PostgreSQL loopback binding | `5432` |
+| `BACKEND_HOST_PORT` | Local backend loopback binding | `8080` |
+| `FRONTEND_HOST_PORT` | Local frontend loopback binding | `4000` |
+| `BACKEND_INTERNAL_ORIGIN` | Frontend SSR runtime and local SSR `/api` proxy | `http://backend:8080` in Compose |
 
 ## Database Migrations
 
@@ -268,6 +302,8 @@ Use native Angular and Spring development servers when rapid feedback matters:
 
 Milestone 2 implements the native development proxy in `frontend/proxy.conf.json`: `/api` is forwarded to `http://localhost:8080`. Browser-side production requests remain same-origin under `/api`; request-time SSR can use `BACKEND_INTERNAL_ORIGIN` when an internal backend origin is available.
 
+Milestone 3 keeps that native proxy unchanged. The backend now expects PostgreSQL by default at `jdbc:postgresql://localhost:5432/portfolio`, so native backend runs need either an installed PostgreSQL instance or the Compose `postgres` service exposed on loopback.
+
 Do not require Docker for every UI or backend edit if it slows normal development.
 
 ### Docker Compose Integration
@@ -277,7 +313,7 @@ Use Docker Compose for full-stack integration:
 - frontend container;
 - backend container;
 - PostgreSQL container;
-- optional local Nginx only when testing proxy behavior.
+- frontend SSR server proxying local browser `/api/*` requests to the backend.
 
 This should validate service wiring without replacing hot-reload workflows.
 

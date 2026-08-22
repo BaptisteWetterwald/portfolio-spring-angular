@@ -113,6 +113,10 @@ PostgreSQL is used for this portfolio project and should not be represented as p
 
 Milestone 1 bootstrap decision: persistence dependencies may be present while database, JPA, and Flyway auto-configuration are disabled in the default application configuration. This keeps the scaffold startable before PostgreSQL and migrations exist. The exclusion must be removed or replaced with real datasource configuration when the PostgreSQL/Flyway milestone begins.
 
+Milestone 3 implementation decision: the default application configuration now uses a real PostgreSQL datasource with environment-driven settings. JPA auto-configuration is enabled and the backend starts cleanly against an empty PostgreSQL database with zero entities and zero repositories. Hibernate schema generation is disabled with `spring.jpa.hibernate.ddl-auto=none`.
+
+Flyway remains on the classpath but is disabled with `SPRING_FLYWAY_ENABLED=false` until the first versioned migration exists. This avoids creating migration metadata before a schema migration milestone while preserving the approved Flyway architecture. The lightweight application context tests use a `test` profile that excludes persistence auto-configuration; Docker Compose integration validates the real PostgreSQL connection.
+
 ## Migrations
 
 Use Flyway migration files committed with the backend source.
@@ -247,6 +251,8 @@ Expose:
 - readiness including database connectivity;
 - build/version info if safe;
 - no sensitive environment details.
+
+Milestone 3 uses Actuator health for Docker health checks. With the default runtime datasource enabled, backend startup initializes HikariCP and Hibernate against PostgreSQL; a failed database connection makes the backend health check fail.
 
 Nginx and the deployment process should use health endpoints to verify successful rollout.
 

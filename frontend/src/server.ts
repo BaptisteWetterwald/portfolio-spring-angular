@@ -4,13 +4,26 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { join } from 'node:path';
+
+import {
+  backendInternalOriginEnvVar,
+  isHopByHopHeader,
+  proxyBackendApiRequest,
+} from './server-api-proxy';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+/**
+ * Proxy browser-facing API requests to the backend over the internal Docker network.
+ */
+app.use('/api', (req, res, next) => {
+  proxyApiRequest(req, res).catch(next);
+});
 
 /**
  * Serve static files from /browser
@@ -52,3 +65,31 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
 export const reqHandler = createNodeRequestHandler(app);
+
+async function proxyApiRequest(req: Request, res: Response): Promise<void> {
+  const hasBody = requestHasBody(req);
+  const backendResponse = await proxyBackendApiRequest(
+    {
+      originalUrl: req.originalUrl,
+      method: req.method,
+      headers: req.headers,
+      protocol: req.protocol,
+      hasBody,
+      body: hasBody ? (req as unknown as BodyInit) : undefined,
+    },
+    process.env[backendInternalOriginEnvVar],
+  );
+
+  res.status(backendResponse.status);
+  backendResponse.headers.forEach((value, header) => {
+    if (!isHopByHopHeader(header)) {
+      res.setHeader(header, value);
+    }
+  });
+
+  res.send(Buffer.from(await backendResponse.arrayBuffer()));
+}
+
+function requestHasBody(req: Request): boolean {
+  return req.method !== 'GET' && req.method !== 'HEAD';
+}

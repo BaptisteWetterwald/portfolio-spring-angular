@@ -92,6 +92,14 @@ Use typed Angular services for backend calls.
 
 Milestone 2 decision: centralize backend API URL resolution in Angular and keep browser requests same-origin through `/api`. During SSR, the same resolver may use `BACKEND_INTERNAL_ORIGIN` for an internal backend origin; otherwise it falls back to the incoming request origin. The initial typed service calls Actuator health at `GET /api/health` only.
 
+Milestone 3 keeps that resolver as the single Angular-side source of backend URL resolution. In Docker Compose, the frontend SSR runtime receives:
+
+```text
+BACKEND_INTERNAL_ORIGIN=http://backend:8080
+```
+
+The built SSR server also proxies browser-facing `/api/*` requests to `BACKEND_INTERNAL_ORIGIN`. This is local integration behavior that preserves browser same-origin API calls and avoids adding production Nginx configuration before the deployment milestone. Native `ng serve` development continues to use `frontend/proxy.conf.json` and is unchanged.
+
 Initial public endpoints expected:
 
 ```text
