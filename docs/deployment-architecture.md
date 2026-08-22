@@ -170,6 +170,8 @@ Milestone 3 local variables:
 | `FRONTEND_HOST_PORT` | Local frontend loopback binding | `4000` |
 | `BACKEND_INTERNAL_ORIGIN` | Frontend SSR runtime and local SSR `/api` proxy | `http://backend:8080` in Compose |
 
+Milestone 4 update: the backend Compose service now enables Flyway by default with `SPRING_FLYWAY_ENABLED=true`. On startup, the backend applies versioned migrations to PostgreSQL and then Hibernate validates the schema.
+
 ## Database Migrations
 
 Use Flyway migrations committed with backend source.
@@ -182,6 +184,14 @@ Approved V1 production strategy:
 - prefer backward-compatible migrations.
 
 A dedicated migration deployment step can be introduced later if complexity justifies it.
+
+Milestone 4 created the first production migration:
+
+```text
+V1__create_project_domain.sql
+```
+
+The backend runs this migration at startup in the current local Compose stack. Docker Compose smoke validation confirmed the backend reaches healthy status with the migration applied and Hibernate schema validation enabled.
 
 Prefer backward-compatible migrations:
 
@@ -303,6 +313,8 @@ Use native Angular and Spring development servers when rapid feedback matters:
 Milestone 2 implements the native development proxy in `frontend/proxy.conf.json`: `/api` is forwarded to `http://localhost:8080`. Browser-side production requests remain same-origin under `/api`; request-time SSR can use `BACKEND_INTERNAL_ORIGIN` when an internal backend origin is available.
 
 Milestone 3 keeps that native proxy unchanged. The backend now expects PostgreSQL by default at `jdbc:postgresql://localhost:5432/portfolio`, so native backend runs need either an installed PostgreSQL instance or the Compose `postgres` service exposed on loopback.
+
+Milestone 4 enables Flyway and Hibernate validation by default. For native backend runs, the local PostgreSQL database must be reachable before Spring Boot starts so migrations can apply and schema validation can complete.
 
 Do not require Docker for every UI or backend edit if it slows normal development.
 

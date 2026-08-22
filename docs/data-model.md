@@ -11,6 +11,16 @@ This document defines the first-pass PostgreSQL model for portfolio projects and
 - Keep media modelling minimal for V1.
 - Allow richer case studies later without forcing V1 into a page-builder architecture.
 
+## Implementation Status
+
+Milestone 4 implements this V1 model through Flyway migration:
+
+```text
+backend/src/main/resources/db/migration/V1__create_project_domain.sql
+```
+
+The migration is structural only and does not seed production portfolio content. Test data is fictional and limited to repository tests.
+
 ## Entity Overview
 
 ```text
@@ -105,7 +115,7 @@ Constraints:
 
 ## First-Pass SQL Shape
 
-This is illustrative only. Actual migration files should be created during backend implementation.
+This reflects the Milestone 4 V1 migration shape.
 
 ```sql
 create table projects (
@@ -121,7 +131,7 @@ create table projects (
   updated_at timestamptz not null,
   published_at timestamptz,
   constraint projects_status_check check (status in ('DRAFT', 'PUBLISHED', 'ARCHIVED')),
-  constraint projects_slug_check check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+  constraint projects_slug_check check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 create table project_translations (
@@ -134,6 +144,8 @@ create table project_translations (
   created_at timestamptz not null,
   updated_at timestamptz not null,
   constraint project_translations_locale_check check (locale in ('fr', 'en')),
+  constraint project_translations_title_not_blank check (length(btrim(title)) > 0),
+  constraint project_translations_short_description_not_blank check (length(btrim(short_description)) > 0),
   constraint project_translations_project_locale_unique unique (project_id, locale)
 );
 
@@ -145,7 +157,8 @@ create table technologies (
   category varchar(80),
   created_at timestamptz not null,
   updated_at timestamptz not null,
-  constraint technologies_slug_check check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+  constraint technologies_name_not_blank check (length(btrim(name)) > 0),
+  constraint technologies_slug_check check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 create table project_technologies (
@@ -164,6 +177,7 @@ Recommended indexes:
 - `projects(status, display_order)`;
 - `project_translations(locale)`;
 - `project_technologies(technology_id)`.
+- `project_technologies(project_id, display_order)` for ordered technology retrieval per project.
 
 ## Query Patterns
 
@@ -207,4 +221,3 @@ Future evolution options:
 - add a full `project_media` domain for screenshots, videos, captions, and alt text if the content strategy requires it later.
 
 Do not introduce a generic page-builder or CMS schema in V1. It would add complexity before the content model proves it needs that flexibility.
-

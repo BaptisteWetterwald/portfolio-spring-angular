@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-No PostgreSQL schema, CI/CD, deployment, portfolio UI, project domain, or i18n implementation exists yet.
+The backend now contains the first PostgreSQL-backed project persistence domain. CI/CD, production deployment, portfolio UI, public project APIs, project pages, and i18n implementation are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -29,6 +29,13 @@ Milestone 3 adds local Docker Compose integration:
 - `backend` runs the Spring Boot jar and connects to PostgreSQL through environment variables;
 - `frontend` runs the built Angular request-time SSR server;
 - Dockerized browser `/api/*` requests are proxied by the frontend SSR server to the backend over the Compose network.
+
+Milestone 4 adds backend persistence for projects and technologies:
+
+- Flyway migration `V1__create_project_domain.sql` creates the project domain schema;
+- Hibernate validates the migrated schema instead of creating or mutating it;
+- Spring Data JPA repositories support the future public project query patterns;
+- PostgreSQL-backed repository tests use isolated temporary schemas and fictional fixture data only.
 
 ## Frontend
 
@@ -76,10 +83,19 @@ The backend now uses PostgreSQL configuration from environment variables, with s
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/portfolio
 SPRING_DATASOURCE_USERNAME=portfolio
 SPRING_DATASOURCE_PASSWORD=portfolio-local-password
-SPRING_FLYWAY_ENABLED=false
+SPRING_FLYWAY_ENABLED=true
 ```
 
-Hibernate schema generation is disabled. Flyway remains disabled until the first versioned migration is introduced in a later milestone.
+Flyway is enabled by default and is the schema source of truth. Hibernate runs with `spring.jpa.hibernate.ddl-auto=validate`.
+
+Backend tests now require PostgreSQL. Start the Compose PostgreSQL service before running the test suite:
+
+```bash
+docker compose up -d postgres --wait
+cmd /c mvnw.cmd test
+```
+
+The `test` profile points at PostgreSQL but creates per-run schemas such as `portfolio_test_<id>`, applies Flyway, validates the schema with Hibernate, and drops those schemas after the tests.
 
 The current public connectivity endpoint is:
 
@@ -109,7 +125,7 @@ Compose services:
 | Service | Image/runtime | Host binding | Notes |
 | --- | --- | --- | --- |
 | `postgres` | `postgres:18-alpine` | `127.0.0.1:5432` | Data persists in the `postgres-data` named volume. |
-| `backend` | Spring Boot on Eclipse Temurin Java 21 JRE Alpine | `127.0.0.1:8080` | Uses `jdbc:postgresql://postgres:5432/portfolio` in Compose. |
+| `backend` | Spring Boot on Eclipse Temurin Java 21 JRE Alpine | `127.0.0.1:8080` | Uses `jdbc:postgresql://postgres:5432/portfolio`, runs Flyway, then validates the schema. |
 | `frontend` | Angular SSR on Node.js 24.19.0 Alpine | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`. |
 
 The local host port bindings are loopback-only and exist for browser testing, native frontend proxy compatibility, native backend database access, and health validation. Production routing through host Nginx is not implemented in this milestone.

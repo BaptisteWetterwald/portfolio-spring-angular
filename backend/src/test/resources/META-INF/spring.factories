@@ -1,0 +1,5 @@
+org.springframework.test.context.ContextCustomizerFactory=\
+fr.bwetterwald.portfolio.support.PostgresSchemaIsolationContextCustomizerFactory
+
+org.springframework.test.context.TestExecutionListener=\
+fr.bwetterwald.portfolio.support.PostgresSchemaCleanupTestExecutionListener

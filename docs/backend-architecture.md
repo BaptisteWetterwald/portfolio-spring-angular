@@ -1,6 +1,6 @@
 # Backend Architecture
 
-This document proposes a proportionate Spring Boot backend for the portfolio. No Spring Boot project has been initialized yet.
+This document describes the proportionate Spring Boot backend for the portfolio.
 
 ## Objectives
 
@@ -115,7 +115,9 @@ Milestone 1 bootstrap decision: persistence dependencies may be present while da
 
 Milestone 3 implementation decision: the default application configuration now uses a real PostgreSQL datasource with environment-driven settings. JPA auto-configuration is enabled and the backend starts cleanly against an empty PostgreSQL database with zero entities and zero repositories. Hibernate schema generation is disabled with `spring.jpa.hibernate.ddl-auto=none`.
 
-Flyway remains on the classpath but is disabled with `SPRING_FLYWAY_ENABLED=false` until the first versioned migration exists. This avoids creating migration metadata before a schema migration milestone while preserving the approved Flyway architecture. The lightweight application context tests use a `test` profile that excludes persistence auto-configuration; Docker Compose integration validates the real PostgreSQL connection.
+Milestone 4 implementation decision: Flyway is enabled by default with `SPRING_FLYWAY_ENABLED=true`, and the first versioned schema migration exists. Hibernate now runs with `spring.jpa.hibernate.ddl-auto=validate`; Flyway owns schema creation and Hibernate only verifies that the mapped entities match the migrated PostgreSQL schema.
+
+The previous Milestone 3 test profile exclusions for datasource, JPA, repositories, and Flyway have been removed. Backend tests now use PostgreSQL through the same datasource defaults and create isolated temporary schemas for test runs.
 
 ## Migrations
 
@@ -130,6 +132,14 @@ V3__add_contact_requests.sql
 ```
 
 Names are examples only. The actual files should be created during implementation.
+
+Milestone 4 created:
+
+```text
+backend/src/main/resources/db/migration/V1__create_project_domain.sql
+```
+
+The V1 migration is structural only. It creates `projects`, `project_translations`, `technologies`, and `project_technologies`; no production seed data is inserted because approved real portfolio content has not been supplied.
 
 Approved V1 production strategy:
 
@@ -193,6 +203,30 @@ Localized:
 - detailed description, optional.
 
 Technologies are shared across locales in V1.
+
+Milestone 4 maps the persistence domain as:
+
+```text
+project
+  domain
+    ProjectStatus
+    ProjectLocale
+  persistence
+    ProjectEntity
+    ProjectTranslationEntity
+    ProjectTechnologyEntity
+    ProjectRepository
+    ProjectTranslationRepository
+    ProjectTechnologyRepository
+technology
+  persistence
+    TechnologyEntity
+    TechnologyRepository
+```
+
+`ProjectStatus` is persisted as a string enum. `ProjectLocale` is a small enum persisted through an attribute converter as `fr` or `en`. The project-to-technology relationship is an explicit association entity because the join table owns `display_order`.
+
+Entity timestamps use a small JPA lifecycle callback superclass that sets `created_at` and `updated_at` on persist and updates `updated_at` on update. The migration also defines database defaults as a fallback for non-JPA inserts.
 
 ## Future Contact Handling
 

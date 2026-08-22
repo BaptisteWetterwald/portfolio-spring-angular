@@ -24,7 +24,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-portfolio}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-portfolio}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-portfolio-local-password}
-      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_FLYWAY_ENABLED: "true"
     ports:
       - "127.0.0.1:${BACKEND_HOST_PORT:-8080}:8080"
     depends_on:
