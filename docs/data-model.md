@@ -38,6 +38,8 @@ Project n..m Technology
 
 Public APIs must exclude `DRAFT` projects.
 
+Project status and the `featured` flag are not a complete long-term project-importance model. The portfolio may later distinguish featured, standard, and minor/archive projects once real project inventory exists. Do not add a new persistence field for that hierarchy until approved project content shows that `featured` plus `ARCHIVED` cannot express the needed visual prominence.
+
 ## Tables
 
 ### `projects`

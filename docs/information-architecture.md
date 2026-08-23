@@ -47,7 +47,7 @@ Canonical URL examples should use this domain.
 | Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail.                                        |
 | Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                  |
 
-Milestone 5 implemented the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Milestone 7 replaces the Projects placeholder with an API-backed listing and implements project detail routing, data loading, and metadata for shared V1 slugs.
+Milestone 5 implemented the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Milestone 7 replaces the Projects placeholder with an API-backed listing and implements project detail routing, data loading, and metadata for shared V1 slugs. Milestone 8 replaces the Home, Education, and Experience placeholders with bilingual professional content while leaving Contact without a fabricated public contact method.
 
 ## Project URL Strategy
 
@@ -79,6 +79,20 @@ Milestone 7 wires those detail paths into the Angular route table:
 ```
 
 If a slug is unknown, private, non-public, or missing the requested translation, the localized project route renders the not-found foundation and links back to the localized Projects page. Locale switching preserves the same slug; if the target locale has no translation, that target route follows the same not-found behavior rather than showing fallback-language content.
+
+## Project Prominence Strategy
+
+Project visual weight should eventually follow content importance:
+
+| Level | Intended use |
+| --- | --- |
+| Featured | Major projects that demonstrate the target backend/full-stack profile. |
+| Standard | Meaningful projects worth presenting normally. |
+| Minor / archive | Small academic projects, old experiments, niche demonstrations, or historical exercises. |
+
+The current backend has `status` and `featured`; that is sufficient for Milestone 7 and Milestone 8. Do not add a persistence field for project importance until real project content shows that `featured` plus `ARCHIVED` is insufficient.
+
+Small or old projects should not be deleted only because they are old. They should receive lower visual prominence when they are useful for showing breadth or historical context.
 
 ## Navigation Model
 
@@ -132,13 +146,21 @@ The home page should explicitly account for:
 
 This is a content and hierarchy specification, not a complete page design.
 
+Milestone 8 implementation:
+
+- Home renders Baptiste Wetterwald, Software Engineer identity, Backend & Full-stack positioning, a concise introduction, primary stack highlights, route links into Experience/Education/Projects, and technical skill domains.
+- Skills are presented on Home as domains rather than as a separate route or fake proficiency percentages. The content model supports primary, professional/complementary, secondary, and exploratory/historical importance levels.
+- The existing header, footer, and sonar/compass navigation remain the primary navigation system.
+- No portrait, GitHub link, LinkedIn link, downloadable CV, contact method, GitHub activity, or fake featured project is rendered because those assets/URLs/content are not confirmed.
+- Featured project content remains backend-owned; Home does not seed or invent project cards when the project API has no approved public records.
+
 ## Page Composition
 
 | Page           | Primary Content Blocks                                                                                                                      |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home           | Hero, portrait, visual navigation, short About, core technologies, featured projects, optional GitHub activity, contact CTA.                |
-| Education      | Nautical route/waypoint timeline, ENSISA engineering degree, DUT, UQAC semester abroad, optional credentials.                               |
-| Experience     | Nautical route/waypoint timeline, confirmed roles, technology/context summaries, confidentiality-aware details.                             |
+| Home           | Hero, short About, core technologies, skills domains, route links to deeper sections; portrait/social/project/contact blocks only when approved content exists. |
+| Education      | Semantic timeline/list with ENSISA engineering degree, IUT Robert Schuman DUT, and UQAC international semester. Nautical waypoint styling is deferred. |
+| Experience     | Semantic timeline/list with roles, dates, concise context, and restrained technology tags. Nautical waypoint styling is deferred. |
 | Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |
 | Project detail | Title, short description, optional detailed description, logo/media reference, technologies, GitHub/demo links, related projects if useful. |
 | Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                       |
@@ -190,6 +212,8 @@ Milestone 7 update:
 
 - English is the primary authoring language for future portfolio source copy.
 - French content should be written as a natural localized adaptation, not a literal sentence-by-sentence translation.
+- Public copy must not expose milestone/review/TODO language. Documentation may track missing or unconfirmed content; visitor-facing pages should either omit missing details or use plain user-facing empty states.
+- Long-term content hierarchy and enrichment rules are tracked in `docs/content-strategy.md`.
 
 ## Remaining Decisions
 

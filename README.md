@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-The backend now contains the PostgreSQL-backed project persistence domain and the first public localized project API. The frontend now has the localized public shell, semantic navigation, locale switching, light/dark theme foundation, static sonar/compass navigation enhancement, and API-backed project listing/detail pages. CI/CD, production deployment, final personal content, contact handling, GitHub integration, media management, and final visual polish are still future milestones.
+The backend now contains the PostgreSQL-backed project persistence domain and the first public localized project API. The frontend now has the localized public shell, semantic navigation, locale switching, light/dark theme foundation, static sonar/compass navigation enhancement, API-backed project listing/detail pages, and the first confirmed bilingual Home, Education, Experience, and Skills content. CI/CD, production deployment, real project records, contact handling, GitHub integration, media management, and final visual polish are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -64,6 +64,14 @@ Milestone 7 adds public project API and page rendering:
 - `GET /api/v1/projects/{slug}?locale=fr|en` returns localized detail for a public project;
 - `DRAFT`, unknown, and untranslated project detail requests return 404;
 - Angular Projects and project detail routes resolve project data during request-time SSR and render empty/error/not-found states without inventing portfolio content.
+
+Milestone 8 adds confirmed static portfolio content:
+
+- Home renders Baptiste Wetterwald, Software Engineer identity, Backend / Full-stack positioning, concise bilingual introduction, primary technology directions, and Skills domains;
+- Education renders ENSISA, IUT Robert Schuman, and UQAC entries with semantic date markup where dates are confirmed;
+- Experience renders roles for Plansee Group Functions, Plansee, Bureau Veritas Laboratories / Bureau Veritas Laboratoires, Groupe IES, and UQAC without invented metrics or responsibilities;
+- Skills are grouped by software engineering, Microsoft / enterprise applications, AI-assisted engineering, data/databases, and engineering/infrastructure, with importance levels instead of fake proficiency percentages;
+- GitHub/LinkedIn links, portrait media, downloadable CV, contact method, and public project records remain unimplemented until approved content exists.
 
 ## Frontend
 
@@ -115,7 +123,7 @@ Project detail URLs use shared slugs across locales:
 /en/projects/:slug
 ```
 
-The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls only in this milestone; advanced beams, sonar sweeps, waves, portrait treatment, timelines, and final portfolio content are deferred.
+The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls only in this milestone; advanced beams, sonar sweeps, waves, portrait treatment, nautical timeline styling, and final maritime visual polish are deferred.
 
 For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
 
@@ -202,6 +210,7 @@ The local host port bindings are loopback-only and exist for browser testing, na
 ## Documentation
 
 - [Product vision](docs/product-vision.md)
+- [Content strategy](docs/content-strategy.md)
 - [Content inventory](docs/content-inventory.md)
 - [Information architecture](docs/information-architecture.md)
 - [Design system](docs/design-system.md)

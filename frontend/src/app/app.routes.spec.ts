@@ -20,30 +20,47 @@ describe('localized app routes', () => {
     document.cookie = `${localeCookieName}=; Path=/; Max-Age=0; SameSite=Lax`;
   });
 
-  it('resolves /fr to the French home placeholder', async () => {
+  it('resolves /fr to the French home page content', async () => {
     const harness = await createHarness('/fr');
 
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Accueil');
+    expect(harness.routeNativeElement?.querySelector('app-home-page h1')?.textContent).toContain(
+      'Baptiste Wetterwald',
+    );
+    expect(harness.routeNativeElement?.textContent).toContain('Ingénieur logiciel');
   });
 
-  it('resolves /en to the English home placeholder', async () => {
+  it('resolves /en to the English home page content', async () => {
     const harness = await createHarness('/en');
 
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Home');
+    expect(harness.routeNativeElement?.querySelector('app-home-page h1')?.textContent).toContain(
+      'Baptiste Wetterwald',
+    );
+    expect(harness.routeNativeElement?.textContent).toContain('Software Engineer');
   });
 
-  it('resolves localized aliases to the shared page component', async () => {
+  it('resolves localized education aliases to the education page component', async () => {
     const harness = await createHarness('/fr/formation');
 
     expect(
-      harness.routeNativeElement?.querySelector('app-localized-page h1')?.textContent,
+      harness.routeNativeElement?.querySelector('app-education-page h1')?.textContent,
     ).toContain('Formation');
+    expect(harness.routeNativeElement?.textContent).toContain('ENSISA');
 
     await harness.navigateByUrl('/en/education');
 
     expect(
-      harness.routeNativeElement?.querySelector('app-localized-page h1')?.textContent,
+      harness.routeNativeElement?.querySelector('app-education-page h1')?.textContent,
     ).toContain('Education');
+    expect(harness.routeNativeElement?.textContent).toContain('IUT Robert Schuman');
+  });
+
+  it('resolves localized experience routes to the experience page component', async () => {
+    const harness = await createHarness('/en/experience');
+
+    expect(
+      harness.routeNativeElement?.querySelector('app-experience-page h1')?.textContent,
+    ).toContain('Professional experience');
+    expect(harness.routeNativeElement?.textContent).toContain('Plansee Group Functions');
   });
 
   it('resolves localized projects routes to the API-backed projects page', async () => {
@@ -81,7 +98,9 @@ describe('localized app routes', () => {
     const harness = await createHarness('/');
 
     expect(TestBed.inject(Router).url).toBe('/fr');
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Accueil');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
+      'Baptiste Wetterwald',
+    );
   });
 
   it('renders the public shell landmarks around localized pages', async () => {

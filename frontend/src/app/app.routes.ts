@@ -9,6 +9,9 @@ import {
   projectsPageStateKey,
   projectsResolver,
 } from './core/projects/project-resolvers';
+import { EducationPageComponent } from './pages/education-page/education-page.component';
+import { ExperiencePageComponent } from './pages/experience-page/experience-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
 import { LocalizedPageComponent } from './pages/localized-page/localized-page.component';
 import { NotFoundPageComponent } from './pages/not-found-page/not-found-page.component';
 import { ProjectDetailPageComponent } from './pages/project-detail-page/project-detail-page.component';
@@ -56,6 +59,39 @@ function localizedStaticPageRoute(
       resolve: {
         [projectsPageStateKey]: projectsResolver,
       },
+      data: {
+        pageId,
+      },
+    };
+  }
+
+  if (pageId === 'home') {
+    return {
+      path: localizedSegment(locale, pageId),
+      pathMatch: 'full',
+      component: HomePageComponent,
+      data: {
+        pageId,
+      },
+    };
+  }
+
+  if (pageId === 'education') {
+    return {
+      path: localizedSegment(locale, pageId),
+      pathMatch: 'full',
+      component: EducationPageComponent,
+      data: {
+        pageId,
+      },
+    };
+  }
+
+  if (pageId === 'experience') {
+    return {
+      path: localizedSegment(locale, pageId),
+      pathMatch: 'full',
+      component: ExperiencePageComponent,
       data: {
         pageId,
       },

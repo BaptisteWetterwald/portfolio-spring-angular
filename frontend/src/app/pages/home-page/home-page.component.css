@@ -1,0 +1,211 @@
+.home-page {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5);
+}
+
+.home-page__hero {
+  padding-block: var(--space-5) var(--space-7);
+}
+
+.home-page__eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-accent-maritime);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.home-page__hero h1 {
+  margin: 0;
+  font-size: 3rem;
+  line-height: 1.05;
+  font-weight: 750;
+}
+
+.home-page__orientation {
+  margin: var(--space-3) 0 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.home-page__stack-line {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.home-page__intro {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 760px;
+  margin-top: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.home-page__section {
+  margin-top: var(--space-7);
+}
+
+.home-page__section h2,
+.home-page__section-heading h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.home-page__section-heading p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.home-page__primary-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  list-style: none;
+}
+
+.home-page__primary-stack li {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-page__explore-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.home-page__explore-link {
+  display: grid;
+  min-height: 132px;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-page__explore-link small {
+  color: var(--color-text-muted);
+}
+
+.home-page__skill-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.home-page__skill-group {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-page__skill-group--primary {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 44%, var(--color-border));
+}
+
+.home-page__skill-group--secondary,
+.home-page__skill-group--exploratory-historical {
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+.home-page__skill-group h3 {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.3;
+}
+
+.home-page__skill-group > p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.home-page__skill-domains {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.home-page__skill-domain h4 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.home-page__skill-domain ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.home-page__skill {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+}
+
+.home-page__skill-domain--primary li {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 35%, var(--color-border));
+  font-weight: 700;
+}
+
+.home-page__skill-domain--exploratory-historical li,
+.home-page__skill--exploratory-historical {
+  background: color-mix(in srgb, var(--color-surface-subtle) 62%, transparent);
+  color: var(--color-text-muted);
+}
+
+.home-page__skill--primary {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 35%, var(--color-border));
+  font-weight: 700;
+}
+
+.home-page__skill-domain small {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .home-page {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .home-page__hero h1 {
+    font-size: 2.3rem;
+  }
+
+  .home-page__orientation {
+    font-size: 1.28rem;
+  }
+}

@@ -115,6 +115,13 @@ Project metadata should come from `ProjectTranslation.title` and `ProjectTransla
 
 Milestone 5 metadata is centralized in `PageMetadataService`. Static placeholder pages receive SSR-rendered localized title, description, canonical URL, OpenGraph title/description/url/type/locale, and alternate locale metadata. Structured data is intentionally deferred until approved personal/project content exists.
 
+Milestone 8 updates Home, Education, and Experience metadata to describe real content:
+
+- Home identifies Baptiste Wetterwald as a Software Engineer with backend/full-stack positioning and the approved primary technical directions.
+- Education describes ENSISA, IUT Robert Schuman, and UQAC content.
+- Experience describes professional experience without speculative job-search, location, salary, or future-employer claims.
+- Contact metadata remains conservative because no approved public contact method exists.
+
 ## SSR and Prerendering
 
 Approved main runtime model: Angular request-time SSR.
@@ -224,6 +231,14 @@ Requirements:
 
 Milestone 6 adds a reusable localized shell with semantic `header`, `nav`, shell-owned `main`, and `footer` landmarks. Page placeholders and localized 404 content render as sections inside the shell main region. The sonar/compass enhancement is built from real Angular router links plus decorative SVG marked `aria-hidden="true"`.
 
+Milestone 8 replaces Home, Education, and Experience placeholders with semantic content:
+
+- Home uses one `h1`, sections for introduction, stack highlights, section links, and skill domains, plus lists for technology groups.
+- Education and Experience use ordered timeline lists with `article` entries so chronology remains understandable without styling.
+- Confirmed dates use `<time>` elements with year or month-level `datetime` values only; exact days are not invented.
+- No fake portrait image, social profile link, CV, project card, or contact method is rendered.
+- Public copy must not expose milestone/review/TODO language such as "confirmed roles", "approved content", or "awaiting confirmation".
+
 ## Keyboard Navigation
 
 Requirements:
@@ -302,3 +317,5 @@ When implementation starts, validate with:
 - sitemap and robots inspection;
 - metadata inspection for each locale;
 - Lighthouse or equivalent SEO/performance checks.
+
+Milestone 8 expands the SSR smoke validation to assert real textual content on `/en`, `/fr`, `/en/education`, `/fr/formation`, `/en/experience`, and `/fr/experience`.

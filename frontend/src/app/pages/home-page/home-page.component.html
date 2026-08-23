@@ -1,0 +1,76 @@
+<div class="home-page">
+  <section class="home-page__hero" aria-labelledby="home-title">
+    <div class="home-page__hero-copy">
+      <p class="home-page__eyebrow">{{ content.home.hero.role }}</p>
+      <h1 id="home-title">{{ content.home.hero.name }}</h1>
+      <p class="home-page__orientation">{{ content.home.hero.orientation }}</p>
+      <p class="home-page__stack-line">{{ content.home.hero.stackLine }}</p>
+
+      <div class="home-page__intro">
+        @for (paragraph of content.home.introduction; track paragraph) {
+          <p>{{ paragraph }}</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="home-page__section" aria-labelledby="home-stack-title">
+    <h2 id="home-stack-title">{{ content.home.primaryStackHeading }}</h2>
+    <ul class="home-page__primary-stack" aria-labelledby="home-stack-title">
+      @for (technology of content.home.primaryStack; track technology) {
+        <li>{{ technology }}</li>
+      }
+    </ul>
+  </section>
+
+  <section class="home-page__section" aria-labelledby="home-explore-title">
+    <h2 id="home-explore-title">{{ content.home.exploreHeading }}</h2>
+    <div class="home-page__explore-links">
+      @for (link of content.home.exploreLinks; track link.pageId) {
+        <a class="home-page__explore-link" [routerLink]="localizedPath(link.pageId)">
+          <span>{{ link.label }}</span>
+          <small>{{ link.description }}</small>
+        </a>
+      }
+    </div>
+  </section>
+
+  <section class="home-page__section" aria-labelledby="home-skills-title">
+    <div class="home-page__section-heading">
+      <h2 id="home-skills-title">{{ content.home.skillsHeading }}</h2>
+      <p>{{ content.home.skillsIntroduction }}</p>
+    </div>
+
+    <div class="home-page__skill-groups">
+      @for (group of content.skills; track group.id) {
+        <article [class]="skillGroupClass(group)" [attr.data-skill-importance]="group.importance">
+          <h3>{{ group.title }}</h3>
+          @if (group.summary) {
+            <p>{{ group.summary }}</p>
+          }
+
+          <div class="home-page__skill-domains">
+            @for (domain of group.domains; track domain.title; let domainIndex = $index) {
+              <section
+                [class]="skillDomainClass(domain)"
+                [attr.aria-labelledby]="group.id + '-domain-' + domainIndex"
+              >
+                <h4 [id]="group.id + '-domain-' + domainIndex">{{ domain.title }}</h4>
+                <ul>
+                  @for (technology of domain.technologies; track technology.name) {
+                    <li [class]="skillTechnologyClass(technology)">
+                      <span>{{ technology.name }}</span>
+                      @if (technology.note) {
+                        <small>{{ technology.note }}</small>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+</div>

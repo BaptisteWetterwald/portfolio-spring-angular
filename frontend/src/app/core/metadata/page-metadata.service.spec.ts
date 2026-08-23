@@ -17,7 +17,7 @@ describe('PageMetadataService', () => {
     expect(document.documentElement.getAttribute('lang')).toBe('fr');
     expect(document.title).toBe('Formation | Baptiste Wetterwald');
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
-      'Page temporaire pour la section formation de Baptiste Wetterwald.',
+      "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, DUT informatique et semestre international à l'UQAC.",
     );
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
       'https://bwetterwald.fr/fr/formation',

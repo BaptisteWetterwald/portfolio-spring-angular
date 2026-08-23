@@ -105,6 +105,8 @@ Milestone 5 uses a lightweight Angular-native runtime translation layer:
 
 The initial dictionaries only cover the routing shell, locale switcher, metadata, placeholders, and 404 text. Dynamic backend project translations are deliberately not represented in frontend translation files.
 
+Milestone 8 adds structured frontend-owned static content for biography, Education, Experience, and Skills under `core/content`. Locale-neutral facts such as timeline IDs, date values, shared technologies, skill group/domain/technology ordering, importance classifications, and mostly stable organization names are centralized, while localized human-readable copy stays per locale. Project content remains backend-owned.
+
 ## Localized SEO Metadata
 
 Create a metadata service responsible for:
@@ -241,7 +243,7 @@ Milestone 6 replaces the minimal route placeholder shell with reusable standalon
 - `SonarNavigationComponent` renders the first compass/rose-des-vents visual navigation treatment as semantic links generated from `localized-routes.ts`. Its desktop geometry is intentionally compact and radial so the five destinations read as waypoints around one navigation instrument.
 - `LighthouseThemeToggleComponent` renders a real button backed by the theme service.
 
-The shell is not duplicated across locale route trees. Home, Education, Experience, and Contact remain minimal placeholder sections until approved content is supplied; Projects is API-backed as of Milestone 7.
+The shell is not duplicated across locale route trees. Projects is API-backed as of Milestone 7. Home, Education, and Experience receive confirmed static content in Milestone 8; Contact still avoids publishing a fake contact method.
 
 ### Milestone 7 Project Pages
 
@@ -271,6 +273,21 @@ The detail page renders only fields present in `ProjectDetailDto`: title, short 
 
 Project detail not-found states reuse the localized not-found foundation and set SSR response status 404 through `RESPONSE_INIT` when Angular SSR is handling the request. The generic not-found page links to Home, while project-detail misses link back to the localized Projects page.
 
+### Milestone 8 Static Content Pages
+
+Milestone 8 introduces:
+
+- `HomePageComponent` for identity, backend/full-stack positioning, concise About copy, primary stack highlights, section links, and the main skills/domain presentation.
+- `EducationPageComponent` for a semantic ordered timeline of ENSISA, IUT Robert Schuman, and UQAC.
+- `ExperiencePageComponent` for a semantic ordered timeline of confirmed professional roles.
+- `core/content/portfolio-content.models.ts` and `core/content/portfolio-content.ts` as the typed localized static content source.
+
+The static content model supports localized labels, paragraphs, timeline periods with semantic `datetime` values, optional role context, restrained responsibility bullets, and technology tags. Skill topology is built from `skillGroupFacts`, which centralizes group/domain/technology IDs, ordering, membership, and importance values; localized skill copy provides group/domain labels, localized technology labels where needed, notes, and summaries. Skill groups, domains, and individual technologies can carry an importance value: `primary`, `professional-complementary`, `secondary`, or `exploratory-historical`. This keeps primary backend/full-stack skills visually separable from broader professional, older, niche, or exploratory knowledge. It deliberately omits unconfirmed social URLs, portraits, downloadable CVs, contact methods, project records, PCF/custom connector/.NET integration claims, and role metrics.
+
+AI-assisted engineering is represented as a secondary developer-tooling area: ChatGPT, Codex / coding agents, MCP concepts, and early agentic workflow exploration. The content must not position Baptiste as an AI, ML, LLM, agentic AI, or MCP expert.
+
+The pages keep the Milestone 6 shell and visual foundation. Timelines are readable ordered lists with `article` entries and real `<time>` elements; nautical route drawing, waypoint animation, porthole imagery, waves, and GSAP remain deferred.
+
 ## Design Tokens
 
 Expose design foundations through CSS custom properties:
@@ -289,6 +306,20 @@ Expose design foundations through CSS custom properties:
 ```
 
 Angular components should consume semantic tokens, not hard-coded primitive colors.
+
+## DaisyUI, Tailwind, and Custom Identity Components
+
+DaisyUI is already installed and should be treated from Milestone 9 onward as the preferred source of reusable UI primitives where its components fit the intended design. The official component catalogue includes primitives such as buttons, badges, cards, fieldsets, inputs, textarea, validator, drawer/menu patterns, Hover 3D Card, and timeline components: <https://daisyui.com/components/>.
+
+The intended split is:
+
+- DaisyUI: reusable UI primitives;
+- Tailwind utilities: layout, composition, and adaptation;
+- custom CSS/SVG/Angular: distinctive maritime identity and behavior.
+
+Do not make every component DaisyUI. Identity-specific elements such as the sonar/compass navigation, lighthouse theme toggle and future beam, waves, maritime decorative geometry, and bespoke motion should remain custom where DaisyUI cannot reasonably express the design.
+
+The daisyUI Codex plugin documentation says the plugin can provide the latest daisyUI skill and component/theme usage guidance to Codex: <https://daisyui.com/docs/plugin/codex/>. The plugin is not installed in this environment during the M8 refinement pass, and no global Codex configuration should be changed without explicit authorization.
 
 ## Theme Handling
 

@@ -219,6 +219,29 @@ Milestone 6 implements only the structural motifs:
 
 Advanced sonar sweeps, pings, lighthouse beams, waves, bathymetric textures, porthole portrait treatment, and nautical timelines remain deferred to Milestones 9 and 10.
 
+## DaisyUI Direction for Milestone 9+
+
+DaisyUI is installed in the frontend and should be used from Milestone 9 onward where it provides a good reusable primitive. The official component catalogue should be consulted for suitable primitives such as buttons, badges, cards, timeline, fieldset, inputs, textarea, validator, drawer/menu patterns, and Hover 3D Card: <https://daisyui.com/components/>.
+
+The design principle is:
+
+```text
+DaisyUI = reusable UI primitives
+Tailwind = layout, composition, adaptation
+Custom CSS/SVG/Angular = distinctive maritime identity and behavior
+```
+
+Use DaisyUI selectively. The goal is not to make every element a DaisyUI component. Continue to use custom CSS/SVG/Angular for identity-specific pieces such as:
+
+- sonar/compass navigation;
+- lighthouse theme toggle and future beam;
+- waves;
+- bathymetric or maritime decorative geometry;
+- bespoke motion/animation;
+- components whose identity cannot reasonably come from DaisyUI.
+
+The daisyUI Codex plugin can provide current daisyUI skill guidance to Codex when installed: <https://daisyui.com/docs/plugin/codex/>. It is not part of the current repository setup and should not be installed or configured globally without explicit authorization.
+
 ## Anti-Patterns
 
 Avoid:

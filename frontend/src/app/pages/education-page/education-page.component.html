@@ -1,0 +1,52 @@
+<section class="timeline-page" aria-labelledby="education-title">
+  <header class="timeline-page__header">
+    <h1 id="education-title">{{ content.educationPage.heading }}</h1>
+    <p>{{ content.educationPage.introduction }}</p>
+  </header>
+
+  <ol class="timeline-page__list">
+    @for (entry of content.education; track entry.id) {
+      <li>
+        <article class="timeline-page__entry">
+          <div class="timeline-page__period">
+            @if (entry.period; as period) {
+              @if (period.single; as single) {
+                <time [attr.datetime]="single.datetime">{{ single.label }}</time>
+              } @else if (period.start && period.end) {
+                <time [attr.datetime]="period.start.datetime">
+                  {{ period.start.label }}
+                </time>
+                <span aria-hidden="true">&ndash;</span>
+                <span class="sr-only">{{ content.educationPage.periodToLabel }}</span>
+                @if (period.endPrefix) {
+                  <span>{{ period.endPrefix }}</span>
+                }
+                <time [attr.datetime]="period.end.datetime">
+                  {{ period.end.label }}
+                </time>
+              } @else if (period.label) {
+                <span>{{ period.label }}</span>
+              }
+            }
+          </div>
+
+          <div class="timeline-page__body">
+            <h2>{{ entry.institution }}</h2>
+            <p class="timeline-page__degree">
+              {{ entry.degree }}
+              @if (entry.field) {
+                <span>{{ entry.field }}</span>
+              }
+            </p>
+            @if (entry.status) {
+              <p class="timeline-page__status">{{ entry.status }}</p>
+            }
+            @if (entry.summary) {
+              <p class="timeline-page__summary">{{ entry.summary }}</p>
+            }
+          </div>
+        </article>
+      </li>
+    }
+  </ol>
+</section>

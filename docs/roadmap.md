@@ -209,6 +209,9 @@ Deliverables:
 - ENSISA, IUT Robert Schuman, and UQAC education content;
 - confirmed experience entries;
 - primary and enterprise skill groups;
+- skill importance model for primary, professional/complementary, secondary, and exploratory/historical knowledge;
+- conservative AI-assisted software engineering content;
+- content strategy documentation for future skill/project enrichment;
 - GitHub/LinkedIn links when actual URLs are approved;
 - downloadable CV link when approved files exist;
 - content inventory updated from TODO to confirmed where source is supplied.
@@ -239,6 +242,7 @@ Deliverables:
 - related but non-inverted light/dark themes;
 - typography and spacing system;
 - navy/off-white/blue/cyan/signal-red palette;
+- DaisyUI-based reusable UI primitive refinement where it fits the portfolio design system;
 - porthole portrait treatment;
 - nautical route/waypoint timeline styling;
 - bathymetric or nautical chart accents where useful.
@@ -442,4 +446,3 @@ Validation criteria:
 - database backup and restore procedure is documented/tested;
 - only intended ports are public;
 - production health can be checked after deployment.
-

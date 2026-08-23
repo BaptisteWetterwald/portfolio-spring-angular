@@ -1,0 +1,66 @@
+<section class="timeline-page" aria-labelledby="experience-title">
+  <header class="timeline-page__header">
+    <h1 id="experience-title">{{ content.experiencePage.heading }}</h1>
+    <p>{{ content.experiencePage.introduction }}</p>
+  </header>
+
+  <ol class="timeline-page__list">
+    @for (entry of content.experience; track entry.id) {
+      <li>
+        <article class="timeline-page__entry">
+          <div class="timeline-page__period">
+            @if (entry.period.single; as single) {
+              <time [attr.datetime]="single.datetime">{{ single.label }}</time>
+            } @else if (entry.period.start && entry.period.end) {
+              <time [attr.datetime]="entry.period.start.datetime">
+                {{ entry.period.start.label }}
+              </time>
+              <span aria-hidden="true">&ndash;</span>
+              <span class="sr-only">{{ content.experiencePage.periodToLabel }}</span>
+              @if (entry.period.endPrefix) {
+                <span>{{ entry.period.endPrefix }}</span>
+              }
+              <time [attr.datetime]="entry.period.end.datetime">
+                {{ entry.period.end.label }}
+              </time>
+            } @else if (entry.period.label) {
+              <span>{{ entry.period.label }}</span>
+            }
+            @if (entry.duration) {
+              <span class="timeline-page__duration">{{ entry.duration }}</span>
+            }
+          </div>
+
+          <div class="timeline-page__body">
+            <h2>{{ entry.organization }}</h2>
+            <p class="timeline-page__role">{{ entry.role }}</p>
+            @if (entry.context) {
+              <p class="timeline-page__context">{{ entry.context }}</p>
+            }
+
+            @if (entry.responsibilities?.length) {
+              <ul class="timeline-page__responsibilities">
+                @for (responsibility of entry.responsibilities; track responsibility) {
+                  <li>{{ responsibility }}</li>
+                }
+              </ul>
+            }
+
+            @if (entry.technologies?.length) {
+              <div class="timeline-page__technologies">
+                <h3 class="sr-only" [id]="entry.id + '-technologies'">
+                  {{ t('projects.technologies') }}
+                </h3>
+                <ul [attr.aria-labelledby]="entry.id + '-technologies'">
+                  @for (technology of entry.technologies; track technology) {
+                    <li>{{ technology }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </article>
+      </li>
+    }
+  </ol>
+</section>
