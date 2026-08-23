@@ -1,0 +1,113 @@
+.contact-page {
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5);
+}
+
+.contact-page__header {
+  max-width: 680px;
+}
+
+.contact-page__header h1 {
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.contact-page__panel {
+  margin-top: var(--space-6);
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 30%, var(--color-border));
+  background:
+    radial-gradient(circle at 88% 18%, var(--color-chart-line), transparent 18rem),
+    linear-gradient(135deg, var(--color-surface), var(--color-surface-subtle));
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-page__body {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-6);
+}
+
+.contact-page__body p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.contact-page__beacon {
+  position: relative;
+  display: grid;
+  width: 96px;
+  height: 120px;
+  justify-items: center;
+  align-items: end;
+}
+
+.contact-page__beam {
+  position: absolute;
+  top: 12px;
+  left: 42px;
+  width: 96px;
+  height: 34px;
+  transform: rotate(-9deg);
+  transform-origin: left center;
+  border-radius: var(--radius-round);
+  background: linear-gradient(90deg, var(--color-beam), transparent);
+}
+
+.contact-page__lantern {
+  z-index: 1;
+  width: 34px;
+  height: 22px;
+  border: 2px solid var(--color-text);
+  border-radius: 8px 8px 2px 2px;
+  background: var(--color-lighthouse-light);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-lighthouse-light) 38%, transparent);
+}
+
+.contact-page__tower {
+  z-index: 1;
+  width: 46px;
+  height: 64px;
+  border-right: 10px solid transparent;
+  border-bottom: 64px solid var(--color-text);
+  border-left: 10px solid transparent;
+}
+
+.contact-page__base {
+  z-index: 1;
+  width: 72px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--color-text);
+}
+
+@media (max-width: 640px) {
+  .contact-page {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .contact-page__body {
+    grid-template-columns: 1fr;
+    padding: var(--space-5);
+  }
+
+  .contact-page__beacon {
+    width: 76px;
+    height: 96px;
+  }
+
+  .contact-page__beam {
+    width: 68px;
+  }
+
+  .contact-page__header h1 {
+    font-size: 1.9rem;
+  }
+}

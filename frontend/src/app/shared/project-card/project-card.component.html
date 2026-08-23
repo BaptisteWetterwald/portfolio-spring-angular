@@ -1,23 +1,30 @@
-<article class="project-card">
+<article
+  class="card card-border project-card"
+  [class.project-card--with-media]="mediaSrc()"
+  [class.project-card--featured]="project().featured"
+  [class.project-card--archived]="project().status === 'ARCHIVED'"
+>
   @if (mediaSrc(); as src) {
-    <img
-      class="project-card__media"
-      [src]="src"
-      width="88"
-      height="88"
-      loading="lazy"
-      [alt]="project().title"
-    />
+    <figure class="project-card__media-frame">
+      <img
+        class="project-card__media"
+        [src]="src"
+        width="88"
+        height="88"
+        loading="lazy"
+        [alt]="project().title"
+      />
+    </figure>
   }
 
-  <div class="project-card__body">
+  <div class="card-body project-card__body">
     <div class="project-card__heading-row">
-      <h3 class="project-card__title">
+      <h3 class="card-title project-card__title">
         <a [routerLink]="detailPath()" [attr.aria-label]="detailsAriaLabel()">
           {{ project().title }}
         </a>
       </h3>
-      <span class="project-card__status">
+      <span class="badge badge-outline project-card__status">
         {{ t('projects.status.' + project().status) }}
       </span>
     </div>
@@ -27,15 +34,20 @@
     @if (project().technologies.length > 0) {
       <ul class="project-card__technologies" [attr.aria-label]="t('projects.technologies')">
         @for (technology of project().technologies; track technology.slug) {
-          <li>{{ technology.name }}</li>
+          <li>
+            <span class="badge badge-outline project-card__technology">
+              {{ technology.name }}
+            </span>
+          </li>
         }
       </ul>
     }
 
     @if (project().githubUrl || project().demoUrl) {
-      <nav class="project-card__links" [attr.aria-label]="t('projects.links')">
+      <nav class="card-actions project-card__links" [attr.aria-label]="t('projects.links')">
         @if (project().githubUrl; as githubUrl) {
           <a
+            class="btn btn-sm btn-outline project-card__action"
             [href]="githubUrl"
             target="_blank"
             rel="noopener noreferrer"
@@ -46,6 +58,7 @@
         }
         @if (project().demoUrl; as demoUrl) {
           <a
+            class="btn btn-sm btn-outline project-card__action"
             [href]="demoUrl"
             target="_blank"
             rel="noopener noreferrer"

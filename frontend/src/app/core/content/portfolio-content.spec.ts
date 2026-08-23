@@ -48,6 +48,53 @@ describe('portfolioContent', () => {
     );
   });
 
+  it('keeps optional timeline affiliation metadata locale-neutral and non-blocking', () => {
+    expect(portfolioContent.en.education[0]).toMatchObject({
+      id: 'ensisa',
+      officialWebsiteUrl: 'https://www.ensisa.uha.fr/',
+      logo: {
+        src: '/assets/logos/logo_ensisa.svg',
+      },
+    });
+    expect(portfolioContent.fr.education[0].officialWebsiteUrl).toBe(
+      portfolioContent.en.education[0].officialWebsiteUrl,
+    );
+    expect(logoSources(portfolioContent.en.education)).toEqual({
+      ensisa: '/assets/logos/logo_ensisa.svg',
+      'iut-robert-schuman': '/assets/logos/logo_iut_robert_schuman.png',
+      'uqac-semester': '/assets/logos/logo_uqac.png',
+    });
+    expect(logoSources(portfolioContent.fr.education)).toEqual(
+      logoSources(portfolioContent.en.education),
+    );
+    expect(logoSources(portfolioContent.en.education)).toEqual(
+      factLogoSources(educationEntryFacts),
+    );
+    expect(portfolioContent.en.experience[0]).toMatchObject({
+      id: 'plansee-group-functions',
+      officialWebsiteUrl: 'https://plansee-group.com/en',
+      logo: {
+        src: '/assets/logos/logo_plansee.png',
+      },
+    });
+    expect(logoSources(portfolioContent.en.experience)).toEqual({
+      'plansee-group-functions': '/assets/logos/logo_plansee.png',
+      'plansee-internship': '/assets/logos/logo_plansee.png',
+      'bureau-veritas-laboratories': '/assets/logos/logo_bureau_veritas.svg',
+      'groupe-ies': '/assets/logos/logo_groupe_ies.jpeg',
+      'uqac-internship': '/assets/logos/logo_uqac.png',
+    });
+    expect(logoSources(portfolioContent.fr.experience)).toEqual(
+      logoSources(portfolioContent.en.experience),
+    );
+    expect(logoSources(portfolioContent.en.experience)).toEqual(
+      factLogoSources(experienceEntryFacts),
+    );
+    expect(portfolioContent.en.experience[3].id).toBe('groupe-ies');
+    expect(portfolioContent.en.experience[3].officialWebsiteUrl).toBeUndefined();
+    expect(portfolioContent.en.experience[3].logo?.src).toBe('/assets/logos/logo_groupe_ies.jpeg');
+  });
+
   it('keeps Plansee employment and internship as separate timeline entries', () => {
     const experience = portfolioContent.en.experience;
 
@@ -186,6 +233,16 @@ function periodDatetimes(
       entry.period?.single?.datetime,
     ].filter((datetime): datetime is string => Boolean(datetime)),
   );
+}
+
+function logoSources(entries: readonly { id: string; logo?: { src: string } }[]) {
+  return Object.fromEntries(entries.map((entry) => [entry.id, entry.logo?.src]));
+}
+
+function factLogoSources(
+  entries: readonly { id: string; affiliation?: { logo?: { src: string } } }[],
+) {
+  return Object.fromEntries(entries.map((entry) => [entry.id, entry.affiliation?.logo?.src]));
 }
 
 function skillDomains(content: LocalizedPortfolioContent): readonly SkillDomain[] {

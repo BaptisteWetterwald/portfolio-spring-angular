@@ -1,9 +1,16 @@
 @switch (state().kind) {
   @case ('error') {
-    <section class="project-detail project-detail--narrow" aria-labelledby="project-error-title">
-      <h1 id="project-error-title">{{ t('projectDetail.error.heading') }}</h1>
-      <p>{{ t('projectDetail.error.message') }}</p>
-      <a [routerLink]="projectsPath">{{ t('projects.backToProjects') }}</a>
+    <section
+      class="card card-border project-detail project-detail--narrow"
+      aria-labelledby="project-error-title"
+    >
+      <div class="card-body">
+        <h1 id="project-error-title" class="card-title">{{ t('projectDetail.error.heading') }}</h1>
+        <p>{{ t('projectDetail.error.message') }}</p>
+        <a class="btn btn-sm btn-outline project-detail__action" [routerLink]="projectsPath">
+          {{ t('projects.backToProjects') }}
+        </a>
+      </div>
     </section>
   }
   @case ('notFound') {
@@ -12,23 +19,30 @@
   @case ('loaded') {
     @if (project(); as project) {
       <article class="project-detail" aria-labelledby="project-title">
-        <a class="project-detail__back-link" [routerLink]="projectsPath">
+        <a class="btn btn-sm btn-ghost project-detail__back-link" [routerLink]="projectsPath">
           {{ t('projects.backToProjects') }}
         </a>
 
-        <header class="project-detail__header">
+        <header
+          class="project-detail__header"
+          [class.project-detail__header--with-media]="mediaSrc()"
+        >
           @if (mediaSrc(); as src) {
-            <img
-              class="project-detail__media"
-              [src]="src"
-              width="112"
-              height="112"
-              [alt]="project.title"
-            />
+            <figure class="project-detail__media-frame">
+              <img
+                class="project-detail__media"
+                [src]="src"
+                width="112"
+                height="112"
+                [alt]="project.title"
+              />
+            </figure>
           }
 
           <div class="project-detail__intro">
-            <p class="project-detail__status">{{ t('projects.status.' + project.status) }}</p>
+            <p class="badge badge-outline project-detail__status">
+              {{ t('projects.status.' + project.status) }}
+            </p>
             <h1 id="project-title">{{ project.title }}</h1>
             <p>{{ project.shortDescription }}</p>
           </div>
@@ -39,16 +53,21 @@
             <h2 id="project-technologies-title">{{ t('projects.technologies') }}</h2>
             <ul class="project-detail__technologies">
               @for (technology of project.technologies; track technology.slug) {
-                <li>{{ technology.name }}</li>
+                <li>
+                  <span class="badge badge-outline project-detail__technology">
+                    {{ technology.name }}
+                  </span>
+                </li>
               }
             </ul>
           </section>
         }
 
         @if (project.githubUrl || project.demoUrl) {
-          <nav class="project-detail__links" [attr.aria-label]="t('projects.links')">
+          <nav class="project-detail__links card-actions" [attr.aria-label]="t('projects.links')">
             @if (project.githubUrl; as githubUrl) {
               <a
+                class="btn btn-outline project-detail__action"
                 [href]="githubUrl"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -59,6 +78,7 @@
             }
             @if (project.demoUrl; as demoUrl) {
               <a
+                class="btn btn-outline project-detail__action"
                 [href]="demoUrl"
                 target="_blank"
                 rel="noopener noreferrer"

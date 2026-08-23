@@ -80,9 +80,20 @@ export interface PortfolioPeriodFact {
   readonly singleDatetime?: string;
 }
 
+export interface TimelineEntryLogo {
+  readonly src: string;
+  readonly alt: string;
+}
+
+export interface TimelineEntryAffiliation {
+  readonly officialWebsiteUrl?: string;
+  readonly logo?: TimelineEntryLogo;
+}
+
 export interface EducationEntryFact {
   readonly id: EducationEntryId;
   readonly period?: PortfolioPeriodFact;
+  readonly affiliation?: TimelineEntryAffiliation;
 }
 
 export interface ExperienceEntryFact {
@@ -91,6 +102,7 @@ export interface ExperienceEntryFact {
   readonly period: PortfolioPeriodFact;
   readonly duration?: Partial<Record<SupportedLocale, string>>;
   readonly technologies?: readonly string[];
+  readonly affiliation?: TimelineEntryAffiliation;
 }
 
 export interface SkillTechnologyFact {
@@ -116,6 +128,7 @@ export interface HomeHeroContent {
   readonly role: string;
   readonly orientation: string;
   readonly stackLine: string;
+  readonly portraitAlt: string;
 }
 
 export interface HomeLinkContent {
@@ -143,6 +156,8 @@ export interface EducationEntry {
   readonly status?: string;
   readonly period?: PortfolioPeriod;
   readonly summary?: string;
+  readonly officialWebsiteUrl?: string;
+  readonly logo?: TimelineEntryLogo;
 }
 
 export interface ExperienceEntry {
@@ -154,6 +169,8 @@ export interface ExperienceEntry {
   readonly context?: string;
   readonly responsibilities?: readonly string[];
   readonly technologies?: readonly string[];
+  readonly officialWebsiteUrl?: string;
+  readonly logo?: TimelineEntryLogo;
 }
 
 export interface SkillTechnology {
@@ -182,6 +199,8 @@ export interface TimelinePageContent {
   readonly heading: string;
   readonly introduction: string;
   readonly periodToLabel: string;
+  readonly officialWebsiteLabel: string;
+  readonly opensInNewTabLabel: string;
 }
 
 export interface LocalizedPortfolioContent {

@@ -2,11 +2,49 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-color: var(--color-border);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 120ms ease;
+}
+
+.project-card:hover,
+.project-card:focus-within {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 38%, var(--color-border));
+  box-shadow: var(--shadow-md);
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+}
+
+.project-card--featured {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 52%, var(--color-border));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent-maritime) 8%, transparent),
+      transparent 46%
+    ),
+    var(--color-surface);
+}
+
+.project-card--archived {
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+.project-card:not(.project-card--with-media) {
+  grid-template-columns: 1fr;
+}
+
+.project-card__media-frame {
+  display: grid;
+  align-self: start;
+  margin: var(--space-5) 0 0 var(--space-5);
 }
 
 .project-card__media {
@@ -20,6 +58,7 @@
 
 .project-card__body {
   min-width: 0;
+  padding: var(--space-5);
 }
 
 .project-card__heading-row {
@@ -49,9 +88,10 @@
 
 .project-card__status {
   flex: 0 0 auto;
-  padding: 2px 8px;
-  border: 1px solid var(--color-border);
+  height: auto;
+  border-color: var(--color-border);
   border-radius: var(--radius-round);
+  background: var(--color-surface-subtle);
   color: var(--color-text-muted);
   font-size: 0.82rem;
   line-height: 1.5;
@@ -73,12 +113,19 @@
 }
 
 .project-card__technologies li {
-  padding: 3px 9px;
-  border: 1px solid color-mix(in srgb, var(--color-accent-maritime) 30%, var(--color-border));
+  display: flex;
+}
+
+.project-card__technology {
+  height: auto;
+  justify-content: start;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 30%, var(--color-border));
   border-radius: var(--radius-round);
   color: var(--color-text);
   background: color-mix(in srgb, var(--color-accent-maritime) 8%, transparent);
   font-size: 0.86rem;
+  line-height: 1.35;
+  white-space: normal;
 }
 
 .project-card__links {
@@ -88,15 +135,16 @@
   margin-top: var(--space-4);
 }
 
-.project-card__links a {
+.project-card__action {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 34%, var(--color-border));
   color: var(--color-link);
   font-weight: 600;
-  text-decoration: none;
 }
 
-.project-card__links a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.project-card__action:hover,
+.project-card__action:focus-visible {
+  border-color: var(--color-accent-maritime);
+  background: color-mix(in srgb, var(--color-accent-maritime) 10%, transparent);
 }
 
 @media (max-width: 560px) {
@@ -109,7 +157,21 @@
     height: 72px;
   }
 
+  .project-card__media-frame {
+    margin: var(--space-5) var(--space-5) 0;
+  }
+
   .project-card__heading-row {
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card {
+    transition: none;
+  }
+
+  .project-card:hover {
+    transform: none;
   }
 }

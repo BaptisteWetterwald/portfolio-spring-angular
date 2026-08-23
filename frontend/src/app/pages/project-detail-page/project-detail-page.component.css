@@ -6,6 +6,9 @@
 
 .project-detail--narrow {
   max-width: 720px;
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .project-detail--narrow h1 {
@@ -24,30 +27,46 @@
 .project-detail--narrow a {
   color: var(--color-link);
   font-weight: 600;
-  text-decoration: none;
 }
 
-.project-detail__back-link:hover,
-.project-detail--narrow a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.project-detail__back-link {
+  width: fit-content;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 24%, transparent);
+  color: var(--color-text);
 }
 
 .project-detail__header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   align-items: start;
   margin-top: var(--space-5);
+}
+
+.project-detail__header--with-media {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.project-detail__media-frame {
+  display: grid;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-accent-maritime) 28%, var(--color-border));
+  border-radius: var(--radius-md);
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 18px,
+      var(--color-depth-line) 19px 20px
+    ),
+    var(--color-surface-subtle);
 }
 
 .project-detail__media {
   width: 112px;
   height: 112px;
   object-fit: contain;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-subtle);
+  border-radius: var(--radius-sm);
 }
 
 .project-detail__intro {
@@ -57,9 +76,10 @@
 .project-detail__status {
   display: inline-block;
   margin: 0 0 var(--space-3);
-  padding: 3px 10px;
-  border: 1px solid var(--color-border);
+  height: auto;
+  border-color: var(--color-border);
   border-radius: var(--radius-round);
+  background: var(--color-surface-subtle);
   color: var(--color-text-muted);
   font-size: 0.86rem;
 }
@@ -98,10 +118,18 @@
 }
 
 .project-detail__technologies li {
-  padding: 4px 10px;
-  border: 1px solid color-mix(in srgb, var(--color-accent-maritime) 32%, var(--color-border));
+  display: flex;
+}
+
+.project-detail__technology {
+  height: auto;
+  justify-content: start;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 32%, var(--color-border));
   border-radius: var(--radius-round);
   background: color-mix(in srgb, var(--color-accent-maritime) 8%, transparent);
+  color: var(--color-text);
+  line-height: 1.35;
+  white-space: normal;
 }
 
 .project-detail__links {
@@ -111,15 +139,16 @@
   margin-top: var(--space-6);
 }
 
-.project-detail__links a {
+.project-detail__action {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 34%, var(--color-border));
   color: var(--color-link);
   font-weight: 650;
-  text-decoration: none;
 }
 
-.project-detail__links a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.project-detail__action:hover,
+.project-detail__action:focus-visible {
+  border-color: var(--color-accent-maritime);
+  background: color-mix(in srgb, var(--color-accent-maritime) 10%, transparent);
 }
 
 .project-detail__description {
@@ -135,7 +164,8 @@
     padding-inline: var(--space-4);
   }
 
-  .project-detail__header {
+  .project-detail__header,
+  .project-detail__header--with-media {
     grid-template-columns: 1fr;
   }
 

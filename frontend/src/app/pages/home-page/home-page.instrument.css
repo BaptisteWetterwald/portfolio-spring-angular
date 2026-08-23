@@ -1,0 +1,81 @@
+.home-page__portrait-slot {
+  --portrait-ring-size: 20px;
+  --portrait-ring-color: color-mix(in srgb, var(--color-neutral) 84%, #020617);
+  --portrait-cyan-line: color-mix(in srgb, var(--color-accent-maritime) 62%, transparent);
+  --portrait-rivet-color: color-mix(
+    in srgb,
+    var(--color-surface-raised) 42%,
+    var(--color-accent-maritime)
+  );
+
+  position: relative;
+  display: grid;
+  width: clamp(218px, 24vw, 276px);
+  aspect-ratio: 1;
+  padding: var(--portrait-ring-size);
+  justify-self: end;
+  border: 1px solid var(--portrait-cyan-line);
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 50% 7%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 80.4% 19.6%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 93% 50%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 80.4% 80.4%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 50% 93%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 19.6% 80.4%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 7% 50%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 19.6% 19.6%, var(--portrait-rivet-color) 0 2px, transparent 2.6px),
+    var(--portrait-ring-color);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-accent-maritime) 18%, transparent),
+    var(--shadow-sm);
+}
+
+.home-page__portrait-slot::before {
+  position: absolute;
+  inset: calc(var(--portrait-ring-size) - 5px);
+  border: 1px solid var(--portrait-cyan-line);
+  border-radius: var(--radius-round);
+  pointer-events: none;
+  content: '';
+}
+
+.home-page__portrait-photo-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-round);
+  background: #ffffff;
+}
+
+.home-page__portrait {
+  position: absolute;
+  top: -6%;
+  left: 50%;
+  width: 86%;
+  height: 128%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 640px) {
+  .home-page__portrait-slot {
+    --portrait-ring-size: 10px;
+
+    grid-area: portrait;
+    width: clamp(128px, 35vw, 145px);
+    align-self: center;
+    justify-self: end;
+    translate: 0 -6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .home-page__portrait-slot {
+    --portrait-ring-size: 9px;
+
+    width: clamp(108px, 34vw, 120px);
+    justify-self: center;
+    translate: none;
+  }
+}

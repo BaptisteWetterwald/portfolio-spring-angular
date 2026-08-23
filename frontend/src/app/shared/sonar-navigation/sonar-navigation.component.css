@@ -3,7 +3,7 @@
 }
 
 .sonar-nav {
-  max-width: 820px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 0 var(--space-5) var(--space-4);
 }
@@ -13,11 +13,14 @@
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-maritime)),
-    var(--color-surface)
-  );
+  background:
+    radial-gradient(circle at 50% 50%, var(--color-chart-line), transparent 11rem),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-maritime)),
+      var(--color-surface)
+    );
+  box-shadow: var(--shadow-sm);
 }
 
 .sonar-nav__svg {
@@ -82,7 +85,7 @@
 .sonar-nav__link:hover,
 .sonar-nav__link:focus-visible {
   border-color: var(--color-accent-maritime);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
 }
 
 .sonar-nav__link:hover {
@@ -117,8 +120,8 @@
 
 @media (min-width: 768px) {
   .sonar-nav__frame {
-    min-height: 260px;
-    aspect-ratio: 8 / 3;
+    min-height: 220px;
+    aspect-ratio: 7 / 2.7;
   }
 
   .sonar-nav__list {
@@ -135,26 +138,26 @@
 
   .sonar-nav__item--home {
     top: 50%;
-    left: 25%;
+    left: 27%;
   }
 
   .sonar-nav__item--education {
-    top: 18%;
+    top: 16%;
     left: 50%;
   }
 
   .sonar-nav__item--experience {
     top: 50%;
-    left: 75%;
+    left: 73%;
   }
 
   .sonar-nav__item--projects {
-    top: 76%;
-    left: 61%;
+    top: 78%;
+    left: 60%;
   }
 
   .sonar-nav__item--contact {
-    top: 76%;
+    top: 78%;
     left: 39%;
   }
 

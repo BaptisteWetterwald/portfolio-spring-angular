@@ -77,6 +77,7 @@ describe('SonarNavigationComponent integration', () => {
 
     expect(sonarNav?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     expect(sonarNav?.querySelector('canvas')).toBeNull();
+    expect(sonarNav?.querySelector('.sonar-nav__bearing')).toBeNull();
     expect(sonarLinks(harness).length).toBe(5);
   });
 });

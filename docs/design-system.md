@@ -242,6 +242,89 @@ Use DaisyUI selectively. The goal is not to make every element a DaisyUI compone
 
 The daisyUI Codex plugin can provide current daisyUI skill guidance to Codex when installed: <https://daisyui.com/docs/plugin/codex/>. It is not part of the current repository setup and should not be installed or configured globally without explicit authorization.
 
+### Milestone 9 Component Strategy
+
+Milestone 9 uses the installed local daisyUI Codex skill only. Do not use or install the paid daisyUI MCP.
+
+Implementation matrix:
+
+| Area | M9 strategy | Notes |
+| --- | --- | --- |
+| Header | Hybrid daisyUI/custom | Use `navbar`, `menu`, and `btn` as accessible primitives. Keep shell geometry, exact route state, skip link, and maritime surface styling custom. |
+| Footer | Hybrid daisyUI/custom | Use `footer` and `link` primitives while retaining custom chart-like surface treatment and exact active links. |
+| Theme toggle | Hybrid daisyUI/custom | Use button semantics and a daisyUI `btn` foundation. Keep the lighthouse drawing and illuminated lantern custom. Defer lighthouse beam work to a later motion/polish milestone. |
+| Locale switcher | DaisyUI-led | Use `join` and compact `btn` anchors with custom active-state integration. |
+| Sonar/compass | Custom | Keep semantic links and custom SVG/CSS instrument geometry. Rings must use consistent radial spacing around a balanced center, with only symmetrical radial lines and no arbitrary cone/triangle markers. DaisyUI is not a good fit for the signature navigation itself. |
+| Home hero | Custom | Render the approved owner portrait inside a restrained circular porthole/navigation frame. Use the original portrait asset as the image source and CSS object cropping for the circular presentation; do not create a manually cropped square derivative or apply heavy filters/blur/overlays. |
+| Home navigation/content surfaces | Removed in M9 correction | Do not render redundant Home route cards because header navigation, signature sonar, mobile navigation, and footer navigation already cover portfolio navigation. |
+| Skills | Hybrid daisyUI/custom | Use `card` for skill groups and `badge` for technologies. Preserve importance classes and data attributes for the primary/professional/secondary/exploratory hierarchy. Skill cards are informational surfaces, not clickable controls. |
+| Experience | Hybrid daisyUI/custom | Use daisyUI `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, and `<hr>` geometry first, then style it as a plotted maritime route. Desktop entries alternate around one central route; mobile uses compact one-sided behavior. Preserve chronological DOM order, visible dates, and organization names. Optional organization logos belong in the card metadata column under the period on desktop, then reflow beside the organization name on mobile. |
+| Education | Hybrid daisyUI/custom | Same daisyUI-first timeline strategy as Experience, with education-specific content and order unchanged. Optional school logos and official links follow the same secondary identity-area treatment. |
+| Projects list | Hybrid daisyUI/custom | Use `card`, `badge`, and `btn` primitives. Featured projects receive stronger presentation than standard or archived projects, but no new persistence field is added. |
+| Project detail | Hybrid daisyUI/custom | Use badges and buttons for status, technologies, and actions. Mockup wrappers are deferred until the API/content can distinguish screenshots from logos/media references. |
+| Contact | Hybrid daisyUI/custom | Establish a visual contact surface using `card` without inventing contact data or fake form submission. Form primitives remain reserved for a later real contact milestone. |
+
+Approved daisyUI components for M9:
+
+- `btn` for commands and prominent links.
+- `badge` for technologies, statuses, and restrained metadata.
+- `card` for repeated content surfaces and project presentation foundations.
+- `timeline` for Experience and Education structure, combined with custom route styling.
+- `navbar`, `menu`, `footer`, `link`, and `join` for shell primitives.
+- `aura` remains approved only as a rare future focal accent, but the M9 correction removes the previous Home aura because the redundant navigation-card section was removed.
+
+Deferred or constrained components:
+
+- `mockup-browser`, `mockup-phone`, and `mockup-code` are approved for future project showcases, but M9 does not apply them to generic `logoMediaRef` values because the current API does not prove that a media item is a screenshot, phone capture, or code sample.
+- `hover-3d` is deferred. The official component requires noninteractive content or a whole-card link, while current project cards contain separate detail, GitHub, and demo links.
+- Form components (`fieldset`, `input`, `textarea`, `validator`) are reserved for a later real contact implementation. Do not build a fake contact backend or inert form.
+
+### Milestone 9 Visual Hierarchy
+
+Skills must remain visually weighted:
+
+- primary software engineering and backend/full-stack skills receive the strongest surfaces and badges;
+- professional/complementary skills remain prominent but quieter than the primary stack;
+- secondary skills are discoverable without competing with primary skills;
+- exploratory/historical skills use the quietest treatment.
+
+AI-assisted engineering remains a secondary developer-tooling area. Visual emphasis must not imply AI Engineer, ML Engineer, LLM Engineer, MCP expert, or agentic AI expert positioning.
+
+Project presentation must support three future prominence levels:
+
+- featured/flagship projects: strongest card treatment, optional aura or mockup only when real content supports it;
+- standard projects: normal project cards with technologies and actions;
+- archived/minor projects: quieter surfaces and lower visual weight.
+
+The existing `featured` and `ARCHIVED` backend concepts are enough for M9. Do not add a project-importance persistence field until real project content proves it is necessary.
+
+### Milestone 9 Maritime Identity Rules
+
+Maritime identity should come from instrument-like details rather than literal theming:
+
+- compass bearings, plotted-route lines, waypoint markers, porthole-like circular details, subtle lighthouse light, restrained wave edges, and low-contrast bathymetric/chart lines are appropriate;
+- fake telemetry, targeting language, pirate elements, military roleplay, and literal ship dashboards are not appropriate;
+- light mode should feel like daylight navigation charts using warm off-white, navy text, cool mist separation, and restrained red/blue accents;
+- dark mode should feel like nighttime navigation using deep navy, restrained cyan illumination, and subtle lighthouse accents.
+
+Motion remains progressive enhancement in M9. A static state must communicate the same meaning as any animated hover, focus, sonar, aura, or lighthouse treatment.
+
+### Milestone 9 Owner-Review Corrections
+
+The corrected M9 Home page does not include a secondary portfolio-navigation card section. Page navigation is provided by the header, desktop sonar/compass, mobile menu, and footer. The Home flow is hero, primary technologies, skills/domains, and future featured projects only when real backend project content exists.
+
+The Home hero's right side now uses the approved owner portrait in the porthole frame. On desktop and large tablets, the portrait balances the Hero text in the right column. On mobile, it sits beside the name/identity block before the biography; very narrow screens may stack it directly after the name while still keeping it before the role, stack, and biography. This keeps the portrait part of the identity hierarchy without creating excessive vertical whitespace before the primary technology section. Keep the portrait natural and recognizable. Crop it responsively with `object-fit: cover` and `object-position`; do not add a generated avatar, stock substitute, heavy filter, artificial blur, excessive overlay, or manually cropped square derivative.
+
+The main sonar remains the signature navigation instrument. Its SVG geometry should stay clean: evenly spaced concentric rings, a balanced center, symmetrical axes, real destination links close to the instrument, and no random triangle/cone markers.
+
+The lighthouse header toggle should not render a beam in M9. Dark mode is communicated by the illuminated lantern and subtle glow only. A credible rotating lighthouse beam remains deferred to the later motion/polish milestone.
+
+Skill cards remain informational. Do not add click behavior, `cursor: pointer`, strong scaling, or any effect that implies navigation. A subtle desktop-only border/shadow/1px lift is acceptable for materiality.
+
+Education and Experience timelines must use daisyUI timeline geometry first: one central continuous route, waypoints on that route, alternating `timeline-start` and `timeline-end` entries on desktop, `<hr>` route segments between points, and `max-md:timeline-compact` for narrow viewports. Custom CSS may style route color, waypoints, and card surfaces, but must not replace the daisyUI layout with a detached custom rail.
+
+Timeline entries may expose an optional logo asset and official website URL. Logos are secondary identity marks with normalized display dimensions, regardless of source aspect ratio. On desktop timeline cards, logos sit below the date/period in the left metadata column so they use otherwise empty space; the organization or school name stays in the right content column. On mobile, the same logo may reflow beside the organization or school name. When an official URL is present, only the logo and/or name may be scoped links with external-link semantics; never turn the whole timeline card into a link. Prefer official organization or school websites over LinkedIn pages. Do not add logos unless approved logo assets are provided. The durable asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; when existing owner-supplied filenames differ, typed facts must reference the exact local asset path until the files are safely normalized.
+
 ## Anti-Patterns
 
 Avoid:

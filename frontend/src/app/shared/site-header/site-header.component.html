@@ -1,6 +1,6 @@
 <a class="skip-link" href="#main-content">{{ t('nav.skipToContent') }}</a>
 
-<header class="site-header">
+<header class="site-header navbar">
   <div class="site-header__inner">
     <div class="site-header__bar">
       <a class="site-header__identity" [routerLink]="localizedPath('home')">
@@ -8,18 +8,22 @@
       </a>
 
       <nav class="site-header__nav" data-primary-nav [attr.aria-label]="t('nav.primary')">
-        @for (pageId of navPages; track pageId) {
-          <a
-            class="site-header__nav-link"
-            [routerLink]="localizedPath(pageId)"
-            routerLinkActive="site-header__nav-link--active"
-            #activeLink="routerLinkActive"
-            [routerLinkActiveOptions]="exactPageCurrentOptions"
-            [attr.aria-current]="activeLink.isActive ? 'page' : null"
-          >
-            {{ navLabel(pageId) }}
-          </a>
-        }
+        <ul class="menu menu-horizontal site-header__nav-list">
+          @for (pageId of navPages; track pageId) {
+            <li>
+              <a
+                class="site-header__nav-link"
+                [routerLink]="localizedPath(pageId)"
+                routerLinkActive="site-header__nav-link--active"
+                #activeLink="routerLinkActive"
+                [routerLinkActiveOptions]="exactPageCurrentOptions"
+                [attr.aria-current]="activeLink.isActive ? 'page' : null"
+              >
+                {{ navLabel(pageId) }}
+              </a>
+            </li>
+          }
+        </ul>
       </nav>
 
       <div class="site-header__actions">
@@ -27,7 +31,7 @@
         <app-lighthouse-theme-toggle />
         <button
           #mobileMenuButton
-          class="site-header__menu-button"
+          class="btn btn-circle btn-ghost site-header__menu-button"
           type="button"
           [attr.aria-label]="menuButtonLabel()"
           [attr.aria-expanded]="isMobileMenuOpen() ? 'true' : 'false'"
@@ -49,20 +53,24 @@
         [id]="mobileMenuId"
         [attr.aria-label]="t('nav.primary')"
       >
-        @for (pageId of navPages; track pageId) {
-          <a
-            #mobileNavLink
-            class="site-header__mobile-link"
-            [routerLink]="localizedPath(pageId)"
-            routerLinkActive="site-header__mobile-link--active"
-            #activeMobileLink="routerLinkActive"
-            [routerLinkActiveOptions]="exactPageCurrentOptions"
-            [attr.aria-current]="activeMobileLink.isActive ? 'page' : null"
-            (click)="closeMobileMenu()"
-          >
-            {{ navLabel(pageId) }}
-          </a>
-        }
+        <ul class="menu site-header__mobile-list">
+          @for (pageId of navPages; track pageId) {
+            <li>
+              <a
+                #mobileNavLink
+                class="site-header__mobile-link"
+                [routerLink]="localizedPath(pageId)"
+                routerLinkActive="site-header__mobile-link--active"
+                #activeMobileLink="routerLinkActive"
+                [routerLinkActiveOptions]="exactPageCurrentOptions"
+                [attr.aria-current]="activeMobileLink.isActive ? 'page' : null"
+                (click)="closeMobileMenu()"
+              >
+                {{ navLabel(pageId) }}
+              </a>
+            </li>
+          }
+        </ul>
       </nav>
     }
   </div>

@@ -260,6 +260,16 @@ Validation criteria:
 - components remain readable on mobile and desktop;
 - maritime visuals support content rather than overpowering it.
 
+Milestone 9 implementation status:
+
+- DaisyUI custom light/dark theme variables now align with the portfolio navy/off-white/red/cyan tokens.
+- Header, footer, locale switcher, project cards, project detail actions, skills, Contact, and timelines use daisyUI primitives where appropriate.
+- Sonar/compass navigation and lighthouse visuals remain custom identity components backed by semantic links/buttons. Sonar geometry uses consistent concentric rings and symmetrical axes; the M9 lighthouse beam experiment is removed.
+- Home no longer renders redundant route-card navigation. The hero renders the approved portrait in the porthole frame using the original asset and CSS object cropping.
+- Education and Experience use daisyUI timeline geometry with a central route, waypoints on the route, desktop start/end alternation, compact mobile behavior, and custom maritime route styling.
+- Contact has a designed non-functional visual foundation without publishing fake contact methods or forms.
+- Mockups, hover-3d, floating sonar, lighthouse beam work, and advanced motion remain deferred.
+
 ## 10. Motion
 
 Objective: add selected signature motion without harming accessibility.

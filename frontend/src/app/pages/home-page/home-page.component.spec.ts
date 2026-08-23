@@ -33,17 +33,52 @@ describe('HomePageComponent', () => {
     expect(page.textContent).toContain('Angular');
   });
 
-  it('does not render fake social profile links or a fake portrait', async () => {
+  it('renders the provided portrait source without fake social profile links', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
     const links = Array.from(page.querySelectorAll<HTMLAnchorElement>('a'));
+    const portraitSlot = page.querySelector('[data-portrait-slot]');
+    const portraitFrame = portraitSlot?.querySelector('.home-page__portrait-photo-frame');
+    const portrait = portraitSlot?.querySelector('img');
 
-    expect(page.querySelector('img')).toBeNull();
+    expect(portraitSlot).not.toBeNull();
+    expect(portraitFrame).not.toBeNull();
+    expect(portraitSlot?.querySelector('.home-page__portrait-ring')).toBeNull();
+    expect(portrait?.getAttribute('src')).toBe('/assets/portrait/baptiste-wetterwald-portrait.png');
+    expect(portrait?.getAttribute('alt')).toBe('Portrait of Baptiste Wetterwald');
+    expect(portrait?.getAttribute('width')).toBe('4916');
+    expect(portrait?.getAttribute('height')).toBe('7370');
     expect(links.some((link) => (link.getAttribute('href') ?? '').includes('github'))).toBe(false);
     expect(links.some((link) => (link.getAttribute('href') ?? '').includes('linkedin'))).toBe(
       false,
     );
   });
+
+  it('localizes the portrait alternative text', async () => {
+    const fixture = await createFixture('fr');
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('[data-portrait-slot] img')?.getAttribute('alt')).toBe(
+      'Portrait de Baptiste Wetterwald',
+    );
+  });
+
+  it.each([
+    ['en', 'Continue through the portfolio'],
+    ['fr', 'Parcourir le portfolio'],
+  ] as const)(
+    'does not render the redundant %s portfolio navigation card section',
+    async (locale, heading) => {
+      const fixture = await createFixture(locale);
+      const page = fixture.nativeElement as HTMLElement;
+      const text = page.textContent ?? '';
+
+      expect(text).not.toContain(heading);
+      expect(text).not.toContain('Professional experience');
+      expect(text).not.toContain('Parcours professionnel');
+      expect(page.querySelector('.home-page__explore-link')).toBeNull();
+    },
+  );
 
   it('renders the approved skill groups without percentage metrics', async () => {
     const fixture = await createFixture('en');
@@ -81,6 +116,18 @@ describe('HomePageComponent', () => {
     ]);
     expect(groups[0].classList.contains('home-page__skill-group--primary')).toBe(true);
     expect(groups[2].classList.contains('home-page__skill-group--secondary')).toBe(true);
+  });
+
+  it('uses daisyUI primitives without fake navigation interactivity in skills', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('.aura')).toBeNull();
+    expect(page.querySelectorAll('.home-page__primary-stack .badge').length).toBe(4);
+    expect(page.querySelectorAll('.home-page__skill-group.card').length).toBe(5);
+    expect(page.querySelectorAll('.home-page__skill-badge.badge').length).toBeGreaterThan(0);
+    expect(page.querySelector('.home-page__skill-group a')).toBeNull();
+    expect(page.querySelector('.home-page__skill-group button')).toBeNull();
   });
 
   it('uses natural French labels for skill groups and AI-assisted tooling', async () => {

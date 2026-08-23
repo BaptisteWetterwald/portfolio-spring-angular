@@ -1,7 +1,7 @@
-<nav class="locale-switcher" [attr.aria-label]="t('localeSwitcher.ariaLabel')">
+<nav class="join locale-switcher" [attr.aria-label]="t('localeSwitcher.ariaLabel')">
   @for (locale of locales; track locale) {
     <a
-      class="locale-switcher__link"
+      class="btn btn-sm join-item locale-switcher__link"
       [routerLink]="localePath(locale)"
       [attr.aria-current]="currentLocale() === locale ? 'page' : null"
       [attr.aria-label]="localeAriaLabel(locale)"

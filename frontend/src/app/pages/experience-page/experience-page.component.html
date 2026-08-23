@@ -4,35 +4,120 @@
     <p>{{ content.experiencePage.introduction }}</p>
   </header>
 
-  <ol class="timeline-page__list">
-    @for (entry of content.experience; track entry.id) {
-      <li>
-        <article class="timeline-page__entry">
-          <div class="timeline-page__period">
-            @if (entry.period.single; as single) {
-              <time [attr.datetime]="single.datetime">{{ single.label }}</time>
-            } @else if (entry.period.start && entry.period.end) {
-              <time [attr.datetime]="entry.period.start.datetime">
-                {{ entry.period.start.label }}
-              </time>
-              <span aria-hidden="true">&ndash;</span>
-              <span class="sr-only">{{ content.experiencePage.periodToLabel }}</span>
-              @if (entry.period.endPrefix) {
-                <span>{{ entry.period.endPrefix }}</span>
+  <ol
+    class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical timeline-page__list"
+  >
+    @for (
+      entry of content.experience;
+      track entry.id;
+      let entryIndex = $index;
+      let isFirst = $first;
+      let isLast = $last
+    ) {
+      <li class="timeline-page__item">
+        @if (!isFirst) {
+          <hr class="timeline-page__route-line" />
+        }
+
+        <div class="timeline-middle timeline-page__waypoint" aria-hidden="true">
+          <span></span>
+        </div>
+
+        <article
+          class="timeline-box timeline-page__entry"
+          [class.timeline-page__entry--has-logo]="entry.logo"
+          [class.timeline-start]="entryIndex % 2 === 0"
+          [class.timeline-end]="entryIndex % 2 !== 0"
+        >
+          <div class="timeline-page__meta">
+            <div class="timeline-page__period">
+              @if (entry.period.single; as single) {
+                <time [attr.datetime]="single.datetime">{{ single.label }}</time>
+              } @else if (entry.period.start && entry.period.end) {
+                <time [attr.datetime]="entry.period.start.datetime">
+                  {{ entry.period.start.label }}
+                </time>
+                <span aria-hidden="true">&ndash;</span>
+                <span class="sr-only">{{ content.experiencePage.periodToLabel }}</span>
+                @if (entry.period.endPrefix) {
+                  <span>{{ entry.period.endPrefix }}</span>
+                }
+                <time [attr.datetime]="entry.period.end.datetime">
+                  {{ entry.period.end.label }}
+                </time>
+              } @else if (entry.period.label) {
+                <span>{{ entry.period.label }}</span>
               }
-              <time [attr.datetime]="entry.period.end.datetime">
-                {{ entry.period.end.label }}
-              </time>
-            } @else if (entry.period.label) {
-              <span>{{ entry.period.label }}</span>
-            }
-            @if (entry.duration) {
-              <span class="timeline-page__duration">{{ entry.duration }}</span>
+              @if (entry.duration) {
+                <span class="timeline-page__duration">{{ entry.duration }}</span>
+              }
+            </div>
+
+            @if (entry.logo; as logo) {
+              @if (entry.officialWebsiteUrl) {
+                <a
+                  class="timeline-page__logo-link"
+                  [href]="entry.officialWebsiteUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="
+                    entry.organization +
+                    ' logo - ' +
+                    content.experiencePage.officialWebsiteLabel +
+                    ' (' +
+                    content.experiencePage.opensInNewTabLabel +
+                    ')'
+                  "
+                >
+                  <span class="timeline-page__logo-frame" aria-hidden="true">
+                    <img
+                      class="timeline-page__logo"
+                      [src]="logo.src"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                </a>
+              } @else {
+                <span class="timeline-page__logo-frame" aria-hidden="true">
+                  <img
+                    class="timeline-page__logo"
+                    [src]="logo.src"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              }
             }
           </div>
 
           <div class="timeline-page__body">
-            <h2>{{ entry.organization }}</h2>
+            <h2>
+              @if (entry.officialWebsiteUrl) {
+                <a
+                  class="link link-hover timeline-page__identity-link"
+                  [href]="entry.officialWebsiteUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="
+                    entry.organization +
+                    ' - ' +
+                    content.experiencePage.officialWebsiteLabel +
+                    ' (' +
+                    content.experiencePage.opensInNewTabLabel +
+                    ')'
+                  "
+                >
+                  <span class="timeline-page__identity-name">{{ entry.organization }}</span>
+                </a>
+              } @else {
+                <span class="timeline-page__identity">
+                  <span class="timeline-page__identity-name">{{ entry.organization }}</span>
+                </span>
+              }
+            </h2>
             <p class="timeline-page__role">{{ entry.role }}</p>
             @if (entry.context) {
               <p class="timeline-page__context">{{ entry.context }}</p>
@@ -53,13 +138,21 @@
                 </h3>
                 <ul [attr.aria-labelledby]="entry.id + '-technologies'">
                   @for (technology of entry.technologies; track technology) {
-                    <li>{{ technology }}</li>
+                    <li>
+                      <span class="badge badge-outline timeline-page__technology">
+                        {{ technology }}
+                      </span>
+                    </li>
                   }
                 </ul>
               </div>
             }
           </div>
         </article>
+
+        @if (!isLast) {
+          <hr class="timeline-page__route-line" />
+        }
       </li>
     }
   </ol>

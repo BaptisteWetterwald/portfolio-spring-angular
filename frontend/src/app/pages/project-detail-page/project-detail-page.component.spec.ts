@@ -27,6 +27,8 @@ describe('ProjectDetailPageComponent', () => {
     expect(Array.from(page.querySelectorAll('li')).map((item) => item.textContent?.trim())).toEqual(
       ['Angular'],
     );
+    expect(page.querySelector('.project-detail__status.badge')).not.toBeNull();
+    expect(page.querySelector('.project-detail__technology.badge')).not.toBeNull();
     expect(
       Array.from(page.querySelectorAll<HTMLAnchorElement>('nav a')).map((link) => link.href),
     ).toEqual([
@@ -43,6 +45,7 @@ describe('ProjectDetailPageComponent', () => {
     const page = fixture.nativeElement as HTMLElement;
 
     expect(page.querySelector('h1')?.textContent).toContain('Portfolio API');
+    expect(page.querySelector('.project-detail__header--with-media')).toBeNull();
     expect(page.querySelector('.project-detail__description')).toBeNull();
     expect(page.textContent).not.toContain('undefined');
   });

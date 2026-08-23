@@ -9,6 +9,7 @@ import {
   projectsPageStateKey,
   projectsResolver,
 } from './core/projects/project-resolvers';
+import { ContactPageComponent } from './pages/contact-page/contact-page.component';
 import { EducationPageComponent } from './pages/education-page/education-page.component';
 import { ExperiencePageComponent } from './pages/experience-page/experience-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
@@ -92,6 +93,17 @@ function localizedStaticPageRoute(
       path: localizedSegment(locale, pageId),
       pathMatch: 'full',
       component: ExperiencePageComponent,
+      data: {
+        pageId,
+      },
+    };
+  }
+
+  if (pageId === 'contact') {
+    return {
+      path: localizedSegment(locale, pageId),
+      pathMatch: 'full',
+      component: ContactPageComponent,
       data: {
         pageId,
       },

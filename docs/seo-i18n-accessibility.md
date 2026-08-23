@@ -202,7 +202,7 @@ Each public page should define:
 - `og:locale`;
 - alternate locales.
 
-Project pages should use the optional project logo/media reference when approved and properly sized. Do not use unapproved portraits or fabricated imagery.
+Project pages should use the optional project logo/media reference when approved and properly sized. Do not use unapproved or fabricated imagery. The Home portrait is approved content and should render from the original portrait asset with localized alt text.
 
 ## Structured Data
 
@@ -229,14 +229,17 @@ Requirements:
 - buttons only for actions, links for navigation;
 - form labels explicitly associated with inputs when contact form exists.
 
+Milestone 9 may adopt daisyUI primitives, but the semantic contract remains unchanged. Cards must still be rendered as meaningful articles or sections where appropriate, project titles must remain real links, locale switching remains anchors with language attributes, theme switching remains a real button, and timelines must remain ordered content with visible dates and organization or institution names. DaisyUI timeline geometry is allowed, but it must not reorder the DOM or hide dates behind interactions.
+
 Milestone 6 adds a reusable localized shell with semantic `header`, `nav`, shell-owned `main`, and `footer` landmarks. Page placeholders and localized 404 content render as sections inside the shell main region. The sonar/compass enhancement is built from real Angular router links plus decorative SVG marked `aria-hidden="true"`.
 
 Milestone 8 replaces Home, Education, and Experience placeholders with semantic content:
 
-- Home uses one `h1`, sections for introduction, stack highlights, section links, and skill domains, plus lists for technology groups.
+- Home uses one `h1`, sections for introduction, stack highlights, and skill domains, plus lists for technology groups. The M9 correction removes redundant section-link cards. The approved Home portrait renders in the porthole frame with localized alt text and CSS object cropping from the original asset.
 - Education and Experience use ordered timeline lists with `article` entries so chronology remains understandable without styling.
 - Confirmed dates use `<time>` elements with year or month-level `datetime` values only; exact days are not invented.
-- No fake portrait image, social profile link, CV, project card, or contact method is rendered.
+- Optional Education and Experience official-site links are limited to the logo/name identity area, use `target="_blank"` with `rel="noopener noreferrer"`, and expose localized accessible labels. Timeline cards themselves must not become links.
+- No fake social profile link, CV, project card, contact method, or organization logo is rendered.
 - Public copy must not expose milestone/review/TODO language such as "confirmed roles", "approved content", or "awaiting confirmation".
 
 ## Keyboard Navigation
@@ -296,6 +299,12 @@ Reduced motion mode should:
 - preserve all navigation and content access.
 
 Milestone 6 does not add looping motion. Component CSS includes reduced-motion safeguards, and the compass remains usable as static links.
+
+Milestone 9 reduced-motion behavior:
+
+- any hover lift, sonar sweep, future aura, future lighthouse beam, or route-line transition must reduce to a static visual state;
+- active navigation, current locale, current route, project status, and skill importance must be understandable without animation;
+- hover-only effects need equivalent focus-visible treatment where they indicate an interactive state.
 
 ## Accessible Fallback Navigation
 

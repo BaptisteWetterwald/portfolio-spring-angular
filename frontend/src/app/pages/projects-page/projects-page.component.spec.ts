@@ -23,6 +23,8 @@ describe('ProjectsPageComponent', () => {
     expect(sectionText(page, 'Featured projects')).toContain('Featured Project');
     expect(sectionText(page, 'Published projects')).toContain('Published Project');
     expect(sectionText(page, 'Archive')).toContain('Archived Project');
+    expect(page.querySelector('.projects-page__group--featured')).not.toBeNull();
+    expect(page.querySelector('.projects-page__group--archived')).not.toBeNull();
     expect(
       page.querySelector<HTMLAnchorElement>('app-project-card h3 a')?.getAttribute('href'),
     ).toBe('/en/projects/featured-project');

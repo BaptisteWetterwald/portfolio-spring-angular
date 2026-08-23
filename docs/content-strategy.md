@@ -29,6 +29,8 @@ Skills should use importance levels rather than percentages, star ratings, years
 
 Future additions such as LabVIEW or older school technologies should use the lower levels unless the owner supplies a reason to promote them. Small or older skills should not be deleted merely because they are no longer central.
 
+Milestone 9 visual treatment must reinforce this hierarchy. Primary backend/full-stack skills may use the strongest surfaces, route-like accents, and highest-contrast badges. Professional/complementary skills should remain clearly visible but quieter. Secondary and exploratory/historical skills should be discoverable without competing with the primary stack. Visual weight must never imply unsupported expertise or flatten every technology into the same priority. Skill cards are informational surfaces, not navigation; do not add fake click behavior, pointer cursors, or strong interactive transforms.
+
 ## AI-Assisted Engineering
 
 AI-assisted software engineering is relevant to the portfolio, but it must remain subordinate to the backend/full-stack positioning for now.
@@ -72,6 +74,8 @@ The existing backend project status model (`PUBLISHED`, `ARCHIVED`, `DRAFT`) is 
 
 Do not modify persistence solely to anticipate this hierarchy. Document the requirement until the content model needs it.
 
+Milestone 9 may style existing `featured`, standard published, and `ARCHIVED` project groups with different visual weight. It must not invent project records, screenshots, demos, repository URLs, or a new persistence field for project importance. DaisyUI mockup treatments should wait until real project media is supplied and its type is known.
+
 The portfolio application itself is expected to become an important open-source project once it has enough real content, visual polish, and deployment maturity to be presented as such. Do not create a fake project record before approved project copy exists.
 
 ## Content Evolution
@@ -81,8 +85,10 @@ The portfolio should be able to grow without redesigning the pages:
 - skills can be progressively enriched with owner-approved older, niche, academic, and professional knowledge;
 - projects can include major portfolio projects, academic work, small experiments, and archives with different visual weights;
 - experience entries can receive richer responsibilities, outcomes, and technologies only when confirmed;
-- static biography, education, experience, and skill content remains frontend-owned for now;
-- project records remain backend-owned.
+- static identity, biography, education, experience, skill hierarchy, organization/school links, and organization/school logo references remain frontend-owned, typed, and version-controlled;
+- project records, project translations, project technologies, project publication/archive/featured state, and project-owned media remain backend-owned.
+
+Do not move CV/profile content into PostgreSQL or introduce profile CMS tables unless future requirements materially change. Valid triggers would include runtime editing/admin needs, many dynamic clients, substantially more locales, or an external content-management workflow.
 
 Documentation may contain TODOs, confidence notes, missing-content labels, and confirmation status. Visitor-facing content must not expose internal milestone, review, confirmation, or TODO language.
 

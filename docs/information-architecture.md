@@ -129,12 +129,14 @@ The mobile menu is conventional rather than radial. The compass enhancement rema
 
 Future visual milestones may explore a compact or floating sonar state deeper in page content. Before implementing that, evaluate the full navigation hierarchy: conventional header, large signature sonar, possible compact/floating sonar, and footer navigation. The portfolio should not present three simultaneous navigation systems that all do the same thing.
 
+Milestone 9 conclusion: do not add a floating or compact sonar control yet. The current IA already has conventional header navigation, the desktop signature sonar/compass, mobile menu navigation, and footer navigation. Adding a floating copy during the visual-system milestone would create redundant navigation before there is evidence that visitors lose orientation in long pages. Revisit only after M9/M10 visual and motion polish can be evaluated on real pages.
+
 ## Home Page Structure
 
 The home page should explicitly account for:
 
 - hero with "Baptiste Wetterwald" and Software Engineer - Backend / Full-stack positioning;
-- portrait slot with future porthole treatment;
+- approved portrait with porthole treatment;
 - GitHub and LinkedIn links when actual URLs are approved;
 - sonar/compass navigation entry points;
 - short About content;
@@ -151,14 +153,20 @@ Milestone 8 implementation:
 - Home renders Baptiste Wetterwald, Software Engineer identity, Backend & Full-stack positioning, a concise introduction, primary stack highlights, route links into Experience/Education/Projects, and technical skill domains.
 - Skills are presented on Home as domains rather than as a separate route or fake proficiency percentages. The content model supports primary, professional/complementary, secondary, and exploratory/historical importance levels.
 - The existing header, footer, and sonar/compass navigation remain the primary navigation system.
-- No portrait, GitHub link, LinkedIn link, downloadable CV, contact method, GitHub activity, or fake featured project is rendered because those assets/URLs/content are not confirmed.
+- The approved Home portrait is rendered in the hero porthole frame. Approved school/organization logos may appear only inside Education and Experience identity clusters. No GitHub link, LinkedIn link, downloadable CV, contact method, GitHub activity, or fake featured project is rendered because those assets/URLs/content are not confirmed.
 - Featured project content remains backend-owned; Home does not seed or invent project cards when the project API has no approved public records.
+
+Milestone 9 correction:
+
+- Redundant Home route-card navigation is removed because the header, signature sonar/compass, mobile menu, and footer already provide portfolio navigation.
+- The hero right-hand area contains the approved portrait in a porthole frame. Keep it as identity support for the hero, not a separate navigation or decorative radar surface.
+- Home should flow from hero to primary technologies to skills/domains, with featured projects added only when real backend project content exists.
 
 ## Page Composition
 
 | Page           | Primary Content Blocks                                                                                                                      |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home           | Hero, short About, core technologies, skills domains, route links to deeper sections; portrait/social/project/contact blocks only when approved content exists. |
+| Home           | Hero, short About, approved portrait/porthole frame, core technologies, skills domains; social/project/contact blocks only when approved content exists. |
 | Education      | Semantic timeline/list with ENSISA engineering degree, IUT Robert Schuman DUT, and UQAC international semester. Nautical waypoint styling is deferred. |
 | Experience     | Semantic timeline/list with roles, dates, concise context, and restrained technology tags. Nautical waypoint styling is deferred. |
 | Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |

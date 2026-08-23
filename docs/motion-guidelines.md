@@ -11,6 +11,8 @@ This document defines future motion principles. It does not implement components
 - Respect `prefers-reduced-motion`.
 - Keep the maritime layer subtle and professional.
 
+Milestone 9 uses motion only as restrained progressive enhancement. The visual system may include short hover/focus transitions and very subtle material response on informational surfaces. It must not introduce competing ambient loops, lighthouse beams, scroll choreography, or motion-dependent navigation. Complex sonar pings, animated waves, rotating beams, bathymetric drift, and GSAP choreography remain Milestone 10 or later work unless a focused accessibility-safe need is identified.
+
 ## Motion Scale
 
 | Token | Duration | Use |
@@ -45,6 +47,8 @@ Milestone 6 implements only the static foundation: SVG/CSS compass rings, waypoi
 
 Future M9/M10 exploration: consider whether the large sonar navigation should have an optional compact or floating state once users scroll into page content. A compact control could reuse the same localized route model and active-state semantics, and could expand on hover, click, or focus to reveal the five destinations. This must be evaluated against the conventional header, the large signature sonar, and footer navigation so the site does not present redundant navigation systems with the same purpose at the same time.
 
+M9 evaluation result: the floating/compact sonar is deferred. Header links, the desktop signature sonar, the mobile menu, and footer links already provide enough route access for the current page lengths.
+
 ## Lighthouse Theme Toggle
 
 Purpose:
@@ -58,7 +62,7 @@ Guidelines:
 - the effect should not flash rapidly;
 - state must be clear without animation.
 
-Milestone 6 implements the lighthouse as a simple accessible button. The dark state illuminates the lantern statically. The moving lighthouse beam and transition choreography remain deferred.
+Milestone 6 implements the lighthouse as a simple accessible button. The dark state illuminates the lantern statically. The M9 owner-review correction keeps this approach and removes the experimental static beam. Moving or realistic lighthouse beams and transition choreography remain deferred.
 
 ## Lighthouse Beam
 
@@ -87,6 +91,7 @@ Possible uses:
 Guidelines:
 
 - timeline must remain semantic HTML;
+- use daisyUI's timeline geometry first: one central route, waypoints on the route, desktop start/end alternation, and compact one-sided mobile behavior;
 - line and marker styling can borrow from route maps or nautical charts;
 - avoid coordinates or telemetry unless real and meaningful;
 - current/featured points can use restrained blue or signal red accents.

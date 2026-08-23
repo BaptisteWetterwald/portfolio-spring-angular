@@ -62,6 +62,13 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
       startDatetime: '2022',
       endDatetime: '2025',
     },
+    affiliation: {
+      officialWebsiteUrl: 'https://www.ensisa.uha.fr/',
+      logo: {
+        src: '/assets/logos/logo_ensisa.svg',
+        alt: 'ENSISA logo',
+      },
+    },
   },
   {
     id: 'iut-robert-schuman',
@@ -69,9 +76,23 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
       startDatetime: '2020',
       endDatetime: '2022',
     },
+    affiliation: {
+      officialWebsiteUrl: 'https://iutrs.unistra.fr/',
+      logo: {
+        src: '/assets/logos/logo_iut_robert_schuman.png',
+        alt: 'IUT Robert Schuman logo',
+      },
+    },
   },
   {
     id: 'uqac-semester',
+    affiliation: {
+      officialWebsiteUrl: 'https://www.uqac.ca/',
+      logo: {
+        src: '/assets/logos/logo_uqac.png',
+        alt: 'UQAC logo',
+      },
+    },
   },
 ];
 
@@ -82,6 +103,13 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     period: {
       startDatetime: '2025-12',
       endDatetime: '2026-11',
+    },
+    affiliation: {
+      officialWebsiteUrl: 'https://plansee-group.com/en',
+      logo: {
+        src: '/assets/logos/logo_plansee.png',
+        alt: 'Plansee logo',
+      },
     },
   },
   {
@@ -95,6 +123,13 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
       fr: '11 semaines',
     },
     technologies: ['Angular', 'DaisyUI'],
+    affiliation: {
+      officialWebsiteUrl: 'https://www.plansee.com/',
+      logo: {
+        src: '/assets/logos/logo_plansee.png',
+        alt: 'Plansee logo',
+      },
+    },
   },
   {
     id: 'bureau-veritas-laboratories',
@@ -107,6 +142,13 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
       endDatetime: '2025',
     },
     technologies: ['Power Platform', 'Power Apps', 'Power Automate', 'Dataverse', 'Microsoft 365'],
+    affiliation: {
+      officialWebsiteUrl: 'https://www.bureauveritas.fr/',
+      logo: {
+        src: '/assets/logos/logo_bureau_veritas.svg',
+        alt: 'Bureau Veritas logo',
+      },
+    },
   },
   {
     id: 'groupe-ies',
@@ -115,12 +157,25 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
       singleDatetime: '2023',
     },
     technologies: ['.NET'],
+    affiliation: {
+      logo: {
+        src: '/assets/logos/logo_groupe_ies.jpeg',
+        alt: 'Groupe IES logo',
+      },
+    },
   },
   {
     id: 'uqac-internship',
     organization: 'UQAC',
     period: {
       singleDatetime: '2022',
+    },
+    affiliation: {
+      officialWebsiteUrl: 'https://www.uqac.ca/',
+      logo: {
+        src: '/assets/logos/logo_uqac.png',
+        alt: 'UQAC logo',
+      },
     },
   },
 ];
@@ -467,6 +522,7 @@ export const portfolioContent: PortfolioContentByLocale = {
         role: 'Software Engineer',
         orientation: 'Backend & Full-stack',
         stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js',
+        portraitAlt: 'Portrait of Baptiste Wetterwald',
       },
       introduction: [
         'Engineering graduate in Computer Science and Networks, oriented toward backend and full-stack software engineering.',
@@ -502,6 +558,8 @@ export const portfolioContent: PortfolioContentByLocale = {
       introduction:
         'Academic path in computer science and networks, from DUT studies to an engineering degree.',
       periodToLabel: 'to',
+      officialWebsiteLabel: 'Official website',
+      opensInNewTabLabel: 'opens in a new tab',
     },
     education: educationEntriesFor('en'),
     experiencePage: {
@@ -509,6 +567,8 @@ export const portfolioContent: PortfolioContentByLocale = {
       introduction:
         'Software development roles across internships, apprenticeship, and professional work.',
       periodToLabel: 'to',
+      officialWebsiteLabel: 'Official website',
+      opensInNewTabLabel: 'opens in a new tab',
     },
     experience: experienceEntriesFor('en'),
     skills: skillGroupsFor('en'),
@@ -520,6 +580,7 @@ export const portfolioContent: PortfolioContentByLocale = {
         role: 'Ingénieur logiciel',
         orientation: 'Backend & full-stack',
         stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js',
+        portraitAlt: 'Portrait de Baptiste Wetterwald',
       },
       introduction: [
         'Ingénieur diplômé en informatique et réseaux, orienté backend et full-stack.',
@@ -555,6 +616,8 @@ export const portfolioContent: PortfolioContentByLocale = {
       introduction:
         "Parcours académique en informatique et réseaux, du DUT au diplôme d'ingénieur.",
       periodToLabel: 'à',
+      officialWebsiteLabel: 'Site officiel',
+      opensInNewTabLabel: 'ouvre dans un nouvel onglet',
     },
     education: educationEntriesFor('fr'),
     experiencePage: {
@@ -562,6 +625,8 @@ export const portfolioContent: PortfolioContentByLocale = {
       introduction:
         'Expériences en développement logiciel à travers stages, alternance et activité professionnelle.',
       periodToLabel: 'à',
+      officialWebsiteLabel: 'Site officiel',
+      opensInNewTabLabel: 'ouvre dans un nouvel onglet',
     },
     experience: experienceEntriesFor('fr'),
     skills: skillGroupsFor('fr'),
@@ -584,6 +649,8 @@ function educationEntriesFor(locale: SupportedLocale): readonly EducationEntry[]
       status: copy.status,
       summary: copy.summary,
       period: periodFromFact(fact.period, copy.periodLabels),
+      officialWebsiteUrl: fact.affiliation?.officialWebsiteUrl,
+      logo: fact.affiliation?.logo,
     };
   });
 }
@@ -601,6 +668,8 @@ function experienceEntriesFor(locale: SupportedLocale): readonly ExperienceEntry
       context: copy.context,
       responsibilities: copy.responsibilities,
       technologies: fact.technologies,
+      officialWebsiteUrl: fact.affiliation?.officialWebsiteUrl,
+      logo: fact.affiliation?.logo,
     };
   });
 }

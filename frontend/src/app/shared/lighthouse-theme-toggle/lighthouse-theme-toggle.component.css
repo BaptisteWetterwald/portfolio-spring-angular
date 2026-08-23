@@ -6,6 +6,7 @@
   display: inline-grid;
   width: 40px;
   height: 40px;
+  min-height: 40px;
   place-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-round);
@@ -70,4 +71,14 @@
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--color-lighthouse-light) 20%, transparent),
     0 0 16px color-mix(in srgb, var(--color-lighthouse-light) 58%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition: none;
+  }
+
+  .theme-toggle:active {
+    transform: none;
+  }
 }

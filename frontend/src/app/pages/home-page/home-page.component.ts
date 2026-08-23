@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { portfolioContentFor } from '../../core/content/portfolio-content';
 import {
@@ -10,13 +10,15 @@ import {
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
-import { localizedPath, StaticPageId } from '../../core/routing/localized-routes';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.css',
+  styleUrls: [
+    './home-page.component.css',
+    './home-page.instrument.css',
+    './home-page.surfaces.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePageComponent {
@@ -33,12 +35,8 @@ export class HomePageComponent {
     this.#metadata.applyStaticPage('home', this.locale);
   }
 
-  protected localizedPath(pageId: StaticPageId): string {
-    return localizedPath(this.locale, pageId);
-  }
-
   protected skillGroupClass(group: SkillGroup): string {
-    return `home-page__skill-group home-page__skill-group--${group.importance}`;
+    return `card card-border home-page__skill-group home-page__skill-group--${group.importance}`;
   }
 
   protected skillDomainClass(domain: SkillDomain): string {

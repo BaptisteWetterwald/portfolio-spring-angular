@@ -74,6 +74,15 @@ describe('localized app routes', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Portfolio API');
   });
 
+  it('resolves localized contact routes to the contact page component', async () => {
+    const harness = await createHarness('/fr/contact');
+
+    expect(harness.routeNativeElement?.querySelector('app-contact-page h1')?.textContent).toContain(
+      'Contact',
+    );
+    expect(harness.routeNativeElement?.querySelector('form')).toBeNull();
+  });
+
   it('resolves localized project detail routes with shared slugs', async () => {
     const harness = await createHarness('/fr/projets/portfolio-api', {
       getProject: () => of(detailProject()),

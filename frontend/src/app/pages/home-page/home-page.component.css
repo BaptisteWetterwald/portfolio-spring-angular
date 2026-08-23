@@ -5,6 +5,11 @@
 }
 
 .home-page__hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: var(--space-7);
+  align-items: center;
   padding-block: var(--space-5) var(--space-7);
 }
 
@@ -73,37 +78,16 @@
   list-style: none;
 }
 
-.home-page__primary-stack li {
+.home-page__stack-badge {
+  height: auto;
+  min-height: 38px;
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 38%, var(--color-border));
   border-radius: var(--radius-round);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
   font-weight: 700;
   box-shadow: var(--shadow-sm);
-}
-
-.home-page__explore-links {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-}
-
-.home-page__explore-link {
-  display: grid;
-  min-height: 132px;
-  align-content: start;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.home-page__explore-link small {
-  color: var(--color-text-muted);
 }
 
 .home-page__skill-groups {
@@ -111,24 +95,6 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: var(--space-5);
   margin-top: var(--space-5);
-}
-
-.home-page__skill-group {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.home-page__skill-group--primary {
-  border-color: color-mix(in srgb, var(--color-accent-maritime) 44%, var(--color-border));
-}
-
-.home-page__skill-group--secondary,
-.home-page__skill-group--exploratory-historical {
-  background: var(--color-surface-subtle);
-  box-shadow: none;
 }
 
 .home-page__skill-group h3 {
@@ -170,26 +136,15 @@
   display: grid;
   gap: var(--space-1);
   max-width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-subtle);
 }
 
 .home-page__skill-domain--primary li {
-  border-color: color-mix(in srgb, var(--color-accent-maritime) 35%, var(--color-border));
   font-weight: 700;
 }
 
 .home-page__skill-domain--exploratory-historical li,
 .home-page__skill--exploratory-historical {
-  background: color-mix(in srgb, var(--color-surface-subtle) 62%, transparent);
   color: var(--color-text-muted);
-}
-
-.home-page__skill--primary {
-  border-color: color-mix(in srgb, var(--color-accent-maritime) 35%, var(--color-border));
-  font-weight: 700;
 }
 
 .home-page__skill-domain small {
@@ -201,11 +156,68 @@
     padding: var(--space-6) var(--space-4);
   }
 
+  .home-page__hero {
+    grid-template-areas:
+      'eyebrow eyebrow'
+      'title portrait'
+      'orientation orientation'
+      'stack stack'
+      'intro intro';
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    padding-block: var(--space-4);
+  }
+
+  .home-page__hero-copy {
+    display: contents;
+  }
+
+  .home-page__eyebrow {
+    grid-area: eyebrow;
+    margin-bottom: 0;
+  }
+
   .home-page__hero h1 {
+    grid-area: title;
+    align-self: center;
     font-size: 2.3rem;
   }
 
   .home-page__orientation {
+    grid-area: orientation;
+    margin-top: calc(var(--space-2) * -1);
     font-size: 1.28rem;
+  }
+
+  .home-page__stack-line {
+    grid-area: stack;
+    margin-top: 0;
+  }
+
+  .home-page__intro {
+    grid-area: intro;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .home-page__hero + .home-page__section {
+    margin-top: var(--space-4);
+  }
+}
+
+@media (max-width: 360px) {
+  .home-page__hero {
+    grid-template-areas:
+      'eyebrow'
+      'title'
+      'portrait'
+      'orientation'
+      'stack'
+      'intro';
+    grid-template-columns: 1fr;
+  }
+
+  .home-page__orientation {
+    margin-top: 0;
   }
 }

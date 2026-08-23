@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
+import { portfolioContent } from '../../core/content/portfolio-content';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import { ExperiencePageComponent } from './experience-page.component';
 
@@ -84,6 +85,112 @@ describe('ExperiencePageComponent', () => {
     ]);
   });
 
+  it('uses a daisyUI timeline foundation while preserving entry order and technology labels', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+    const timeline = page.querySelector('ol.timeline.timeline-vertical');
+    const entries = Array.from(page.querySelectorAll<HTMLElement>('article.timeline-page__entry'));
+
+    expect(timeline).not.toBeNull();
+    expect(timeline?.classList.contains('timeline-snap-icon')).toBe(true);
+    expect(timeline?.classList.contains('max-md:timeline-compact')).toBe(true);
+    expect(page.querySelectorAll('.timeline-page__waypoint[aria-hidden="true"]').length).toBe(5);
+    expect(page.querySelectorAll('hr.timeline-page__route-line').length).toBe(8);
+    expect(entries.map((entry) => timelineSide(entry))).toEqual([
+      'start',
+      'end',
+      'start',
+      'end',
+      'start',
+    ]);
+    expect(entryHeadings(page)).toEqual([
+      'Plansee Group Functions',
+      'Plansee',
+      'Bureau Veritas Laboratories',
+      'Groupe IES',
+      'UQAC',
+    ]);
+    expect(page.querySelectorAll('.timeline-page__technology.badge').length).toBeGreaterThan(0);
+  });
+
+  it('links only the organization name and metadata logo areas when an official website is available', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+    const links = Array.from(
+      page.querySelectorAll<HTMLAnchorElement>('a.timeline-page__identity-link'),
+    );
+    const logoLinks = Array.from(
+      page.querySelectorAll<HTMLAnchorElement>('a.timeline-page__logo-link'),
+    );
+
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      'https://plansee-group.com/en',
+      'https://www.plansee.com/',
+      'https://www.bureauveritas.fr/',
+      'https://www.uqac.ca/',
+    ]);
+    expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
+    expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
+    expect(links[0].getAttribute('aria-label')).toContain('Official website');
+    expect(links.every((link) => link.closest('h2'))).toBe(true);
+    expect(links.every((link) => link.querySelector('.timeline-page__logo-frame'))).toBe(false);
+    expect(logoLinks.map((link) => link.getAttribute('href'))).toEqual([
+      'https://plansee-group.com/en',
+      'https://www.plansee.com/',
+      'https://www.bureauveritas.fr/',
+      'https://www.uqac.ca/',
+    ]);
+    expect(logoLinks.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
+    expect(logoLinks.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(
+      true,
+    );
+    expect(logoLinks[0].getAttribute('aria-label')).toContain('logo - Official website');
+    expect(logoLinks.every((link) => link.closest('.timeline-page__meta'))).toBe(true);
+    expect(imageSources(logoLinks)).toEqual([
+      '/assets/logos/logo_plansee.png',
+      '/assets/logos/logo_plansee.png',
+      '/assets/logos/logo_bureau_veritas.svg',
+      '/assets/logos/logo_uqac.png',
+    ]);
+    expect(
+      Array.from(page.querySelectorAll<HTMLImageElement>('.timeline-page__logo')).every(
+        (logo) => logo.getAttribute('alt') === '',
+      ),
+    ).toBe(true);
+    expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(5);
+    expect(entryText(page, 'Groupe IES')).toContain('Full Stack .NET Developer Intern');
+    expect(
+      entryArticle(page, 'Groupe IES')?.querySelector('a.timeline-page__identity-link'),
+    ).toBeNull();
+    expect(
+      entryArticle(page, 'Groupe IES')
+        ?.querySelector<HTMLImageElement>('.timeline-page__meta img.timeline-page__logo')
+        ?.getAttribute('src'),
+    ).toBe('/assets/logos/logo_groupe_ies.jpeg');
+    expect(page.querySelector('article.timeline-page__entry > a')).toBeNull();
+  });
+
+  it('renders experience entries gracefully when an optional logo is absent', async () => {
+    const fixture = await createFixture(
+      'en',
+      { applyStaticPage: vi.fn() },
+      {
+        ...portfolioContent.en,
+        experience: portfolioContent.en.experience.map((entry) =>
+          entry.id === 'groupe-ies' ? { ...entry, logo: undefined } : entry,
+        ),
+      },
+    );
+
+    const page = fixture.nativeElement as HTMLElement;
+    const groupeIesEntry = entryArticle(page, 'Groupe IES');
+
+    expect(groupeIesEntry?.querySelector('.timeline-page__logo')).toBeNull();
+    expect(groupeIesEntry?.querySelector('.timeline-page__identity-name')?.textContent).toContain(
+      'Groupe IES',
+    );
+  });
+
   it('applies localized experience metadata', async () => {
     const metadata = { applyStaticPage: vi.fn() };
 
@@ -96,6 +203,7 @@ describe('ExperiencePageComponent', () => {
 async function createFixture(
   locale: 'fr' | 'en',
   metadata: Partial<PageMetadataService> = { applyStaticPage: vi.fn() },
+  contentOverride?: typeof portfolioContent.en,
 ): Promise<ComponentFixture<ExperiencePageComponent>> {
   await TestBed.configureTestingModule({
     imports: [ExperiencePageComponent],
@@ -119,6 +227,11 @@ async function createFixture(
 
   const fixture = TestBed.createComponent(ExperiencePageComponent);
 
+  if (contentOverride) {
+    (fixture.componentInstance as unknown as { content: typeof portfolioContent.en }).content =
+      contentOverride;
+  }
+
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
@@ -133,9 +246,29 @@ function entryHeadings(page: HTMLElement): string[] {
 }
 
 function entryText(page: HTMLElement, heading: string): string {
-  const headingElement = Array.from(page.querySelectorAll('article h2')).find(
-    (element) => element.textContent?.trim() === heading,
-  );
+  return entryArticle(page, heading)?.textContent ?? '';
+}
 
-  return headingElement?.closest('article')?.textContent ?? '';
+function timelineSide(entry: HTMLElement): 'start' | 'end' | 'none' {
+  if (entry.classList.contains('timeline-start')) {
+    return 'start';
+  }
+
+  return entry.classList.contains('timeline-end') ? 'end' : 'none';
+}
+
+function entryArticle(page: HTMLElement, heading: string): HTMLElement | null {
+  return (
+    Array.from(page.querySelectorAll('article h2'))
+      .find((element) => element.textContent?.trim() === heading)
+      ?.closest('article') ?? null
+  );
+}
+
+function imageSources(elements: readonly HTMLElement[]): (string | null)[] {
+  return elements.map(
+    (element) =>
+      element.querySelector<HTMLImageElement>('img.timeline-page__logo')?.getAttribute('src') ??
+      null,
+  );
 }

@@ -42,6 +42,17 @@ describe('ProjectCardComponent', () => {
     );
   });
 
+  it('uses card and badge primitives with media-safe layout hooks', () => {
+    const card = fixture.nativeElement as HTMLElement;
+    const article = card.querySelector('article');
+
+    expect(article?.classList.contains('card')).toBe(true);
+    expect(article?.classList.contains('project-card--featured')).toBe(true);
+    expect(article?.classList.contains('project-card--with-media')).toBe(true);
+    expect(card.querySelector('.project-card__status.badge')).not.toBeNull();
+    expect(card.querySelectorAll('.project-card__technology.badge').length).toBe(2);
+  });
+
   it('renders optional external links only when present', () => {
     const card = fixture.nativeElement as HTMLElement;
     const externalLinks = Array.from(card.querySelectorAll<HTMLAnchorElement>('nav a'));

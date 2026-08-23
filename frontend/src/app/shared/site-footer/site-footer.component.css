@@ -3,8 +3,12 @@
 }
 
 .site-footer {
+  display: block;
   border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background:
+    radial-gradient(circle at 85% 20%, var(--color-chart-line), transparent 22rem),
+    linear-gradient(180deg, var(--color-surface), var(--color-surface-subtle));
+  color: var(--color-text);
 }
 
 .site-footer__inner {
@@ -17,13 +21,7 @@
 
 .site-footer__home {
   font-weight: 700;
-  text-decoration: none;
-}
-
-.site-footer__home:hover,
-.site-footer__link:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: var(--color-text);
 }
 
 .site-footer__copyright {
@@ -40,7 +38,7 @@
 }
 
 .site-footer__link {
-  text-decoration: none;
+  color: var(--color-text-muted);
 }
 
 .site-footer__link--active {

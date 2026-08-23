@@ -282,7 +282,9 @@ Milestone 8 introduces:
 - `ExperiencePageComponent` for a semantic ordered timeline of confirmed professional roles.
 - `core/content/portfolio-content.models.ts` and `core/content/portfolio-content.ts` as the typed localized static content source.
 
-The static content model supports localized labels, paragraphs, timeline periods with semantic `datetime` values, optional role context, restrained responsibility bullets, and technology tags. Skill topology is built from `skillGroupFacts`, which centralizes group/domain/technology IDs, ordering, membership, and importance values; localized skill copy provides group/domain labels, localized technology labels where needed, notes, and summaries. Skill groups, domains, and individual technologies can carry an importance value: `primary`, `professional-complementary`, `secondary`, or `exploratory-historical`. This keeps primary backend/full-stack skills visually separable from broader professional, older, niche, or exploratory knowledge. It deliberately omits unconfirmed social URLs, portraits, downloadable CVs, contact methods, project records, PCF/custom connector/.NET integration claims, and role metrics.
+The static content model supports localized labels, paragraphs, timeline periods with semantic `datetime` values, optional role context, restrained responsibility bullets, technology tags, and optional timeline affiliation metadata for official organization/school links and approved logo assets. Skill topology is built from `skillGroupFacts`, which centralizes group/domain/technology IDs, ordering, membership, and importance values; localized skill copy provides group/domain labels, localized technology labels where needed, notes, and summaries. Skill groups, domains, and individual technologies can carry an importance value: `primary`, `professional-complementary`, `secondary`, or `exploratory-historical`. This keeps primary backend/full-stack skills visually separable from broader professional, older, niche, or exploratory knowledge. It deliberately omits unconfirmed social URLs, downloadable CVs, contact methods, project records, PCF/custom connector/.NET integration claims, and role metrics.
+
+The approved content architecture is hybrid. Identity, biography, Education, Experience, Skills, skill hierarchy, organization/school logo references, and official organization/school links remain typed, frontend-owned, and version-controlled because they change infrequently and benefit from Git review. Projects remain backend/PostgreSQL-owned with project translations, technologies, publication/archive/featured state, and project-domain media. Do not add profile/CV CMS tables, Education/Experience/Skill database tables, or admin CRUD unless future requirements materially change, such as runtime editing, many dynamic clients, significantly more locales, or external content-management needs.
 
 AI-assisted engineering is represented as a secondary developer-tooling area: ChatGPT, Codex / coding agents, MCP concepts, and early agentic workflow exploration. The content must not position Baptiste as an AI, ML, LLM, agentic AI, or MCP expert.
 
@@ -320,6 +322,39 @@ The intended split is:
 Do not make every component DaisyUI. Identity-specific elements such as the sonar/compass navigation, lighthouse theme toggle and future beam, waves, maritime decorative geometry, and bespoke motion should remain custom where DaisyUI cannot reasonably express the design.
 
 The daisyUI Codex plugin documentation says the plugin can provide the latest daisyUI skill and component/theme usage guidance to Codex: <https://daisyui.com/docs/plugin/codex/>. The plugin is not installed in this environment during the M8 refinement pass, and no global Codex configuration should be changed without explicit authorization.
+
+### Milestone 9 Visual System Architecture
+
+Milestone 9 keeps the M6-M8 routing, SSR, content, and project API architecture intact. The work is visual-system implementation, not a content-model or backend redesign.
+
+Component ownership for M9:
+
+| Component area | DaisyUI role | Custom role |
+| --- | --- | --- |
+| Header | `navbar`, `menu`, `btn` primitives | responsive shell composition, exact active styles, maritime surface, skip link behavior |
+| Footer | `footer`, `link` primitives | chart/footer texture, route state, compact identity layout |
+| Locale switcher | `join`, `btn` anchors | locale persistence and current-locale state |
+| Lighthouse theme toggle | `btn` foundation | lighthouse icon, illuminated lantern, theme service integration; beam deferred |
+| Sonar/compass navigation | None for the core instrument | semantic route links, evenly spaced SVG rings, symmetrical axes, active waypoint state |
+| Home portrait slot | None | approved portrait displayed in a circular porthole/navigation frame using CSS object cropping from the original image asset |
+| Skills | `card`, `badge` | importance classes and hierarchy-specific treatment |
+| Experience/Education | `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, `<hr>` | daisyUI central-route geometry first; custom plotted-route/waypoint styling second |
+| Projects | `card`, `badge`, `btn` | featured/standard/archive visual weight, media-safe presentation |
+| Contact | `card` | conservative empty public-contact state and lighthouse/contact visual |
+
+The project card contract remains based on `ProjectSummaryDto`; the detail page remains based on `ProjectDetailDto`. M9 may style `featured`, `PUBLISHED`, and `ARCHIVED` differently, but it must not add a persistence field solely for visual importance.
+
+Mockup support is architecture-ready but deferred in rendering. The current API exposes only `logoMediaRef`, which may be a logo or other generic media. DaisyUI mockups should only be used when a future media contract or owner-supplied asset identifies browser screenshots, phone screenshots, or code samples.
+
+Hover 3D is deferred because the current cards contain multiple interactive controls. The daisyUI Hover 3D component is appropriate later only for noninteractive showcases or a single whole-card link surface.
+
+Contact remains non-functional until a real public contact method or form backend is approved. M9 may provide a designed page shell, but no fake submission flow, placeholder email, or social URL should be added.
+
+Owner-review correction: Home does not render secondary route cards because they duplicate header navigation, the signature sonar, mobile navigation, and footer links. The Home component may retain localized route-card copy in the content model for now, but it must not render that section unless a later IA decision introduces non-redundant content.
+
+Education and Experience timelines must keep ordered DOM content while using daisyUI's timeline structure for geometry. Desktop alternates entries with `timeline-start` and `timeline-end`; narrow viewports use `max-md:timeline-compact` for one-sided rendering. Custom CSS must not create a separate detached rail.
+
+Timeline affiliation metadata remains frontend-owned static content. Official website URLs are optional and should point to organization or school websites, not LinkedIn substitutes. Logo assets are optional and must only be added when approved files exist. The renderer places logos below the period in the desktop metadata column, reflows them beside the organization or school name on mobile, applies `target="_blank"` plus `rel="noopener noreferrer"` to scoped logo/name links, and leaves the rest of each timeline card non-interactive. The preferred logo asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; until existing owner-supplied files are normalized, facts should reference their exact current filenames.
 
 ## Theme Handling
 
