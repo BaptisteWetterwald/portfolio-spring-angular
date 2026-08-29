@@ -78,9 +78,7 @@ describe('ProjectCardComponent', () => {
     expect(projectMediaSrc('https://cdn.example.test/logo.svg')).toBe(
       'https://cdn.example.test/logo.svg',
     );
-    expect(projectMediaSrc('http://cdn.example.test/logo.svg')).toBe(
-      'http://cdn.example.test/logo.svg',
-    );
+    expect(projectMediaSrc('http://cdn.example.test/logo.svg')).toBeUndefined();
     expect(projectMediaSrc('//external.example/logo.svg')).toBeUndefined();
     expect(projectMediaSrc('javascript:alert(1)')).toBeUndefined();
     expect(projectMediaSrc('data:image/svg+xml;base64,AAAA')).toBeUndefined();
@@ -94,7 +92,7 @@ function projectFixture(): ProjectSummaryDto {
     slug: 'portfolio-api',
     title: 'Portfolio API',
     shortDescription: 'A public API fixture.',
-    logoMediaRef: '/media/projects/portfolio-api.svg',
+    logoMediaRef: '/assets/projects/portfolio-api.svg',
     githubUrl: 'https://example.test/portfolio-api.git',
     demoUrl: 'https://demo.example.test/portfolio-api',
     featured: true,

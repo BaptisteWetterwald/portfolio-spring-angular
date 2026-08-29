@@ -115,11 +115,11 @@ Project metadata should come from `ProjectTranslation.title` and `ProjectTransla
 
 Milestone 5 metadata is centralized in `PageMetadataService`. Static placeholder pages receive SSR-rendered localized title, description, canonical URL, OpenGraph title/description/url/type/locale, and alternate locale metadata. Structured data is intentionally deferred until approved personal/project content exists.
 
-Milestone 8 updates Home, Education, and Experience metadata to describe real content:
+Milestone 8 and the Milestone 9 content consolidation update Home, Education, and Experience metadata to describe real content:
 
 - Home identifies Baptiste Wetterwald as a Software Engineer with backend/full-stack positioning and the approved primary technical directions.
-- Education describes ENSISA, IUT Robert Schuman, and UQAC content.
-- Experience describes professional experience without speculative job-search, location, salary, or future-employer claims.
+- Education describes ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand content.
+- Experience describes Plansee, Bureau Veritas Laboratoires, Groupe IES, and LIF/UQAC experience without speculative job-search, salary, or unsupported claims.
 - Contact metadata remains conservative because no approved public contact method exists.
 
 ## SSR and Prerendering
@@ -235,7 +235,7 @@ Milestone 6 adds a reusable localized shell with semantic `header`, `nav`, shell
 
 Milestone 8 replaces Home, Education, and Experience placeholders with semantic content:
 
-- Home uses one `h1`, sections for introduction, stack highlights, and skill domains, plus lists for technology groups. The M9 correction removes redundant section-link cards. The approved Home portrait renders in the porthole frame with localized alt text and CSS object cropping from the original asset.
+- Home uses one `h1`, sections for introduction, stack highlights, skill domains, and languages, plus lists for technology groups. The M9 correction removes redundant section-link cards. The approved Home portrait renders in the porthole frame with localized alt text and CSS object cropping from the original asset. Language levels are rendered as text, not progress bars, percentages, gauges, or ratings.
 - Education and Experience use ordered timeline lists with `article` entries so chronology remains understandable without styling.
 - Confirmed dates use `<time>` elements with year or month-level `datetime` values only; exact days are not invented.
 - Optional Education and Experience official-site links are limited to the logo/name identity area, use `target="_blank"` with `rel="noopener noreferrer"`, and expose localized accessible labels. Timeline cards themselves must not become links.

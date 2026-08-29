@@ -86,14 +86,23 @@ describe('HomePageComponent', () => {
     const text = page.textContent ?? '';
 
     expect(text).toContain('Software Engineering');
-    expect(text).toContain('Microsoft / Enterprise Applications');
-    expect(text).toContain('AI-assisted Engineering');
     expect(text).toContain('Data & Databases');
-    expect(text).toContain('Engineering / Infrastructure');
+    expect(text).toContain('Enterprise & Industrial Software');
+    expect(text).toContain('AI-assisted Engineering');
+    expect(text).toContain('Broader Software Experience');
+    expect(text).toContain('Exploratory & Historical');
+    expect(text).toContain('Spring Boot');
+    expect(text).toContain('OAuth 2.0');
+    expect(text).toContain('Sockets');
+    expect(text).toContain('SAP S/4HANA');
+    expect(text).toContain('ABAP');
+    expect(text).toContain('LabVIEW');
     expect(text).toContain('PostgreSQL');
     expect(text).toContain('Spring Boot / PostgreSQL');
     expect(text).toContain('Codex / coding agents');
     expect(text).toContain('MCP concepts');
+    expect(skillBadgeLabels(page)).toContain('Sockets');
+    expect(skillBadgeLabels(page)).not.toContain('sockets');
     expect(text).not.toMatch(/\b\d{1,3}%\b/);
     expect(text).not.toContain('PCF');
     expect(text).not.toContain('Custom Connectors');
@@ -110,12 +119,23 @@ describe('HomePageComponent', () => {
     expect(groups.map((group) => group.dataset['skillImportance'])).toEqual([
       'primary',
       'professional-complementary',
-      'secondary',
       'professional-complementary',
       'secondary',
+      'secondary',
+      'exploratory-historical',
     ]);
     expect(groups[0].classList.contains('home-page__skill-group--primary')).toBe(true);
-    expect(groups[2].classList.contains('home-page__skill-group--secondary')).toBe(true);
+    expect(groups[1].classList.contains('home-page__skill-group--professional-complementary')).toBe(
+      true,
+    );
+    expect(groups[2].classList.contains('home-page__skill-group--professional-complementary')).toBe(
+      true,
+    );
+    expect(groups[3].classList.contains('home-page__skill-group--secondary')).toBe(true);
+    expect(groups[4].classList.contains('home-page__skill-group--secondary')).toBe(true);
+    expect(groups[5].classList.contains('home-page__skill-group--exploratory-historical')).toBe(
+      true,
+    );
   });
 
   it('uses daisyUI primitives without fake navigation interactivity in skills', async () => {
@@ -124,10 +144,28 @@ describe('HomePageComponent', () => {
 
     expect(page.querySelector('.aura')).toBeNull();
     expect(page.querySelectorAll('.home-page__primary-stack .badge').length).toBe(4);
-    expect(page.querySelectorAll('.home-page__skill-group.card').length).toBe(5);
+    expect(page.querySelectorAll('.home-page__skill-group.card').length).toBe(6);
     expect(page.querySelectorAll('.home-page__skill-badge.badge').length).toBeGreaterThan(0);
     expect(page.querySelector('.home-page__skill-group a')).toBeNull();
     expect(page.querySelector('.home-page__skill-group button')).toBeNull();
+  });
+
+  it('renders languages as factual secondary content without progress bars', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+    const text = page.textContent ?? '';
+
+    expect(text).toContain('Languages');
+    expect(text).toContain('French');
+    expect(text).toContain('Native language');
+    expect(text).toContain('English');
+    expect(text).toContain('C1');
+    expect(text).toContain('TOEIC 975');
+    expect(text).toContain('German');
+    expect(text).toContain('B1');
+    expect(page.querySelectorAll('.home-page__language-card.card').length).toBe(3);
+    expect(page.querySelector('progress')).toBeNull();
+    expect(page.querySelector('[role="progressbar"]')).toBeNull();
   });
 
   it('uses natural French labels for skill groups and AI-assisted tooling', async () => {
@@ -137,7 +175,9 @@ describe('HomePageComponent', () => {
 
     expect(text).toContain('Développement logiciel');
     expect(text).toContain('Développement assisté par IA');
-    expect(text).toContain('flux de travail de développement logiciel');
+    expect(text).toContain('développement logiciel');
+    expect(text).toContain('Langues');
+    expect(text).toContain('Langue maternelle');
     expect(text).not.toContain('software engineering');
     expect(text).not.toContain('workflows');
   });
@@ -187,6 +227,12 @@ async function createFixture(
 
 function primaryStack(page: HTMLElement): string[] {
   return Array.from(page.querySelectorAll('.home-page__primary-stack li')).map(
+    (element) => element.textContent?.trim() ?? '',
+  );
+}
+
+function skillBadgeLabels(page: HTMLElement): string[] {
+  return Array.from(page.querySelectorAll('.home-page__skill-badge')).map(
     (element) => element.textContent?.trim() ?? '',
   );
 }

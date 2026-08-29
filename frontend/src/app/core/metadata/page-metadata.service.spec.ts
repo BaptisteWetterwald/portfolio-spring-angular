@@ -17,7 +17,7 @@ describe('PageMetadataService', () => {
     expect(document.documentElement.getAttribute('lang')).toBe('fr');
     expect(document.title).toBe('Formation | Baptiste Wetterwald');
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
-      "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, DUT informatique et semestre international à l'UQAC.",
+      "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, semestre UQAC, DUT informatique, INSA Lyon et baccalauréat STI2D.",
     );
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
       'https://bwetterwald.fr/fr/formation',
@@ -79,7 +79,7 @@ describe('PageMetadataService', () => {
       slug: 'portfolio-api',
       title: 'Portfolio API',
       shortDescription: 'Public project API.',
-      logoMediaRef: '/media/projects/portfolio-api.png',
+      logoMediaRef: '/assets/projects/portfolio-api.png',
       availableLocales: ['en', 'fr'],
     });
 
@@ -98,7 +98,7 @@ describe('PageMetadataService', () => {
       'article',
     );
     expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
-      'https://bwetterwald.fr/media/projects/portfolio-api.png',
+      'https://bwetterwald.fr/assets/projects/portfolio-api.png',
     );
     expect(
       document.querySelector('meta[property="og:locale:alternate"]')?.getAttribute('content'),
@@ -124,9 +124,10 @@ describe('PageMetadataService', () => {
 
   it('builds production absolute URLs', () => {
     expect(absoluteUrl('/en/projects')).toBe('https://bwetterwald.fr/en/projects');
-    expect(absoluteMediaUrl('/media/projects/logo.svg')).toBe(
-      'https://bwetterwald.fr/media/projects/logo.svg',
+    expect(absoluteMediaUrl('/assets/projects/logo.svg')).toBe(
+      'https://bwetterwald.fr/assets/projects/logo.svg',
     );
+    expect(absoluteMediaUrl('http://cdn.example.test/logo.svg')).toBeUndefined();
     expect(absoluteMediaUrl('//cdn.example.test/logo.svg')).toBeUndefined();
   });
 });

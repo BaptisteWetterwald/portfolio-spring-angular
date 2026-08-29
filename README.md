@@ -71,7 +71,7 @@ Milestone 8 adds confirmed static portfolio content:
 - Education renders ENSISA, IUT Robert Schuman, and UQAC entries with semantic date markup where dates are confirmed;
 - Experience renders roles for Plansee Group Functions, Plansee, Bureau Veritas Laboratories / Bureau Veritas Laboratoires, Groupe IES, and UQAC without invented metrics or responsibilities;
 - Skills are grouped by software engineering, Microsoft / enterprise applications, AI-assisted engineering, data/databases, and engineering/infrastructure, with importance levels instead of fake proficiency percentages;
-- GitHub/LinkedIn links, portrait media, downloadable CV, contact method, and public project records remain unimplemented until approved content exists.
+- GitHub/LinkedIn links, downloadable CV, contact method, and public project records remain unimplemented until approved content exists.
 
 ## Frontend
 
@@ -123,7 +123,7 @@ Project detail URLs use shared slugs across locales:
 /en/projects/:slug
 ```
 
-The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls only in this milestone; advanced beams, sonar sweeps, waves, portrait treatment, nautical timeline styling, and final maritime visual polish are deferred.
+The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls, the approved portrait renders in its porthole frame, and Education/Experience use the M9 nautical route timeline styling. Advanced beams, sonar sweeps, waves, and final motion polish remain deferred.
 
 For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
 

@@ -1,4 +1,4 @@
-const supportedAbsoluteMediaProtocols = new Set(['http:', 'https:']);
+const supportedAbsoluteMediaProtocols = new Set(['https:']);
 
 export function projectMediaSrc(mediaRef: string | null | undefined): string | undefined {
   const value = mediaRef?.trim();

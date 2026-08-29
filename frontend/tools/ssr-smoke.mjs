@@ -73,8 +73,10 @@ const checks = [
     expectedBody: [
       '<title>Formation | Baptiste Wetterwald</title>',
       'ENSISA',
-      'IUT Robert Schuman',
       'Université du Québec à Chicoutimi',
+      'IUT Robert Schuman',
+      'INSA Lyon',
+      'Lycée Louis Armand',
       'href="https://www.ensisa.uha.fr/"',
       'hreflang="en" href="https://bwetterwald.fr/en/education"',
       'href="/fr/formation"',
@@ -89,8 +91,10 @@ const checks = [
       '<title>Education | Baptiste Wetterwald</title>',
       'Engineering Degree',
       'Computer Science and Networks',
+      'Study semester abroad',
       'DUT Computer Science',
-      'International semester',
+      'First year of the integrated engineering preparatory cycle',
+      'Baccalauréat STI2D',
     ],
   },
   {
@@ -102,6 +106,7 @@ const checks = [
       'Plansee Group Functions',
       'Bureau Veritas Laboratoires',
       'Power Platform',
+      'Laboratoire d’Informatique Formelle',
       'href="https://plansee-group.com/en"',
       'sans développement ABAP',
     ],
@@ -113,9 +118,10 @@ const checks = [
     expectedBody: [
       '<title>Experience | Baptiste Wetterwald</title>',
       'Plansee Group Functions',
-      'Software Engineering Internship',
+      'Software Developer Intern',
       'Bureau Veritas Laboratories',
       'Power Platform',
+      'BeamNG.drive',
     ],
   },
   {

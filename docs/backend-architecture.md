@@ -272,7 +272,7 @@ Project records should separate locale-neutral fields from translated content.
 Locale-neutral:
 
 - stable slug;
-- logo/media reference;
+- logo/media reference, stored as a root-relative `/...` path or approved absolute `https://` URL;
 - GitHub URL;
 - demo URL;
 - featured flag;

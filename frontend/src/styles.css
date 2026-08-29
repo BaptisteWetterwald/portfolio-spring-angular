@@ -82,7 +82,7 @@
   --color-surface-subtle: #edf4f6;
   --color-surface-raised: #ffffff;
   --color-text: #0a1a2f;
-  --color-text-muted: #64748b;
+  --color-text-muted: #59697f;
   --color-border: #cfdbe4;
   --color-link: #2563eb;
   --color-focus: #d7263d;
@@ -219,6 +219,13 @@ button {
   object-fit: contain;
 }
 
+.timeline-page__location {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--color-accent-maritime) 28%, transparent);
 }
@@ -262,5 +269,9 @@ button {
 
   .timeline-page__logo {
     max-height: 32px;
+  }
+
+  .timeline-page__location {
+    grid-column: 1 / -1;
   }
 }

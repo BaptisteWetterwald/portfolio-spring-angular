@@ -27,8 +27,8 @@ class ProjectSchemaMigrationTests {
 		try {
 			var result = flyway.migrate();
 
-			assertThat(result.migrationsExecuted).isEqualTo(1);
-			assertThat(flyway.info().current().getVersion().toString()).isEqualTo("1");
+			assertThat(result.migrationsExecuted).isEqualTo(2);
+			assertThat(flyway.info().current().getVersion().toString()).isEqualTo("2");
 			assertThat(tableExists(schema, "projects")).isTrue();
 			assertThat(tableExists(schema, "project_translations")).isTrue();
 			assertThat(tableExists(schema, "technologies")).isTrue();

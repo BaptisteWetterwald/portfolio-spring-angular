@@ -6,19 +6,26 @@ import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import { EducationPageComponent } from './education-page.component';
 
 describe('EducationPageComponent', () => {
-  it('renders confirmed education entries in the approved order', async () => {
+  it('renders the full education inventory in reverse chronological order', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
 
     expect(entryHeadings(page)).toEqual([
       'ENSISA',
-      'IUT Robert Schuman',
       'Université du Québec à Chicoutimi',
+      'IUT Robert Schuman',
+      'INSA Lyon',
+      'Lycée Louis Armand',
     ]);
     expect(page.textContent).toContain('Engineering Degree');
     expect(page.textContent).toContain('Computer Science and Networks');
+    expect(page.textContent).toContain('Study semester abroad');
     expect(page.textContent).toContain('DUT Computer Science');
-    expect(page.textContent).toContain('International semester');
+    expect(page.textContent).toContain(
+      'First year of the integrated engineering preparatory cycle',
+    );
+    expect(page.textContent).toContain('Baccalauréat STI2D');
+    expect(page.textContent).toContain('Mention Très Bien');
   });
 
   it('renders localized French degree labels with the same factual entries', async () => {
@@ -27,16 +34,20 @@ describe('EducationPageComponent', () => {
 
     expect(entryHeadings(page)).toEqual([
       'ENSISA',
-      'IUT Robert Schuman',
       'Université du Québec à Chicoutimi',
+      'IUT Robert Schuman',
+      'INSA Lyon',
+      'Lycée Louis Armand',
     ]);
-    expect(page.textContent).toContain("Diplôme d'ingénieur");
-    expect(page.textContent).toContain('Informatique et réseaux');
-    expect(page.textContent).toContain('DUT informatique');
+    expect(page.textContent).toContain("Diplôme d'Ingénieur");
+    expect(page.textContent).toContain('Informatique et Réseaux');
     expect(page.textContent).toContain('Semestre international');
+    expect(page.textContent).toContain('DUT Informatique');
+    expect(page.textContent).toContain('Première année du cycle préparatoire intégré');
+    expect(page.textContent).toContain('Spécialité : SIN');
   });
 
-  it('uses semantic time elements for confirmed date ranges', async () => {
+  it('uses semantic time elements for confirmed education periods without invented UQAC dates', async () => {
     const fixture = await createFixture('en');
     const times = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLTimeElement>('time'),
@@ -45,8 +56,12 @@ describe('EducationPageComponent', () => {
     expect(times.map((time) => time.getAttribute('datetime'))).toEqual([
       '2022',
       '2025',
+      '2022',
       '2020',
       '2022',
+      '2019',
+      '2020',
+      '2019',
     ]);
   });
 
@@ -59,14 +74,33 @@ describe('EducationPageComponent', () => {
     expect(timeline).not.toBeNull();
     expect(timeline?.classList.contains('timeline-snap-icon')).toBe(true);
     expect(timeline?.classList.contains('max-md:timeline-compact')).toBe(true);
-    expect(page.querySelectorAll('.timeline-page__waypoint[aria-hidden="true"]').length).toBe(3);
-    expect(page.querySelectorAll('hr.timeline-page__route-line').length).toBe(4);
-    expect(entries.map((entry) => timelineSide(entry))).toEqual(['start', 'end', 'start']);
+    expect(page.querySelectorAll('.timeline-page__waypoint[aria-hidden="true"]').length).toBe(5);
+    expect(page.querySelectorAll('hr.timeline-page__route-line').length).toBe(8);
+    expect(entries.map((entry) => timelineSide(entry))).toEqual([
+      'start',
+      'end',
+      'start',
+      'end',
+      'start',
+    ]);
     expect(entryHeadings(page)).toEqual([
       'ENSISA',
-      'IUT Robert Schuman',
       'Université du Québec à Chicoutimi',
+      'IUT Robert Schuman',
+      'INSA Lyon',
+      'Lycée Louis Armand',
     ]);
+  });
+
+  it('renders locations as secondary timeline card content', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(entryText(page, 'ENSISA')).toContain('Mulhouse, France');
+    expect(entryText(page, 'Université du Québec à Chicoutimi')).toContain('Chicoutimi, Canada');
+    expect(entryText(page, 'IUT Robert Schuman')).toContain('Illkirch, France');
+    expect(entryText(page, 'INSA Lyon')).toContain('Lyon, France');
+    expect(entryText(page, 'Lycée Louis Armand')).toContain('Mulhouse, France');
   });
 
   it('links only the school name and metadata logo areas when an official website is available', async () => {
@@ -81,8 +115,8 @@ describe('EducationPageComponent', () => {
 
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       'https://www.ensisa.uha.fr/',
-      'https://iutrs.unistra.fr/',
       'https://www.uqac.ca/',
+      'https://iutrs.unistra.fr/',
     ]);
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
@@ -91,8 +125,8 @@ describe('EducationPageComponent', () => {
     expect(links.every((link) => link.querySelector('.timeline-page__logo-frame'))).toBe(false);
     expect(logoLinks.map((link) => link.getAttribute('href'))).toEqual([
       'https://www.ensisa.uha.fr/',
-      'https://iutrs.unistra.fr/',
       'https://www.uqac.ca/',
+      'https://iutrs.unistra.fr/',
     ]);
     expect(logoLinks.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(logoLinks.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(
@@ -102,15 +136,24 @@ describe('EducationPageComponent', () => {
     expect(logoLinks.every((link) => link.closest('.timeline-page__meta'))).toBe(true);
     expect(imageSources(logoLinks)).toEqual([
       '/assets/logos/logo_ensisa.svg',
-      '/assets/logos/logo_iut_robert_schuman.png',
       '/assets/logos/logo_uqac.png',
+      '/assets/logos/logo_iut_robert_schuman.png',
     ]);
     expect(
       Array.from(page.querySelectorAll<HTMLImageElement>('.timeline-page__logo')).every(
         (logo) => logo.getAttribute('alt') === '',
       ),
     ).toBe(true);
-    expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(3);
+    expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(4);
+    expect(entryArticle(page, 'INSA Lyon')?.querySelector('.timeline-page__logo')).toBeNull();
+    expect(
+      entryArticle(page, 'Lycée Louis Armand')?.querySelector('a.timeline-page__identity-link'),
+    ).toBeNull();
+    expect(
+      entryArticle(page, 'Lycée Louis Armand')
+        ?.querySelector<HTMLImageElement>('.timeline-page__meta img.timeline-page__logo')
+        ?.getAttribute('src'),
+    ).toBe('/assets/logos/logo_lycée_louis_armand.jpeg');
     expect(page.querySelector('article.timeline-page__entry > a')).toBeNull();
   });
 
@@ -195,6 +238,10 @@ function entryHeadings(page: HTMLElement): string[] {
   return Array.from(page.querySelectorAll('article h2')).map(
     (element) => element.textContent?.trim() ?? '',
   );
+}
+
+function entryText(page: HTMLElement, heading: string): string {
+  return entryArticle(page, heading)?.textContent ?? '';
 }
 
 function entryArticle(page: HTMLElement, heading: string): HTMLElement | null {

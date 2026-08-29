@@ -206,8 +206,9 @@ Deliverables:
 
 - Baptiste Wetterwald identity content;
 - Backend / Full-stack positioning;
-- ENSISA, IUT Robert Schuman, and UQAC education content;
+- ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand education content;
 - confirmed experience entries;
+- language facts when owner-supplied;
 - primary and enterprise skill groups;
 - skill importance model for primary, professional/complementary, secondary, and exploratory/historical knowledge;
 - conservative AI-assisted software engineering content;
@@ -226,7 +227,7 @@ Validation criteria:
 
 - all public personal content is owner-approved;
 - French and English variants are complete;
-- Plansee SAP-related internship is not described as ABAP work;
+- Plansee internship is not described as ABAP work;
 - PostgreSQL is not described as previous professional experience;
 - no TODO copy appears on production pages.
 

@@ -33,42 +33,42 @@ Do not use brass/gold as a primary brand accent. A warm pale lighthouse light ma
 
 ### Primitive Tokens
 
-| Token | Value | Role |
-| --- | --- | --- |
-| `navy-950` | `#0A1A2F` | Core navy reference, dark background, primary identity color. |
-| `navy-900` | `#10243D` | Deep surfaces and high-emphasis dark accents. |
-| `navy-800` | `#173456` | Secondary dark surface. |
-| `off-white` | `#F7F4ED` | Nautical chart-inspired light background. |
-| `white` | `#FFFFFF` | Clean base surface. |
-| `mist-100` | `#EEF5F8` | Cool light surface tint. |
-| `slate-700` | `#334155` | Secondary text. |
-| `slate-500` | `#64748B` | Muted text and icons. |
-| `blue-600` | `#2563EB` | Restrained navigation blue. |
-| `cyan-400` | `#22D3EE` | Limited sonar/night illumination. |
-| `signal-red-600` | `#D7263D` | Restrained French-inspired signal red and error base. |
-| `green-600` | `#16A34A` | Success state. |
-| `amber-500` | `#F59E0B` | Warning state. |
-| `lighthouse-light` | `#FFF3B0` | Decorative pale lighthouse light only. |
+| Token              | Value     | Role                                                          |
+| ------------------ | --------- | ------------------------------------------------------------- |
+| `navy-950`         | `#0A1A2F` | Core navy reference, dark background, primary identity color. |
+| `navy-900`         | `#10243D` | Deep surfaces and high-emphasis dark accents.                 |
+| `navy-800`         | `#173456` | Secondary dark surface.                                       |
+| `off-white`        | `#F7F4ED` | Nautical chart-inspired light background.                     |
+| `white`            | `#FFFFFF` | Clean base surface.                                           |
+| `mist-100`         | `#EEF5F8` | Cool light surface tint.                                      |
+| `slate-700`        | `#334155` | Secondary text.                                               |
+| `slate-500`        | `#64748B` | Muted text and icons.                                         |
+| `blue-600`         | `#2563EB` | Restrained navigation blue.                                   |
+| `cyan-400`         | `#22D3EE` | Limited sonar/night illumination.                             |
+| `signal-red-600`   | `#D7263D` | Restrained French-inspired signal red and error base.         |
+| `green-600`        | `#16A34A` | Success state.                                                |
+| `amber-500`        | `#F59E0B` | Warning state.                                                |
+| `lighthouse-light` | `#FFF3B0` | Decorative pale lighthouse light only.                        |
 
 Avoid building the entire interface from navy and cyan. Signal red should be used sparingly for orientation, active navigation accents, or semantic error states.
 
 ### Semantic Tokens
 
-| Token | Light Theme | Dark Theme |
-| --- | --- | --- |
-| `color-bg` | `off-white` | `navy-950` |
-| `color-surface` | softened near-white | `navy-900` |
-| `color-surface-subtle` | cool mist surface | `navy-800` |
-| `color-text` | `navy-950` | `#F8FAFC` |
-| `color-text-muted` | `slate-500` | `#CBD5E1` |
-| `color-border` | `#D8E1EA` | `#29435F` |
-| `color-link` | `blue-600` | `#67E8F9` |
-| `color-focus` | `signal-red-600` | `cyan-400` |
-| `color-accent-maritime` | `blue-600` | `cyan-400` |
-| `color-accent-signal` | `signal-red-600` | `#FB7185` |
-| `color-error` | `signal-red-600` | `#FB7185` |
-| `color-success` | `green-600` | `#4ADE80` |
-| `color-warning` | `amber-500` | `#FBBF24` |
+| Token                   | Light Theme         | Dark Theme |
+| ----------------------- | ------------------- | ---------- |
+| `color-bg`              | `off-white`         | `navy-950` |
+| `color-surface`         | softened near-white | `navy-900` |
+| `color-surface-subtle`  | cool mist surface   | `navy-800` |
+| `color-text`            | `navy-950`          | `#F8FAFC`  |
+| `color-text-muted`      | `#59697F`           | `#CBD5E1`  |
+| `color-border`          | `#D8E1EA`           | `#29435F`  |
+| `color-link`            | `blue-600`          | `#67E8F9`  |
+| `color-focus`           | `signal-red-600`    | `cyan-400` |
+| `color-accent-maritime` | `blue-600`          | `cyan-400` |
+| `color-accent-signal`   | `signal-red-600`    | `#FB7185`  |
+| `color-error`           | `signal-red-600`    | `#FB7185`  |
+| `color-success`         | `green-600`         | `#4ADE80`  |
+| `color-warning`         | `amber-500`         | `#FBBF24`  |
 
 ## Light and Dark Themes
 
@@ -94,16 +94,16 @@ The themes should be related but not simple inversions. Dark mode can introduce 
 
 Choose fonts during implementation. The roles should exist regardless of font family.
 
-| Role | Purpose |
-| --- | --- |
-| `display` | Home headline or major page heading only. |
-| `heading-1` | Page title. |
-| `heading-2` | Section title. |
-| `heading-3` | Card or subsection title. |
-| `body` | Default reading text. |
-| `body-small` | Supporting text, metadata, captions. |
-| `label` | Form labels, nav labels, badges. |
-| `code` | Technical identifiers, if needed. |
+| Role         | Purpose                                   |
+| ------------ | ----------------------------------------- |
+| `display`    | Home headline or major page heading only. |
+| `heading-1`  | Page title.                               |
+| `heading-2`  | Section title.                            |
+| `heading-3`  | Card or subsection title.                 |
+| `body`       | Default reading text.                     |
+| `body-small` | Supporting text, metadata, captions.      |
+| `label`      | Form labels, nav labels, badges.          |
+| `code`       | Technical identifiers, if needed.         |
 
 Typography constraints:
 
@@ -116,10 +116,10 @@ Typography constraints:
 
 Use a compact spacing scale based on `4px`.
 
-| Token | Value |
-| --- | --- |
-| `space-1` | `4px` |
-| `space-2` | `8px` |
+| Token     | Value  |
+| --------- | ------ |
+| `space-1` | `4px`  |
+| `space-2` | `8px`  |
 | `space-3` | `12px` |
 | `space-4` | `16px` |
 | `space-5` | `24px` |
@@ -132,41 +132,41 @@ Use larger spacing for page rhythm and smaller spacing for navigation, badges, c
 
 ## Borders, Radii, and Shadows
 
-| Token | Value | Role |
-| --- | --- | --- |
-| `border-thin` | `1px` | Default borders. |
-| `border-strong` | `2px` | Focus, selected states, and waypoint markers. |
-| `radius-sm` | `4px` | Small controls and tags. |
-| `radius-md` | `8px` | Cards, modals, repeated items. |
-| `radius-round` | `999px` | Pills, porthole frames, circular navigation markers. |
-| `shadow-sm` | subtle | Raised controls. |
-| `shadow-md` | moderate | Dialogs, menus. |
+| Token           | Value    | Role                                                 |
+| --------------- | -------- | ---------------------------------------------------- |
+| `border-thin`   | `1px`    | Default borders.                                     |
+| `border-strong` | `2px`    | Focus, selected states, and waypoint markers.        |
+| `radius-sm`     | `4px`    | Small controls and tags.                             |
+| `radius-md`     | `8px`    | Cards, modals, repeated items.                       |
+| `radius-round`  | `999px`  | Pills, porthole frames, circular navigation markers. |
+| `shadow-sm`     | subtle   | Raised controls.                                     |
+| `shadow-md`     | moderate | Dialogs, menus.                                      |
 
 Repeated cards should stay at `8px` radius or less unless a later design system explicitly changes that rule.
 
 ## Breakpoints
 
-| Token | Width | Use |
-| --- | --- | --- |
-| `bp-sm` | `480px` | Small phones and narrow layouts. |
-| `bp-md` | `768px` | Tablet and mobile navigation transition. |
-| `bp-lg` | `1024px` | Desktop layout. |
-| `bp-xl` | `1280px` | Wide layout constraints. |
+| Token   | Width    | Use                                      |
+| ------- | -------- | ---------------------------------------- |
+| `bp-sm` | `480px`  | Small phones and narrow layouts.         |
+| `bp-md` | `768px`  | Tablet and mobile navigation transition. |
+| `bp-lg` | `1024px` | Desktop layout.                          |
+| `bp-xl` | `1280px` | Wide layout constraints.                 |
 
 Use container constraints where practical instead of relying only on viewport breakpoints.
 
 ## Semantic States
 
-| State | Requirement |
-| --- | --- |
-| Default | Quiet, readable, no decorative overload. |
-| Hover | Clear but restrained affordance. |
-| Active/current | Visible state, may use signal red or sonar/compass marker. |
-| Focus | High-contrast visible focus ring. |
-| Disabled | Lower contrast but still legible where text is present. |
-| Loading | Stable layout, no content jump. |
-| Error | Clear message and recovery path using semantic error styling. |
-| Success | Confirm action without excessive animation. |
+| State          | Requirement                                                   |
+| -------------- | ------------------------------------------------------------- |
+| Default        | Quiet, readable, no decorative overload.                      |
+| Hover          | Clear but restrained affordance.                              |
+| Active/current | Visible state, may use signal red or sonar/compass marker.    |
+| Focus          | High-contrast visible focus ring.                             |
+| Disabled       | Lower contrast but still legible where text is present.       |
+| Loading        | Stable layout, no content jump.                               |
+| Error          | Clear message and recovery path using semantic error styling. |
+| Success        | Confirm action without excessive animation.                   |
 
 ## Theme Handling
 
@@ -217,7 +217,7 @@ Milestone 6 implements only the structural motifs:
 - static sonar/compass navigation rings and waypoint markers in a compact radial geometry;
 - a simple lighthouse theme toggle.
 
-Advanced sonar sweeps, pings, lighthouse beams, waves, bathymetric textures, porthole portrait treatment, and nautical timelines remain deferred to Milestones 9 and 10.
+Advanced sonar sweeps, pings, lighthouse beams, waves, bathymetric textures, and final motion polish remain deferred.
 
 ## DaisyUI Direction for Milestone 9+
 
@@ -248,21 +248,21 @@ Milestone 9 uses the installed local daisyUI Codex skill only. Do not use or ins
 
 Implementation matrix:
 
-| Area | M9 strategy | Notes |
-| --- | --- | --- |
-| Header | Hybrid daisyUI/custom | Use `navbar`, `menu`, and `btn` as accessible primitives. Keep shell geometry, exact route state, skip link, and maritime surface styling custom. |
-| Footer | Hybrid daisyUI/custom | Use `footer` and `link` primitives while retaining custom chart-like surface treatment and exact active links. |
-| Theme toggle | Hybrid daisyUI/custom | Use button semantics and a daisyUI `btn` foundation. Keep the lighthouse drawing and illuminated lantern custom. Defer lighthouse beam work to a later motion/polish milestone. |
-| Locale switcher | DaisyUI-led | Use `join` and compact `btn` anchors with custom active-state integration. |
-| Sonar/compass | Custom | Keep semantic links and custom SVG/CSS instrument geometry. Rings must use consistent radial spacing around a balanced center, with only symmetrical radial lines and no arbitrary cone/triangle markers. DaisyUI is not a good fit for the signature navigation itself. |
-| Home hero | Custom | Render the approved owner portrait inside a restrained circular porthole/navigation frame. Use the original portrait asset as the image source and CSS object cropping for the circular presentation; do not create a manually cropped square derivative or apply heavy filters/blur/overlays. |
-| Home navigation/content surfaces | Removed in M9 correction | Do not render redundant Home route cards because header navigation, signature sonar, mobile navigation, and footer navigation already cover portfolio navigation. |
-| Skills | Hybrid daisyUI/custom | Use `card` for skill groups and `badge` for technologies. Preserve importance classes and data attributes for the primary/professional/secondary/exploratory hierarchy. Skill cards are informational surfaces, not clickable controls. |
-| Experience | Hybrid daisyUI/custom | Use daisyUI `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, and `<hr>` geometry first, then style it as a plotted maritime route. Desktop entries alternate around one central route; mobile uses compact one-sided behavior. Preserve chronological DOM order, visible dates, and organization names. Optional organization logos belong in the card metadata column under the period on desktop, then reflow beside the organization name on mobile. |
-| Education | Hybrid daisyUI/custom | Same daisyUI-first timeline strategy as Experience, with education-specific content and order unchanged. Optional school logos and official links follow the same secondary identity-area treatment. |
-| Projects list | Hybrid daisyUI/custom | Use `card`, `badge`, and `btn` primitives. Featured projects receive stronger presentation than standard or archived projects, but no new persistence field is added. |
-| Project detail | Hybrid daisyUI/custom | Use badges and buttons for status, technologies, and actions. Mockup wrappers are deferred until the API/content can distinguish screenshots from logos/media references. |
-| Contact | Hybrid daisyUI/custom | Establish a visual contact surface using `card` without inventing contact data or fake form submission. Form primitives remain reserved for a later real contact milestone. |
+| Area                             | M9 strategy              | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header                           | Hybrid daisyUI/custom    | Use `navbar`, `menu`, and `btn` as accessible primitives. Keep shell geometry, exact route state, skip link, and maritime surface styling custom.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Footer                           | Hybrid daisyUI/custom    | Use `footer` and `link` primitives while retaining custom chart-like surface treatment and exact active links.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Theme toggle                     | Hybrid daisyUI/custom    | Use button semantics and a daisyUI `btn` foundation. Keep the lighthouse drawing and illuminated lantern custom. Defer lighthouse beam work to a later motion/polish milestone.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Locale switcher                  | DaisyUI-led              | Use `join` and compact `btn` anchors with custom active-state integration.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Sonar/compass                    | Custom                   | Keep semantic links and custom SVG/CSS instrument geometry. Rings must use consistent radial spacing around a balanced center, with only symmetrical radial lines and no arbitrary cone/triangle markers. DaisyUI is not a good fit for the signature navigation itself.                                                                                                                                                                                                                                                                                                                                                                                            |
+| Home hero                        | Custom                   | Render the approved owner portrait inside a restrained circular porthole/navigation frame. Use the original portrait asset as the image source and CSS object cropping for the circular presentation; do not create a manually cropped square derivative or apply heavy filters/blur/overlays.                                                                                                                                                                                                                                                                                                                                                                      |
+| Home navigation/content surfaces | Removed in M9 correction | Do not render redundant Home route cards because header navigation, signature sonar, mobile navigation, and footer navigation already cover portfolio navigation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Skills                           | Hybrid daisyUI/custom    | Use `card` for skill groups and `badge` for technologies. Preserve importance classes and data attributes for the primary/professional/secondary/exploratory hierarchy. Skill cards are informational surfaces, not clickable controls.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Experience                       | Hybrid daisyUI/custom    | Use daisyUI `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, and `<hr>` geometry first, then style it as a plotted maritime route. Desktop entries alternate around one central route; mobile uses compact one-sided behavior. Preserve chronological DOM order, visible dates, and organization names. Optional organization logos belong in the card metadata column under the period on desktop, then reflow beside the organization name on mobile. The desktop card header may use a compact metadata/identity split, but summaries, responsibility lists, and technology badges should span the card width so detailed roles remain readable. |
+| Education                        | Hybrid daisyUI/custom    | Same daisyUI-first timeline strategy as Experience, with education-specific content and order unchanged. Optional school logos and official links follow the same secondary identity-area treatment.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Projects list                    | Hybrid daisyUI/custom    | Use `card`, `badge`, and `btn` primitives. Featured projects receive stronger presentation than standard or archived projects, but no new persistence field is added.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Project detail                   | Hybrid daisyUI/custom    | Use badges and buttons for status, technologies, and actions. Mockup wrappers are deferred until the API/content can distinguish screenshots from logos/media references.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Contact                          | Hybrid daisyUI/custom    | Establish a visual contact surface using `card` without inventing contact data or fake form submission. Form primitives remain reserved for a later real contact milestone.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Approved daisyUI components for M9:
 
@@ -323,7 +323,7 @@ Skill cards remain informational. Do not add click behavior, `cursor: pointer`, 
 
 Education and Experience timelines must use daisyUI timeline geometry first: one central continuous route, waypoints on that route, alternating `timeline-start` and `timeline-end` entries on desktop, `<hr>` route segments between points, and `max-md:timeline-compact` for narrow viewports. Custom CSS may style route color, waypoints, and card surfaces, but must not replace the daisyUI layout with a detached custom rail.
 
-Timeline entries may expose an optional logo asset and official website URL. Logos are secondary identity marks with normalized display dimensions, regardless of source aspect ratio. On desktop timeline cards, logos sit below the date/period in the left metadata column so they use otherwise empty space; the organization or school name stays in the right content column. On mobile, the same logo may reflow beside the organization or school name. When an official URL is present, only the logo and/or name may be scoped links with external-link semantics; never turn the whole timeline card into a link. Prefer official organization or school websites over LinkedIn pages. Do not add logos unless approved logo assets are provided. The durable asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; when existing owner-supplied filenames differ, typed facts must reference the exact local asset path until the files are safely normalized.
+Timeline entries may expose an optional logo asset and official website URL. Logos are secondary identity marks with normalized display dimensions, regardless of source aspect ratio. On desktop timeline cards, logos sit below the date/period in the left metadata column so they use otherwise empty space; the organization or school name stays in the right content column. Experience cards use that split only for the compact header; their summary, responsibility bullets, and technology badges span the full card width below the header to avoid constraining detailed work into a narrow column. Education cards keep the simpler compact period/logo and school-content composition. On mobile, the same logo may reflow beside the organization or school name. When an official URL is present, only the logo and/or name may be scoped links with external-link semantics; never turn the whole timeline card into a link. Prefer official organization or school websites over LinkedIn pages. Do not add logos unless approved logo assets are provided. The durable asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; when existing owner-supplied filenames differ, typed facts must reference the exact local asset path until the files are safely normalized.
 
 ## Anti-Patterns
 

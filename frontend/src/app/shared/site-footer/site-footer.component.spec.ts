@@ -1,9 +1,11 @@
+import { TransferState } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { routes } from '../../app.routes';
 import { themeCookieName, themeStorageKey } from '../../core/theme/theme-preference.service';
+import { siteFooterYearStateKey } from './site-footer.component';
 
 describe('SiteFooterComponent integration', () => {
   const originalMatchMedia = globalThis.matchMedia;
@@ -51,13 +53,25 @@ describe('SiteFooterComponent integration', () => {
       true,
     );
   });
+
+  it('reuses the transferred SSR year for stable hydration', async () => {
+    const harness = await createHarness('/en', () => {
+      TestBed.inject(TransferState).set(siteFooterYearStateKey, 2042);
+    });
+
+    expect(footerCopyright(harness)?.textContent).toContain('2042');
+  });
 });
 
-async function createHarness(initialUrl: string): Promise<RouterTestingHarness> {
+async function createHarness(
+  initialUrl: string,
+  beforeCreate?: () => void,
+): Promise<RouterTestingHarness> {
   setSystemTheme(false);
   TestBed.configureTestingModule({
     providers: [provideRouter(routes)],
   });
+  beforeCreate?.();
 
   const harness = await RouterTestingHarness.create(initialUrl);
 
@@ -74,6 +88,10 @@ function footerLinks(harness: RouterTestingHarness): HTMLAnchorElement[] {
 
 function footerLink(harness: RouterTestingHarness, label: string): HTMLAnchorElement | undefined {
   return footerLinks(harness).find((link) => link.textContent?.trim() === label);
+}
+
+function footerCopyright(harness: RouterTestingHarness): HTMLParagraphElement | null {
+  return harness.routeNativeElement?.querySelector('footer .site-footer__copyright') ?? null;
 }
 
 async function settleHarness(harness: RouterTestingHarness): Promise<void> {

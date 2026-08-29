@@ -97,7 +97,7 @@ class PublicProjectApiTests extends AbstractPostgresSpringTest {
 		TechnologyEntity springBoot = saveTechnology("Spring Boot", "spring-boot", "framework");
 		ProjectEntity project = saveTranslatedProject("detail-fixture", ProjectStatus.PUBLISHED, true, 10);
 
-		project.setLogoMediaRef("media/projects/detail-fixture.svg");
+		project.setLogoMediaRef("/assets/projects/detail-fixture.svg");
 		project.setGithubUrl("https://example.test/detail-fixture.git");
 		project.setDemoUrl("https://demo.example.test/detail-fixture");
 		project.addTechnology(springBoot, 20);
@@ -111,7 +111,7 @@ class PublicProjectApiTests extends AbstractPostgresSpringTest {
 			.andExpect(jsonPath("$.title").value("detail-fixture EN"))
 			.andExpect(jsonPath("$.shortDescription").value("English short description for detail-fixture"))
 			.andExpect(jsonPath("$.detailedDescription").value("English detailed description for detail-fixture"))
-			.andExpect(jsonPath("$.logoMediaRef").value("media/projects/detail-fixture.svg"))
+			.andExpect(jsonPath("$.logoMediaRef").value("/assets/projects/detail-fixture.svg"))
 			.andExpect(jsonPath("$.githubUrl").value("https://example.test/detail-fixture.git"))
 			.andExpect(jsonPath("$.demoUrl").value("https://demo.example.test/detail-fixture"))
 			.andExpect(jsonPath("$.featured").value(true))

@@ -6,6 +6,9 @@ import {
   ExperienceEntry,
   ExperienceEntryFact,
   ExperienceEntryId,
+  Language,
+  LanguageFact,
+  LanguageId,
   LocalizedPortfolioContent,
   PortfolioContentByLocale,
   PortfolioPeriod,
@@ -55,9 +58,15 @@ interface LocalizedSkillTechnologyCopy {
   readonly note?: string;
 }
 
+interface LocalizedLanguageCopy {
+  readonly name: string;
+  readonly level?: string;
+}
+
 export const educationEntryFacts: readonly EducationEntryFact[] = [
   {
     id: 'ensisa',
+    location: 'Mulhouse, France',
     period: {
       startDatetime: '2022',
       endDatetime: '2025',
@@ -71,7 +80,22 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
     },
   },
   {
+    id: 'uqac-semester',
+    location: 'Chicoutimi, Canada',
+    period: {
+      singleDatetime: '2022',
+    },
+    affiliation: {
+      officialWebsiteUrl: 'https://www.uqac.ca/',
+      logo: {
+        src: '/assets/logos/logo_uqac.png',
+        alt: 'UQAC logo',
+      },
+    },
+  },
+  {
     id: 'iut-robert-schuman',
+    location: 'Illkirch, France',
     period: {
       startDatetime: '2020',
       endDatetime: '2022',
@@ -85,12 +109,23 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
     },
   },
   {
-    id: 'uqac-semester',
+    id: 'insa-lyon',
+    location: 'Lyon, France',
+    period: {
+      startDatetime: '2019',
+      endDatetime: '2020',
+    },
+  },
+  {
+    id: 'lycee-louis-armand',
+    location: 'Mulhouse, France',
+    period: {
+      singleDatetime: '2019',
+    },
     affiliation: {
-      officialWebsiteUrl: 'https://www.uqac.ca/',
       logo: {
-        src: '/assets/logos/logo_uqac.png',
-        alt: 'UQAC logo',
+        src: '/assets/logos/logo_lycée_louis_armand.jpeg',
+        alt: 'Lycée Louis Armand logo',
       },
     },
   },
@@ -100,10 +135,26 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
   {
     id: 'plansee-group-functions',
     organization: 'Plansee Group Functions',
+    location: 'Mamer, Luxembourg',
     period: {
-      startDatetime: '2025-12',
-      endDatetime: '2026-11',
+      startDatetime: '2025-12-01',
     },
+    duration: {
+      en: 'Planned end: end of November 2026',
+      fr: 'Fin prévue : fin novembre 2026',
+    },
+    technologies: [
+      'ABAP',
+      'SAP S/4HANA',
+      'Angular',
+      'TypeScript',
+      'Node.js',
+      'Express',
+      'REST',
+      'OAuth 2.0',
+      'C#',
+      '.NET',
+    ],
     affiliation: {
       officialWebsiteUrl: 'https://plansee-group.com/en',
       logo: {
@@ -114,15 +165,17 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
   },
   {
     id: 'plansee-internship',
-    organization: 'Plansee',
+    organization: 'Plansee Group Functions',
+    location: 'Mamer, Luxembourg',
     period: {
-      singleDatetime: '2025',
+      startDatetime: '2025-07-01',
+      endDatetime: '2025-09',
     },
     duration: {
       en: '11 weeks',
       fr: '11 semaines',
     },
-    technologies: ['Angular', 'DaisyUI'],
+    technologies: ['Angular', 'TypeScript'],
     affiliation: {
       officialWebsiteUrl: 'https://www.plansee.com/',
       logo: {
@@ -137,11 +190,17 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
       en: 'Bureau Veritas Laboratories',
       fr: 'Bureau Veritas Laboratoires',
     },
+    location: 'Sausheim, France',
     period: {
-      startDatetime: '2023',
-      endDatetime: '2025',
+      startDatetime: '2023-09',
+      endDatetime: '2025-09-30',
     },
-    technologies: ['Power Platform', 'Power Apps', 'Power Automate', 'Dataverse', 'Microsoft 365'],
+    technologies: [
+      'Microsoft Power Apps',
+      'Power Automate',
+      'Dataverse',
+      'Microsoft Power Platform',
+    ],
     affiliation: {
       officialWebsiteUrl: 'https://www.bureauveritas.fr/',
       logo: {
@@ -153,10 +212,16 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
   {
     id: 'groupe-ies',
     organization: 'Groupe IES',
+    location: 'Colmar, France',
     period: {
-      singleDatetime: '2023',
+      startDatetime: '2023-07',
+      endDatetime: '2023-08',
     },
-    technologies: ['.NET'],
+    duration: {
+      en: '2 months',
+      fr: '2 mois',
+    },
+    technologies: ['C#', '.NET', 'ASP.NET Blazor', 'VB.NET', 'REST'],
     affiliation: {
       logo: {
         src: '/assets/logos/logo_groupe_ies.jpeg',
@@ -165,18 +230,40 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     },
   },
   {
-    id: 'uqac-internship',
-    organization: 'UQAC',
+    id: 'lif-uqac-internship',
+    organization: 'Laboratoire d’Informatique Formelle (LIF), UQAC',
+    location: 'Chicoutimi, Canada',
     period: {
-      singleDatetime: '2022',
+      startDatetime: '2022-04',
+      endDatetime: '2022-07',
     },
+    duration: {
+      en: 'approximately 3 months',
+      fr: 'environ 3 mois',
+    },
+    technologies: ['Java', 'Python', 'Sockets', 'BeamNG.drive', 'BeepBeep 3'],
     affiliation: {
-      officialWebsiteUrl: 'https://www.uqac.ca/',
       logo: {
-        src: '/assets/logos/logo_uqac.png',
-        alt: 'UQAC logo',
+        src: '/assets/logos/logo_lif.png',
+        alt: 'LIF logo',
       },
     },
+  },
+];
+
+export const languageFacts: readonly LanguageFact[] = [
+  {
+    id: 'french',
+    level: 'native',
+  },
+  {
+    id: 'english',
+    level: 'C1',
+    certification: 'TOEIC 975',
+  },
+  {
+    id: 'german',
+    level: 'B1',
   },
 ];
 
@@ -186,43 +273,89 @@ export const skillGroupFacts: readonly SkillGroupFact[] = [
     importance: 'primary',
     domains: [
       {
-        id: 'backend',
+        id: 'backend-application-development',
         importance: 'primary',
         technologies: [
-          { id: 'java', defaultName: 'Java' },
-          { id: 'spring', defaultName: 'Spring' },
-          { id: 'csharp', defaultName: 'C#' },
-          { id: 'dotnet', defaultName: '.NET' },
-          { id: 'typescript', defaultName: 'TypeScript' },
-          { id: 'nodejs', defaultName: 'Node.js' },
-          { id: 'rest-apis', defaultName: 'REST APIs' },
+          { id: 'java', defaultName: 'Java', importance: 'primary' },
+          { id: 'spring', defaultName: 'Spring', importance: 'primary' },
+          { id: 'spring-boot', defaultName: 'Spring Boot', importance: 'primary' },
+          { id: 'csharp', defaultName: 'C#', importance: 'primary' },
+          { id: 'dotnet', defaultName: '.NET', importance: 'primary' },
+          { id: 'typescript', defaultName: 'TypeScript', importance: 'primary' },
+          { id: 'nodejs', defaultName: 'Node.js', importance: 'primary' },
+          { id: 'express', defaultName: 'Express' },
         ],
       },
       {
-        id: 'frontend',
-        importance: 'secondary',
+        id: 'frontend-full-stack',
+        importance: 'primary',
         technologies: [
           { id: 'angular', defaultName: 'Angular', importance: 'primary' },
           { id: 'typescript', defaultName: 'TypeScript', importance: 'primary' },
+          { id: 'html', defaultName: 'HTML' },
+          { id: 'css', defaultName: 'CSS' },
           { id: 'tailwind-css', defaultName: 'Tailwind CSS' },
-          { id: 'daisyui', defaultName: 'DaisyUI' },
+          { id: 'daisyui', defaultName: 'daisyUI' },
+        ],
+      },
+      {
+        id: 'apis-integration',
+        importance: 'primary',
+        technologies: [
+          { id: 'rest-apis', defaultName: 'REST' },
+          { id: 'http', defaultName: 'HTTP' },
+          { id: 'oauth2', defaultName: 'OAuth 2.0' },
+          { id: 'sockets', defaultName: 'Sockets' },
         ],
       },
     ],
   },
   {
-    id: 'microsoft-enterprise',
+    id: 'data-databases',
     importance: 'professional-complementary',
     domains: [
       {
-        id: 'microsoft-ecosystem',
+        id: 'data-platforms',
         importance: 'professional-complementary',
         technologies: [
-          { id: 'power-platform', defaultName: 'Power Platform' },
+          { id: 'sql', defaultName: 'SQL' },
+          { id: 'postgresql', defaultName: 'PostgreSQL', importance: 'secondary' },
+          { id: 'mysql', defaultName: 'MySQL', importance: 'secondary' },
+          { id: 'sqlite', defaultName: 'SQLite', importance: 'secondary' },
+          { id: 'oracle', defaultName: 'Oracle', importance: 'secondary' },
+          { id: 'plsql', defaultName: 'PL/SQL', importance: 'secondary' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'enterprise-industrial',
+    importance: 'professional-complementary',
+    domains: [
+      {
+        id: 'sap-industrial',
+        importance: 'professional-complementary',
+        technologies: [
+          { id: 'sap-s4hana', defaultName: 'SAP S/4HANA' },
+          { id: 'abap', defaultName: 'ABAP' },
+        ],
+      },
+      {
+        id: 'microsoft-power-platform',
+        importance: 'professional-complementary',
+        technologies: [
           { id: 'power-apps', defaultName: 'Power Apps' },
           { id: 'power-automate', defaultName: 'Power Automate' },
           { id: 'dataverse', defaultName: 'Dataverse' },
-          { id: 'microsoft-365', defaultName: 'Microsoft 365' },
+          { id: 'power-platform', defaultName: 'Microsoft Power Platform' },
+        ],
+      },
+      {
+        id: 'dotnet-ecosystem',
+        importance: 'secondary',
+        technologies: [
+          { id: 'aspnet-blazor', defaultName: 'ASP.NET Blazor' },
+          { id: 'vbnet', defaultName: 'VB.NET' },
         ],
       },
     ],
@@ -252,35 +385,69 @@ export const skillGroupFacts: readonly SkillGroupFact[] = [
     ],
   },
   {
-    id: 'data-databases',
-    importance: 'professional-complementary',
+    id: 'broader-software-experience',
+    importance: 'secondary',
     domains: [
       {
-        id: 'data-platforms',
-        importance: 'professional-complementary',
+        id: 'broader-programming-frameworks',
+        importance: 'secondary',
         technologies: [
-          { id: 'sql', defaultName: 'SQL' },
-          { id: 'relational-databases', defaultName: 'Relational databases' },
-          { id: 'oracle', defaultName: 'Oracle', importance: 'secondary' },
-          { id: 'sql-server', defaultName: 'SQL Server', importance: 'secondary' },
-          { id: 'sqlite', defaultName: 'SQLite', importance: 'secondary' },
-          { id: 'sap-s4hana', defaultName: 'SAP S/4HANA', importance: 'secondary' },
-          { id: 'mongodb', defaultName: 'MongoDB', importance: 'secondary' },
-          { id: 'postgresql', defaultName: 'PostgreSQL', importance: 'secondary' },
+          { id: 'c', defaultName: 'C' },
+          { id: 'cpp', defaultName: 'C++' },
+          { id: 'python', defaultName: 'Python' },
+          { id: 'django', defaultName: 'Django' },
+          { id: 'php', defaultName: 'PHP' },
+          { id: 'laravel', defaultName: 'Laravel' },
+        ],
+      },
+      {
+        id: 'game-mobile-academic',
+        importance: 'secondary',
+        technologies: [
+          { id: 'android-java', defaultName: 'Android / Java' },
+          { id: 'kotlin', defaultName: 'Kotlin' },
+          { id: 'javafx', defaultName: 'JavaFX' },
+          { id: 'swing', defaultName: 'Swing' },
+          { id: 'unreal-engine', defaultName: 'Unreal Engine' },
+          { id: 'blueprint', defaultName: 'Blueprint' },
+          { id: 'matlab', defaultName: 'MATLAB' },
         ],
       },
     ],
   },
   {
-    id: 'engineering-infrastructure',
-    importance: 'secondary',
+    id: 'exploratory-historical',
+    importance: 'exploratory-historical',
     domains: [
       {
-        id: 'project-api-foundations',
+        id: 'engineering-tools',
+        importance: 'exploratory-historical',
+        technologies: [
+          { id: 'arduino', defaultName: 'Arduino' },
+          { id: 'labview', defaultName: 'LabVIEW' },
+          { id: 'flowcode', defaultName: 'Flowcode' },
+          { id: 'latex', defaultName: 'LaTeX' },
+          { id: 'uml', defaultName: 'UML' },
+          { id: 'solidworks', defaultName: 'SolidWorks' },
+          { id: 'solid-edge', defaultName: 'Solid Edge' },
+        ],
+      },
+      {
+        id: 'version-control',
         importance: 'secondary',
         technologies: [
           { id: 'git', defaultName: 'Git' },
+          { id: 'perforce', defaultName: 'Perforce' },
+          { id: 'subversion', defaultName: 'Apache Subversion' },
           { id: 'docker', defaultName: 'Docker' },
+        ],
+      },
+      {
+        id: 'operating-systems',
+        importance: 'exploratory-historical',
+        technologies: [
+          { id: 'windows', defaultName: 'Windows' },
+          { id: 'linux', defaultName: 'Linux' },
         ],
       },
     ],
@@ -297,37 +464,67 @@ const educationCopy: Record<SupportedLocale, Record<EducationEntryId, LocalizedE
       periodLabels: { start: '2022', end: '2025' },
       summary: 'Engineering graduate in Computer Science and Networks.',
     },
+    'uqac-semester': {
+      institution: 'Université du Québec à Chicoutimi',
+      degree: 'Study semester abroad',
+      field: 'Fourth semester of the DUT Computer Science',
+      periodLabels: { single: '2022' },
+      summary: 'International semester completed at UQAC in Canada.',
+    },
     'iut-robert-schuman': {
       institution: 'IUT Robert Schuman',
       degree: 'DUT Computer Science',
       periodLabels: { start: '2020', end: '2022' },
+      summary: 'The fourth semester was completed abroad at UQAC in Canada.',
     },
-    'uqac-semester': {
-      institution: 'Université du Québec à Chicoutimi',
-      degree: 'International semester',
-      field: 'Computer Science studies during the DUT',
-      periodLabels: { label: 'During the DUT' },
+    'insa-lyon': {
+      institution: 'INSA Lyon',
+      degree: 'First year of the integrated engineering preparatory cycle',
+      field: 'Engineering Sciences',
+      periodLabels: { start: '2019', end: '2020' },
+    },
+    'lycee-louis-armand': {
+      institution: 'Lycée Louis Armand',
+      degree: 'Baccalauréat STI2D',
+      field: 'Specialization: SIN',
+      status: 'Mention Très Bien',
+      periodLabels: { single: '2019' },
     },
   },
   fr: {
     ensisa: {
       institution: 'ENSISA',
-      degree: "Diplôme d'ingénieur",
-      field: 'Informatique et réseaux',
+      degree: "Diplôme d'Ingénieur",
+      field: 'Informatique et Réseaux',
       status: 'Diplômé',
       periodLabels: { start: '2022', end: '2025' },
-      summary: 'Ingénieur diplômé en informatique et réseaux.',
-    },
-    'iut-robert-schuman': {
-      institution: 'IUT Robert Schuman',
-      degree: 'DUT informatique',
-      periodLabels: { start: '2020', end: '2022' },
+      summary: 'Ingénieur diplômé en Informatique et Réseaux.',
     },
     'uqac-semester': {
       institution: 'Université du Québec à Chicoutimi',
       degree: 'Semestre international',
-      field: 'Études informatiques pendant le DUT',
-      periodLabels: { label: 'Pendant le DUT' },
+      field: 'Quatrième semestre du DUT informatique',
+      periodLabels: { single: '2022' },
+      summary: "Semestre du DUT réalisé à l'UQAC, au Canada.",
+    },
+    'iut-robert-schuman': {
+      institution: 'IUT Robert Schuman',
+      degree: 'DUT Informatique',
+      periodLabels: { start: '2020', end: '2022' },
+      summary: "Le quatrième semestre a été effectué à l'UQAC, au Canada.",
+    },
+    'insa-lyon': {
+      institution: 'INSA Lyon',
+      degree: 'Première année du cycle préparatoire intégré',
+      field: "Sciences de l'Ingénieur",
+      periodLabels: { start: '2019', end: '2020' },
+    },
+    'lycee-louis-armand': {
+      institution: 'Lycée Louis Armand',
+      degree: 'Baccalauréat STI2D',
+      field: 'Spécialité : SIN',
+      status: 'Mention Très Bien',
+      periodLabels: { single: '2019' },
     },
   },
 };
@@ -339,69 +536,109 @@ const experienceCopy: Record<
   en: {
     'plansee-group-functions': {
       role: 'Software Developer',
-      periodLabels: {
-        start: 'December 2025',
-        end: 'November 2026',
-        endPrefix: 'planned end ',
-      },
-      context: 'Software Developer position following the previous Plansee internship.',
+      periodLabels: { label: 'Since 1 December 2025' },
+      context:
+        'Software developer role following an 11-week internship at Plansee in an industrial software environment.',
+      responsibilities: [
+        'Continued development of the Angular application initially rebuilt during the internship.',
+        'Worked with SAP S/4HANA and ABAP on transaction functionality and HTTP/API integration, including a SAP transaction connected to an AI-team API used in powder-recipe calculations.',
+        'Adapted an existing C#/.NET industrial measurement application after equipment was moved from Germany to Luxembourg.',
+        'Built a Node.js/Express middleware around the Minew electronic-label API for SAP PI consumption, adding a cleaner REST-oriented layer with OAuth 2.0.',
+      ],
     },
     'plansee-internship': {
-      role: 'Software Engineering Internship',
-      periodLabels: { single: 'Summer 2025' },
-      context: 'Internship focused on redesigning an internal e-commerce-like catalogue/site.',
+      role: 'Software Developer Intern',
+      periodLabels: { start: '1 July 2025', end: 'mid-September 2025' },
+      context:
+        'Internship focused on the complete redevelopment of an internal ordering website used by company departments.',
       responsibilities: [
-        'Redesign of an internal catalogue/site with Angular and DaisyUI.',
-        'The work was carried out in an SAP-related team and did not include ABAP development.',
+        'Modernized the internal application with Angular and TypeScript.',
+        'The work took place in a SAP department environment, without ABAP development during the internship.',
       ],
     },
     'bureau-veritas-laboratories': {
       role: 'Power Platform Developer Apprentice',
-      periodLabels: { start: '2023', end: '2025' },
+      periodLabels: { start: 'September 2023', end: '30 September 2025' },
       context:
-        'Apprenticeship focused on enterprise and business applications in the Microsoft ecosystem.',
+        'Apprenticeship alternating roughly two to three weeks between engineering school and company work.',
+      responsibilities: [
+        "Developed an application to replace the laboratory's previous vehicle-fleet management system.",
+        'Covered vehicle reception, laboratory workflow tracking, maceration room, test bench, and return process.',
+        'Learned Microsoft Power Platform independently and built the implementation largely autonomously, without internal technical Power Platform mentorship.',
+      ],
     },
     'groupe-ies': {
-      role: 'Full Stack .NET Developer Intern',
-      periodLabels: { single: '2023' },
+      role: '.NET Full-stack Developer Intern',
+      periodLabels: { start: 'July 2023', end: 'August 2023' },
+      responsibilities: [
+        'Developed web features in C# with ASP.NET Blazor.',
+        'Built and consumed REST APIs.',
+        'Worked with existing database and service layers implemented in VB.NET/.NET.',
+      ],
     },
-    'uqac-internship': {
+    'lif-uqac-internship': {
       role: 'Software Developer Intern',
-      periodLabels: { single: '2022' },
+      periodLabels: { start: 'approximately April 2022', end: 'July 2022' },
+      context:
+        'Academic research-oriented internship on a two-person project connecting BeamNG.drive with BeepBeep 3, an Event Stream Processing engine developed at LIF.',
+      responsibilities: [
+        'Integrated communication between the BeamNG.drive vehicle simulator and BeepBeep 3.',
+        'Worked on network/socket programming with Java and Python.',
+      ],
     },
   },
   fr: {
     'plansee-group-functions': {
       role: 'Software Developer',
-      periodLabels: {
-        start: 'décembre 2025',
-        end: 'novembre 2026',
-        endPrefix: 'fin prévue ',
-      },
-      context: 'Poste de Software Developer dans la continuité du stage Plansee précédent.',
+      periodLabels: { label: 'Depuis le 1 décembre 2025' },
+      context:
+        "Poste de développeur logiciel dans la continuité d'un stage de 11 semaines chez Plansee, dans un environnement logiciel industriel.",
+      responsibilities: [
+        "Poursuite du développement de l'application Angular initialement reconstruite pendant le stage.",
+        "Travail avec SAP S/4HANA et ABAP sur des fonctionnalités de transaction et des intégrations HTTP/API, dont la connexion d'une transaction SAP à une API de l'équipe IA utilisée dans un flux de calcul de recette de poudre.",
+        "Adaptation d'une application industrielle de mesure en C#/.NET après le transfert d'une machine d'Allemagne vers le Luxembourg.",
+        "Développement d'un middleware Node.js/Express autour de l'API d'étiquettes électroniques Minew pour une consommation par SAP PI, avec une couche REST plus claire et OAuth 2.0.",
+      ],
     },
     'plansee-internship': {
-      role: 'Stage en développement logiciel',
-      periodLabels: { single: 'été 2025' },
-      context: "Stage centré sur la refonte d'un catalogue/site interne de type e-commerce.",
+      role: 'Stagiaire développeur logiciel',
+      periodLabels: { start: '1 juillet 2025', end: 'mi-septembre 2025' },
+      context:
+        "Stage centré sur la refonte complète d'un site interne de commande utilisé par les départements de l'entreprise.",
       responsibilities: [
-        "Refonte d'un catalogue/site interne avec Angular et DaisyUI.",
-        'Travail réalisé dans une équipe liée à SAP, sans développement ABAP.',
+        "Modernisation de l'application interne avec Angular et TypeScript.",
+        'Travail réalisé dans un environnement de département SAP, sans développement ABAP pendant le stage.',
       ],
     },
     'bureau-veritas-laboratories': {
-      role: 'Apprenti développeur Power Platform',
-      periodLabels: { start: '2023', end: '2025' },
+      role: 'Alternant Développeur Power Platform',
+      periodLabels: { start: 'septembre 2023', end: '30 septembre 2025' },
       context:
-        "Alternance orientée applications d'entreprise et métier dans l'écosystème Microsoft.",
+        "Alternance avec des périodes d'environ deux à trois semaines entre l'école d'ingénieurs et l'entreprise.",
+      responsibilities: [
+        "Développement d'une application destinée à remplacer l'ancien système de gestion de flotte de véhicules du laboratoire.",
+        'Suivi des véhicules depuis la réception jusqu’à la restitution, en passant par le flux laboratoire, la salle de macération et le banc de test.',
+        'Apprentissage autonome de Microsoft Power Platform et réalisation largement indépendante, sans mentorat technique interne sur Power Platform.',
+      ],
     },
     'groupe-ies': {
-      role: 'Stagiaire développeur full stack .NET',
-      periodLabels: { single: '2023' },
+      role: 'Stagiaire développeur full-stack .NET',
+      periodLabels: { start: 'juillet 2023', end: 'août 2023' },
+      responsibilities: [
+        'Développement web en C# avec ASP.NET Blazor.',
+        "Développement et consommation d'API REST.",
+        'Interaction avec des couches de base de données et de services existantes en VB.NET/.NET.',
+      ],
     },
-    'uqac-internship': {
+    'lif-uqac-internship': {
       role: 'Stagiaire développeur logiciel',
-      periodLabels: { single: '2022' },
+      periodLabels: { start: 'environ avril 2022', end: 'juillet 2022' },
+      context:
+        "Stage académique orienté recherche sur un projet en binôme reliant BeamNG.drive à BeepBeep 3, un moteur de traitement de flux d'événements développé au LIF.",
+      responsibilities: [
+        'Intégration de la communication entre le simulateur automobile BeamNG.drive et BeepBeep 3.',
+        'Travail de programmation réseau/sockets avec Java et Python.',
+      ],
     },
   },
 };
@@ -410,21 +647,28 @@ const skillGroupCopy: Record<SupportedLocale, Record<SkillGroupId, LocalizedSkil
   en: {
     'software-engineering': {
       title: 'Software Engineering',
-      summary: 'Core backend and full-stack direction.',
-    },
-    'microsoft-enterprise': {
-      title: 'Microsoft / Enterprise Applications',
-      summary: 'Complementary enterprise application experience.',
-    },
-    'ai-assisted-engineering': {
-      title: 'AI-assisted Engineering',
-      summary: 'Practical use of LLM-based developer tools in software engineering workflows.',
+      summary: 'Primary backend and full-stack direction.',
     },
     'data-databases': {
       title: 'Data & Databases',
+      summary: 'Relational data foundations and portfolio database work.',
     },
-    'engineering-infrastructure': {
-      title: 'Engineering / Infrastructure',
+    'enterprise-industrial': {
+      title: 'Enterprise & Industrial Software',
+      summary: 'Professional exposure to SAP, Microsoft Power Platform, and industrial .NET work.',
+    },
+    'ai-assisted-engineering': {
+      title: 'AI-assisted Engineering',
+      summary: 'Practical use of LLM-based tools as software-development assistants.',
+    },
+    'broader-software-experience': {
+      title: 'Broader Software Experience',
+      summary:
+        'Academic, personal, and earlier technologies kept visible with proportional weight.',
+    },
+    'exploratory-historical': {
+      title: 'Exploratory & Historical',
+      summary: 'Older, niche, and supporting engineering tools kept discoverable.',
     },
   },
   fr: {
@@ -432,40 +676,61 @@ const skillGroupCopy: Record<SupportedLocale, Record<SkillGroupId, LocalizedSkil
       title: 'Développement logiciel',
       summary: 'Orientation principale backend et full-stack.',
     },
-    'microsoft-enterprise': {
-      title: 'Applications Microsoft / entreprise',
-      summary: "Expérience complémentaire en applications d'entreprise.",
+    'data-databases': {
+      title: 'Données et bases de données',
+      summary: 'Socle relationnel et usage de PostgreSQL sur le portfolio.',
+    },
+    'enterprise-industrial': {
+      title: 'Logiciels entreprise et industriels',
+      summary:
+        'Expérience professionnelle autour de SAP, Microsoft Power Platform et .NET industriel.',
     },
     'ai-assisted-engineering': {
       title: 'Développement assisté par IA',
+      summary: "Usage pratique d'outils basés sur les LLM comme assistants de développement.",
+    },
+    'broader-software-experience': {
+      title: 'Expérience logicielle élargie',
       summary:
-        "Usage pratique d'outils basés sur les LLM dans les flux de travail de développement logiciel.",
+        'Technologies académiques, personnelles et plus anciennes gardées avec une importance mesurée.',
     },
-    'data-databases': {
-      title: 'Données et bases de données',
-    },
-    'engineering-infrastructure': {
-      title: 'Ingénierie / infrastructure',
+    'exploratory-historical': {
+      title: 'Exploratoire et historique',
+      summary: "Outils d'ingénierie plus anciens, de niche ou de soutien, gardés accessibles.",
     },
   },
 };
 
 const skillDomainCopy: Record<SupportedLocale, Record<SkillDomainId, LocalizedSkillDomainCopy>> = {
   en: {
-    backend: { title: 'Backend' },
-    frontend: { title: 'Frontend' },
-    'microsoft-ecosystem': { title: 'Microsoft ecosystem' },
+    'backend-application-development': { title: 'Backend & application development' },
+    'frontend-full-stack': { title: 'Frontend & full-stack' },
+    'apis-integration': { title: 'APIs & integration' },
+    'data-platforms': { title: 'Relational and database platforms' },
+    'sap-industrial': { title: 'SAP and industrial environments' },
+    'microsoft-power-platform': { title: 'Microsoft Power Platform' },
+    'dotnet-ecosystem': { title: '.NET ecosystem' },
     'developer-tooling-llms': { title: 'Developer tooling with LLMs' },
-    'data-platforms': { title: 'Relational and data platforms' },
-    'project-api-foundations': { title: 'Project foundations' },
+    'broader-programming-frameworks': { title: 'Languages and web frameworks' },
+    'game-mobile-academic': { title: 'Game, desktop, and mobile work' },
+    'engineering-tools': { title: 'Engineering and modelling tools' },
+    'version-control': { title: 'Version control and delivery tools' },
+    'operating-systems': { title: 'Operating systems' },
   },
   fr: {
-    backend: { title: 'Backend' },
-    frontend: { title: 'Frontend' },
-    'microsoft-ecosystem': { title: 'Écosystème Microsoft' },
-    'developer-tooling-llms': { title: 'Outillage développeur avec LLM' },
+    'backend-application-development': { title: "Backend et développement d'applications" },
+    'frontend-full-stack': { title: 'Frontend et full-stack' },
+    'apis-integration': { title: 'API et intégration' },
     'data-platforms': { title: 'Bases relationnelles et plateformes de données' },
-    'project-api-foundations': { title: 'Fondations projet' },
+    'sap-industrial': { title: 'SAP et environnements industriels' },
+    'microsoft-power-platform': { title: 'Microsoft Power Platform' },
+    'dotnet-ecosystem': { title: 'Écosystème .NET' },
+    'developer-tooling-llms': { title: 'Outillage développeur avec LLM' },
+    'broader-programming-frameworks': { title: 'Langages et frameworks web' },
+    'game-mobile-academic': { title: 'Jeu, desktop et mobile' },
+    'engineering-tools': { title: "Outils d'ingénierie et de modélisation" },
+    'version-control': { title: 'Gestion de versions et livraison' },
+    'operating-systems': { title: "Systèmes d'exploitation" },
   },
 };
 
@@ -475,42 +740,60 @@ const skillTechnologyCopy: Record<
 > = {
   en: {
     chatgpt: {
-      note: 'Used as part of software-development and problem-solving workflows.',
+      note: 'Used as a development assistant for software engineering and problem-solving workflows.',
     },
     'codex-coding-agents': {
-      note: 'Practical use for development workflows.',
+      note: 'Practical use for coding-agent assisted repository work.',
     },
     'mcp-concepts': {
-      note: 'Familiarity and early exploration.',
+      note: 'Conceptual familiarity through tool and agent integrations.',
     },
     'agentic-workflows': {
-      note: 'Early exploration of development workflows.',
+      note: 'Early practical exploration for software-development workflows.',
     },
     postgresql: {
       note: "Used in this portfolio's Spring Boot / PostgreSQL project.",
     },
+    kotlin: {
+      note: 'Modern Android exploration.',
+    },
   },
   fr: {
-    'rest-apis': { name: 'API REST' },
-    'relational-databases': { name: 'Bases de données relationnelles' },
+    'rest-apis': { name: 'REST' },
     chatgpt: {
-      note: 'Utilisé dans des flux de travail de développement logiciel et de résolution de problèmes.',
+      note: 'Utilisé comme assistant de développement logiciel et de résolution de problèmes.',
     },
     'codex-coding-agents': {
       name: 'Codex / agents de code',
-      note: 'Usage pratique dans des flux de travail de développement.',
+      note: 'Usage pratique pour du travail de dépôt assisté par agent de code.',
     },
     'mcp-concepts': {
       name: 'Concepts MCP',
-      note: 'Familiarité et exploration initiale.',
+      note: "Familiarité conceptuelle avec des intégrations d'outils et d'agents.",
     },
     'agentic-workflows': {
       name: 'Flux de travail agentiques',
-      note: 'Exploration initiale appliquée au développement.',
+      note: 'Exploration pratique initiale appliquée au développement logiciel.',
     },
     postgresql: {
       note: 'Utilisé dans ce portfolio Spring Boot / PostgreSQL.',
     },
+    kotlin: {
+      note: 'Exploration Android moderne.',
+    },
+  },
+};
+
+const languageCopy: Record<SupportedLocale, Record<LanguageId, LocalizedLanguageCopy>> = {
+  en: {
+    french: { name: 'French', level: 'Native language' },
+    english: { name: 'English' },
+    german: { name: 'German' },
+  },
+  fr: {
+    french: { name: 'Français', level: 'Langue maternelle' },
+    english: { name: 'Anglais' },
+    german: { name: 'Allemand' },
   },
 };
 
@@ -521,12 +804,12 @@ export const portfolioContent: PortfolioContentByLocale = {
         name: 'Baptiste Wetterwald',
         role: 'Software Engineer',
         orientation: 'Backend & Full-stack',
-        stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js',
+        stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js · Angular',
         portraitAlt: 'Portrait of Baptiste Wetterwald',
       },
       introduction: [
-        'Engineering graduate in Computer Science and Networks, oriented toward backend and full-stack software engineering.',
-        'The technical direction spans Java / Spring, C# / .NET, TypeScript / Node.js, Angular, and enterprise applications in the Microsoft ecosystem.',
+        'Computer Science and Networks engineering graduate focused on software development, with a particular interest in backend systems, API-oriented architectures and full-stack applications.',
+        'I work primarily with Java/Spring, C#/.NET and TypeScript/Node.js, while using Angular for frontend and full-stack applications. My experience also spans system integration, SAP, Microsoft Power Platform and industrial software environments.',
       ],
       primaryStackHeading: 'Primary technical directions',
       primaryStack: ['Java / Spring', 'C# / .NET', 'TypeScript / Node.js', 'Angular'],
@@ -552,11 +835,14 @@ export const portfolioContent: PortfolioContentByLocale = {
       skillsHeading: 'Skills and technical domains',
       skillsIntroduction:
         'Technical domains are weighted around the current backend and full-stack direction, with broader knowledge kept in context.',
+      languagesHeading: 'Languages',
+      languagesIntroduction:
+        'Language levels are shown as factual descriptors without artificial scores or progress bars.',
     },
     educationPage: {
       heading: 'Education',
       introduction:
-        'Academic path in computer science and networks, from DUT studies to an engineering degree.',
+        'Academic path in computer science and networks, from secondary studies to an engineering degree.',
       periodToLabel: 'to',
       officialWebsiteLabel: 'Official website',
       opensInNewTabLabel: 'opens in a new tab',
@@ -572,6 +858,7 @@ export const portfolioContent: PortfolioContentByLocale = {
     },
     experience: experienceEntriesFor('en'),
     skills: skillGroupsFor('en'),
+    languages: languagesFor('en'),
   },
   fr: {
     home: {
@@ -579,12 +866,12 @@ export const portfolioContent: PortfolioContentByLocale = {
         name: 'Baptiste Wetterwald',
         role: 'Ingénieur logiciel',
         orientation: 'Backend & full-stack',
-        stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js',
+        stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js · Angular',
         portraitAlt: 'Portrait de Baptiste Wetterwald',
       },
       introduction: [
-        'Ingénieur diplômé en informatique et réseaux, orienté backend et full-stack.',
-        "Le parcours technique couvre Java / Spring, C# / .NET, TypeScript / Node.js, Angular et les applications d'entreprise dans l'écosystème Microsoft.",
+        'Ingénieur diplômé en Informatique et Réseaux, orienté développement logiciel, avec un intérêt particulier pour les systèmes backend, les architectures orientées API et les applications full-stack.',
+        "Je travaille principalement avec Java/Spring, C#/.NET et TypeScript/Node.js, tout en utilisant Angular pour les applications frontend et full-stack. Mon expérience couvre aussi l'intégration de systèmes, SAP, Microsoft Power Platform et les environnements logiciels industriels.",
       ],
       primaryStackHeading: 'Directions techniques principales',
       primaryStack: ['Java / Spring', 'C# / .NET', 'TypeScript / Node.js', 'Angular'],
@@ -610,11 +897,14 @@ export const portfolioContent: PortfolioContentByLocale = {
       skillsHeading: 'Compétences et domaines techniques',
       skillsIntroduction:
         "Les domaines techniques sont hiérarchisés autour de l'orientation backend et full-stack actuelle, avec un socle plus large remis en contexte.",
+      languagesHeading: 'Langues',
+      languagesIntroduction:
+        'Les niveaux de langue sont présentés comme des faits, sans jauges ni scores artificiels.',
     },
     educationPage: {
       heading: 'Formation',
       introduction:
-        "Parcours académique en informatique et réseaux, du DUT au diplôme d'ingénieur.",
+        "Parcours académique en informatique et réseaux, du secondaire au diplôme d'ingénieur.",
       periodToLabel: 'à',
       officialWebsiteLabel: 'Site officiel',
       opensInNewTabLabel: 'ouvre dans un nouvel onglet',
@@ -630,6 +920,7 @@ export const portfolioContent: PortfolioContentByLocale = {
     },
     experience: experienceEntriesFor('fr'),
     skills: skillGroupsFor('fr'),
+    languages: languagesFor('fr'),
   },
 };
 
@@ -644,6 +935,7 @@ function educationEntriesFor(locale: SupportedLocale): readonly EducationEntry[]
     return {
       id: fact.id,
       institution: copy.institution,
+      location: fact.location,
       degree: copy.degree,
       field: copy.field,
       status: copy.status,
@@ -662,6 +954,7 @@ function experienceEntriesFor(locale: SupportedLocale): readonly ExperienceEntry
     return {
       id: fact.id,
       organization: localizedOrganization(fact.organization, locale),
+      location: fact.location,
       role: copy.role,
       period: periodFromFact(fact.period, copy.periodLabels) ?? {},
       duration: fact.duration?.[locale],
@@ -706,6 +999,19 @@ function skillGroupsFor(locale: SupportedLocale): readonly SkillGroup[] {
   });
 }
 
+function languagesFor(locale: SupportedLocale): readonly Language[] {
+  return languageFacts.map((fact) => {
+    const copy = languageCopy[locale][fact.id];
+
+    return {
+      id: fact.id,
+      name: copy.name,
+      level: copy.level ?? fact.level,
+      certification: fact.certification,
+    };
+  });
+}
+
 function periodFromFact(
   fact: PortfolioPeriodFact | undefined,
   labels: PeriodLabels | undefined,
@@ -715,6 +1021,13 @@ function periodFromFact(
       start: { datetime: fact.startDatetime, label: labels?.start ?? fact.startDatetime },
       end: { datetime: fact.endDatetime, label: labels?.end ?? fact.endDatetime },
       endPrefix: labels?.endPrefix,
+    };
+  }
+
+  if (fact?.startDatetime) {
+    return {
+      start: { datetime: fact.startDatetime, label: labels?.start ?? fact.startDatetime },
+      label: labels?.label,
     };
   }
 

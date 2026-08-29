@@ -141,6 +141,7 @@ The home page should explicitly account for:
 - sonar/compass navigation entry points;
 - short About content;
 - core technology highlights: Java/Spring, C#/.NET, TypeScript/Node.js, Angular;
+- languages as secondary profile content;
 - complementary Microsoft / enterprise experience summary;
 - featured projects;
 - optional GitHub activity;
@@ -150,10 +151,11 @@ This is a content and hierarchy specification, not a complete page design.
 
 Milestone 8 implementation:
 
-- Home renders Baptiste Wetterwald, Software Engineer identity, Backend & Full-stack positioning, a concise introduction, primary stack highlights, route links into Experience/Education/Projects, and technical skill domains.
+- Home renders Baptiste Wetterwald, Software Engineer identity, Backend & Full-stack positioning, a concise introduction, primary stack highlights, and technical skill domains.
+- The current content consolidation keeps Home concise while adding a secondary Languages section with French native language, English C1/TOEIC 975, and German B1.
 - Skills are presented on Home as domains rather than as a separate route or fake proficiency percentages. The content model supports primary, professional/complementary, secondary, and exploratory/historical importance levels.
 - The existing header, footer, and sonar/compass navigation remain the primary navigation system.
-- The approved Home portrait is rendered in the hero porthole frame. Approved school/organization logos may appear only inside Education and Experience identity clusters. No GitHub link, LinkedIn link, downloadable CV, contact method, GitHub activity, or fake featured project is rendered because those assets/URLs/content are not confirmed.
+- The approved Home portrait is rendered in the hero porthole frame. Supplied school/organization logos may appear only in scoped Education and Experience logo/name areas, with desktop logos in the timeline metadata column. No GitHub link, LinkedIn link, downloadable CV, contact method, GitHub activity, or fake featured project is rendered until those assets, URLs, or records are supplied.
 - Featured project content remains backend-owned; Home does not seed or invent project cards when the project API has no approved public records.
 
 Milestone 9 correction:
@@ -166,9 +168,9 @@ Milestone 9 correction:
 
 | Page           | Primary Content Blocks                                                                                                                      |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home           | Hero, short About, approved portrait/porthole frame, core technologies, skills domains; social/project/contact blocks only when approved content exists. |
-| Education      | Semantic timeline/list with ENSISA engineering degree, IUT Robert Schuman DUT, and UQAC international semester. Nautical waypoint styling is deferred. |
-| Experience     | Semantic timeline/list with roles, dates, concise context, and restrained technology tags. Nautical waypoint styling is deferred. |
+| Home           | Hero, short About, approved portrait/porthole frame, core technologies, skills domains, languages; social/project/contact blocks only when approved content exists. |
+| Education      | Semantic timeline/list with ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand entries. |
+| Experience     | Semantic timeline/list with Plansee current role, Plansee internship, Bureau Veritas Laboratoires apprenticeship, Groupe IES internship, and LIF/UQAC internship. |
 | Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |
 | Project detail | Title, short description, optional detailed description, logo/media reference, technologies, GitHub/demo links, related projects if useful. |
 | Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                       |

@@ -11,6 +11,12 @@ This document defines the first-pass PostgreSQL model for portfolio projects and
 - Keep media modelling minimal for V1.
 - Allow richer case studies later without forcing V1 into a page-builder architecture.
 
+## Out Of Scope
+
+CV/profile content is intentionally not part of the PostgreSQL data model. Identity, biography, Home copy, Education, Professional Experience, Skills, Languages, organization/school logo references, and official organization/school links remain typed frontend-static content under `frontend/src/app/core/content`.
+
+Do not add Education, Experience, Skill, Language, biography, or generic CMS tables unless future requirements materially change, such as runtime editing/admin, many dynamic clients, substantially more locales, or an external content-management workflow.
+
 ## Implementation Status
 
 Milestone 4 implements this V1 model through Flyway migration:
@@ -48,7 +54,7 @@ Project status and the `featured` flag are not a complete long-term project-impo
 | --- | --- | --- | --- |
 | `id` | `bigserial` | yes | Primary key. |
 | `slug` | `varchar(120)` | yes | Stable public slug, unique. |
-| `logo_media_ref` | `varchar(500)` | no | Minimal V1 logo/media reference. |
+| `logo_media_ref` | `varchar(500)` | no | Minimal V1 logo/media reference: root-relative `/...` path or absolute `https://...` URL. |
 | `github_url` | `varchar(500)` | no | Public repository URL. |
 | `demo_url` | `varchar(500)` | no | Public demo URL. |
 | `featured` | `boolean` | yes | Defaults to `false`; meaningful for `PUBLISHED` projects. |
@@ -63,6 +69,7 @@ Constraints:
 - `slug` unique.
 - `slug` matches lowercase URL-safe format.
 - `status` constrained to `DRAFT`, `PUBLISHED`, `ARCHIVED`.
+- `logo_media_ref` is nullable, or a trimmed canonical media reference using a root-relative path beginning with `/` but not `//`, or an absolute `https://` URL. Bare relative paths, protocol-relative URLs, `http://`, and unsafe schemes are rejected.
 - `featured` should only be effective for `PUBLISHED` projects. This can be enforced in application logic first.
 - `github_url` and `demo_url` valid URL format at application level.
 

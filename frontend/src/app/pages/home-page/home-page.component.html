@@ -79,4 +79,25 @@
       }
     </div>
   </section>
+
+  <section class="home-page__section" aria-labelledby="home-languages-title">
+    <div class="home-page__section-heading">
+      <h2 id="home-languages-title">{{ content.home.languagesHeading }}</h2>
+      <p>{{ content.home.languagesIntroduction }}</p>
+    </div>
+
+    <ul class="home-page__languages" aria-labelledby="home-languages-title">
+      @for (language of content.languages; track language.id) {
+        <li class="card card-border home-page__language-card">
+          <span class="home-page__language-name">{{ language.name }}</span>
+          <span class="home-page__language-level">{{ language.level }}</span>
+          @if (language.certification) {
+            <span class="badge badge-outline home-page__language-certification">
+              {{ language.certification }}
+            </span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
 </div>

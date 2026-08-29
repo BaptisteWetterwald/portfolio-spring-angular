@@ -3,11 +3,13 @@ import { translations } from '../i18n/translations';
 import {
   educationEntryFacts,
   experienceEntryFacts,
+  languageFacts,
   portfolioContent,
   portfolioContentFor,
   skillGroupFacts,
 } from './portfolio-content';
 import {
+  ExperienceEntry,
   LocalizedPortfolioContent,
   SkillDomain,
   SkillGroup,
@@ -19,8 +21,10 @@ describe('portfolioContent', () => {
   it('keeps education and experience entries aligned across locales', () => {
     expect(ids(portfolioContent.en.education)).toEqual([
       'ensisa',
-      'iut-robert-schuman',
       'uqac-semester',
+      'iut-robert-schuman',
+      'insa-lyon',
+      'lycee-louis-armand',
     ]);
     expect(ids(portfolioContent.fr.education)).toEqual(ids(portfolioContent.en.education));
 
@@ -29,90 +33,189 @@ describe('portfolioContent', () => {
       'plansee-internship',
       'bureau-veritas-laboratories',
       'groupe-ies',
-      'uqac-internship',
+      'lif-uqac-internship',
     ]);
     expect(ids(portfolioContent.fr.experience)).toEqual(ids(portfolioContent.en.experience));
   });
 
-  it('keeps important locale-neutral timeline facts in one source', () => {
+  it('keeps shared timeline facts, technologies, locations, and logos locale-neutral', () => {
     expect(ids(educationEntryFacts)).toEqual(ids(portfolioContent.en.education));
     expect(ids(experienceEntryFacts)).toEqual(ids(portfolioContent.en.experience));
-    expect(ids(portfolioContent.fr.education)).toEqual(ids(educationEntryFacts));
-    expect(ids(portfolioContent.fr.experience)).toEqual(ids(experienceEntryFacts));
-
+    expect(periodDatetimes(portfolioContent.en.education)).toEqual(
+      periodDatetimes(portfolioContent.fr.education),
+    );
     expect(periodDatetimes(portfolioContent.en.experience)).toEqual(
       periodDatetimes(portfolioContent.fr.experience),
     );
-    expect(portfolioContent.en.experience[1].technologies).toEqual(
-      portfolioContent.fr.experience[1].technologies,
+    expect(technologyLists(portfolioContent.en.experience)).toEqual(
+      technologyLists(portfolioContent.fr.experience),
     );
-  });
-
-  it('keeps optional timeline affiliation metadata locale-neutral and non-blocking', () => {
-    expect(portfolioContent.en.education[0]).toMatchObject({
-      id: 'ensisa',
-      officialWebsiteUrl: 'https://www.ensisa.uha.fr/',
-      logo: {
-        src: '/assets/logos/logo_ensisa.svg',
-      },
-    });
-    expect(portfolioContent.fr.education[0].officialWebsiteUrl).toBe(
-      portfolioContent.en.education[0].officialWebsiteUrl,
+    expect(locationMap(portfolioContent.en.education)).toEqual(
+      locationMap(portfolioContent.fr.education),
     );
-    expect(logoSources(portfolioContent.en.education)).toEqual({
-      ensisa: '/assets/logos/logo_ensisa.svg',
-      'iut-robert-schuman': '/assets/logos/logo_iut_robert_schuman.png',
-      'uqac-semester': '/assets/logos/logo_uqac.png',
-    });
-    expect(logoSources(portfolioContent.fr.education)).toEqual(
-      logoSources(portfolioContent.en.education),
+    expect(locationMap(portfolioContent.en.experience)).toEqual(
+      locationMap(portfolioContent.fr.experience),
     );
     expect(logoSources(portfolioContent.en.education)).toEqual(
-      factLogoSources(educationEntryFacts),
-    );
-    expect(portfolioContent.en.experience[0]).toMatchObject({
-      id: 'plansee-group-functions',
-      officialWebsiteUrl: 'https://plansee-group.com/en',
-      logo: {
-        src: '/assets/logos/logo_plansee.png',
-      },
-    });
-    expect(logoSources(portfolioContent.en.experience)).toEqual({
-      'plansee-group-functions': '/assets/logos/logo_plansee.png',
-      'plansee-internship': '/assets/logos/logo_plansee.png',
-      'bureau-veritas-laboratories': '/assets/logos/logo_bureau_veritas.svg',
-      'groupe-ies': '/assets/logos/logo_groupe_ies.jpeg',
-      'uqac-internship': '/assets/logos/logo_uqac.png',
-    });
-    expect(logoSources(portfolioContent.fr.experience)).toEqual(
-      logoSources(portfolioContent.en.experience),
+      logoSources(portfolioContent.fr.education),
     );
     expect(logoSources(portfolioContent.en.experience)).toEqual(
-      factLogoSources(experienceEntryFacts),
+      logoSources(portfolioContent.fr.experience),
     );
-    expect(portfolioContent.en.experience[3].id).toBe('groupe-ies');
-    expect(portfolioContent.en.experience[3].officialWebsiteUrl).toBeUndefined();
-    expect(portfolioContent.en.experience[3].logo?.src).toBe('/assets/logos/logo_groupe_ies.jpeg');
   });
 
-  it('keeps Plansee employment and internship as separate timeline entries', () => {
-    const experience = portfolioContent.en.experience;
+  it('renders the full education inventory without fabricating missing INSA assets', () => {
+    expect(portfolioContent.en.education).toEqual([
+      expect.objectContaining({
+        id: 'ensisa',
+        institution: 'ENSISA',
+        location: 'Mulhouse, France',
+        degree: 'Engineering Degree',
+        field: 'Computer Science and Networks',
+        status: 'Graduated',
+        logo: expect.objectContaining({ src: '/assets/logos/logo_ensisa.svg' }),
+      }),
+      expect.objectContaining({
+        id: 'uqac-semester',
+        institution: 'Université du Québec à Chicoutimi',
+        location: 'Chicoutimi, Canada',
+        degree: 'Study semester abroad',
+        logo: expect.objectContaining({ src: '/assets/logos/logo_uqac.png' }),
+      }),
+      expect.objectContaining({
+        id: 'iut-robert-schuman',
+        institution: 'IUT Robert Schuman',
+        location: 'Illkirch, France',
+        degree: 'DUT Computer Science',
+        logo: expect.objectContaining({ src: '/assets/logos/logo_iut_robert_schuman.png' }),
+      }),
+      expect.objectContaining({
+        id: 'insa-lyon',
+        institution: 'INSA Lyon',
+        location: 'Lyon, France',
+        degree: 'First year of the integrated engineering preparatory cycle',
+        field: 'Engineering Sciences',
+        logo: undefined,
+        officialWebsiteUrl: undefined,
+      }),
+      expect.objectContaining({
+        id: 'lycee-louis-armand',
+        institution: 'Lycée Louis Armand',
+        location: 'Mulhouse, France',
+        degree: 'Baccalauréat STI2D',
+        field: 'Specialization: SIN',
+        status: 'Mention Très Bien',
+        logo: expect.objectContaining({
+          src: '/assets/logos/logo_lycée_louis_armand.jpeg',
+        }),
+        officialWebsiteUrl: undefined,
+      }),
+    ]);
+  });
 
-    expect(experience[0]).toMatchObject({
+  it('keeps Plansee employment and internship separate with the correct technology boundary', () => {
+    const [employment, internship] = portfolioContent.en.experience;
+
+    expect(employment).toMatchObject({
       id: 'plansee-group-functions',
       organization: 'Plansee Group Functions',
       role: 'Software Developer',
+      location: 'Mamer, Luxembourg',
+      duration: 'Planned end: end of November 2026',
     });
-    expect(experience[1]).toMatchObject({
+    expect(employment.period.start?.datetime).toBe('2025-12-01');
+    expect(employment.period.label).toBe('Since 1 December 2025');
+    expect(employment.technologies).toEqual([
+      'ABAP',
+      'SAP S/4HANA',
+      'Angular',
+      'TypeScript',
+      'Node.js',
+      'Express',
+      'REST',
+      'OAuth 2.0',
+      'C#',
+      '.NET',
+    ]);
+    expect(employment.responsibilities).toHaveLength(4);
+    expect(employment.responsibilities?.[1]).toContain('powder-recipe calculations');
+
+    expect(internship).toMatchObject({
       id: 'plansee-internship',
-      organization: 'Plansee',
-      role: 'Software Engineering Internship',
+      organization: 'Plansee Group Functions',
+      role: 'Software Developer Intern',
+      duration: '11 weeks',
     });
-    expect(experience[0].technologies).toBeUndefined();
-    expect(experience[1].technologies).toEqual(['Angular', 'DaisyUI']);
+    expect(internship.period.start?.datetime).toBe('2025-07-01');
+    expect(internship.period.end?.datetime).toBe('2025-09');
+    expect(internship.technologies).toEqual(['Angular', 'TypeScript']);
+    expect(stringifyContent(internship)).toContain('without ABAP development');
+    expect(stringifyContent(internship)).not.toContain('DaisyUI');
   });
 
-  it('prioritizes the approved primary technology hierarchy without proficiency metrics', () => {
+  it('keeps Bureau Veritas, Groupe IES, and LIF facts precise and scoped', () => {
+    const experienceById = byId(portfolioContent.en.experience);
+    const bureauVeritas = experienceById.get('bureau-veritas-laboratories');
+    const groupeIes = experienceById.get('groupe-ies');
+    const lif = experienceById.get('lif-uqac-internship');
+
+    expect(bureauVeritas).toMatchObject({
+      organization: 'Bureau Veritas Laboratories',
+      role: 'Power Platform Developer Apprentice',
+      location: 'Sausheim, France',
+      technologies: [
+        'Microsoft Power Apps',
+        'Power Automate',
+        'Dataverse',
+        'Microsoft Power Platform',
+      ],
+    });
+    expect(bureauVeritas?.period.start?.datetime).toBe('2023-09');
+    expect(bureauVeritas?.period.end?.datetime).toBe('2025-09-30');
+    expect(bureauVeritas?.responsibilities?.[2]).toContain(
+      'without internal technical Power Platform mentorship',
+    );
+    expect(stringifyContent(bureauVeritas)).not.toContain('PCF');
+    expect(stringifyContent(bureauVeritas)).not.toContain('Custom Connector');
+
+    expect(groupeIes).toMatchObject({
+      organization: 'Groupe IES',
+      role: '.NET Full-stack Developer Intern',
+      location: 'Colmar, France',
+      duration: '2 months',
+      technologies: ['C#', '.NET', 'ASP.NET Blazor', 'VB.NET', 'REST'],
+    });
+    expect(groupeIes?.period.start?.datetime).toBe('2023-07');
+    expect(groupeIes?.period.end?.datetime).toBe('2023-08');
+
+    expect(lif).toMatchObject({
+      organization: 'Laboratoire d’Informatique Formelle (LIF), UQAC',
+      role: 'Software Developer Intern',
+      location: 'Chicoutimi, Canada',
+      duration: 'approximately 3 months',
+      technologies: ['Java', 'Python', 'Sockets', 'BeamNG.drive', 'BeepBeep 3'],
+      logo: expect.objectContaining({ src: '/assets/logos/logo_lif.png' }),
+      officialWebsiteUrl: undefined,
+    });
+    expect(lif?.period.start?.datetime).toBe('2022-04');
+    expect(lif?.period.end?.datetime).toBe('2022-07');
+  });
+
+  it('renders languages as structured bilingual profile content', () => {
+    expect(ids(languageFacts)).toEqual(['french', 'english', 'german']);
+    expect(portfolioContent.en.languages).toEqual([
+      { id: 'french', name: 'French', level: 'Native language', certification: undefined },
+      { id: 'english', name: 'English', level: 'C1', certification: 'TOEIC 975' },
+      { id: 'german', name: 'German', level: 'B1', certification: undefined },
+    ]);
+    expect(portfolioContent.fr.languages).toEqual([
+      { id: 'french', name: 'Français', level: 'Langue maternelle', certification: undefined },
+      { id: 'english', name: 'Anglais', level: 'C1', certification: 'TOEIC 975' },
+      { id: 'german', name: 'Allemand', level: 'B1', certification: undefined },
+    ]);
+  });
+
+  it('prioritizes the primary technology hierarchy without proficiency metrics', () => {
     for (const locale of supportedLocales) {
       const content = portfolioContentFor(locale);
       const text = stringifyContent(content);
@@ -123,9 +226,12 @@ describe('portfolioContent', () => {
         'TypeScript / Node.js',
         'Angular',
       ]);
+      expect(content.home.hero.stackLine).toContain('Angular');
       expect(text).not.toMatch(/\b\d{1,3}%\b/);
       expect(text).not.toContain('95%');
       expect(text).not.toContain('87%');
+      expect(text).not.toContain('Microsoft Office');
+      expect(text).not.toContain('PIX');
     }
   });
 
@@ -136,19 +242,31 @@ describe('portfolioContent', () => {
     const importanceByDomain = new Map(domains.map((domain) => [domain.id, domain.importance]));
 
     expect(importanceByGroup.get('software-engineering')).toBe('primary');
-    expect(importanceByGroup.get('microsoft-enterprise')).toBe('professional-complementary');
+    expect(importanceByGroup.get('data-databases')).toBe('professional-complementary');
+    expect(importanceByGroup.get('enterprise-industrial')).toBe('professional-complementary');
     expect(importanceByGroup.get('ai-assisted-engineering')).toBe('secondary');
-    expect(importanceByDomain.get('backend')).toBe('primary');
-    expect(importanceByDomain.get('microsoft-ecosystem')).toBe('professional-complementary');
-    expect(importanceByDomain.get('frontend')).toBe('secondary');
+    expect(importanceByGroup.get('broader-software-experience')).toBe('secondary');
+    expect(importanceByGroup.get('exploratory-historical')).toBe('exploratory-historical');
+    expect(importanceByDomain.get('backend-application-development')).toBe('primary');
+    expect(importanceByDomain.get('frontend-full-stack')).toBe('primary');
+    expect(importanceByDomain.get('apis-integration')).toBe('primary');
+    expect(importanceByDomain.get('sap-industrial')).toBe('professional-complementary');
+    expect(importanceByDomain.get('microsoft-power-platform')).toBe('professional-complementary');
     expect(importanceByDomain.get('developer-tooling-llms')).toBe('secondary');
-    expect(new Set(domains.map((domain) => domain.importance))).toEqual(
-      new Set<SkillImportance>(['primary', 'professional-complementary', 'secondary']),
+    expect(importanceByDomain.get('engineering-tools')).toBe('exploratory-historical');
+    expect(new Set(content.skills.map((group) => group.importance))).toEqual(
+      new Set<SkillImportance>([
+        'primary',
+        'professional-complementary',
+        'secondary',
+        'exploratory-historical',
+      ]),
     );
     expect(skillTechnology(content, 'mcp-concepts')?.importance).toBe('exploratory-historical');
     expect(skillTechnology(content, 'agentic-workflows')?.importance).toBe(
       'exploratory-historical',
     );
+    expect(skillTechnology(content, 'sockets')?.name).toBe('Sockets');
   });
 
   it('builds localized skills from shared locale-neutral topology facts', () => {
@@ -157,15 +275,19 @@ describe('portfolioContent', () => {
     expect(skillTopology(portfolioContent.en.skills)).toEqual(expectedTopology);
     expect(skillTopology(portfolioContent.fr.skills)).toEqual(expectedTopology);
     expect(portfolioContent.fr.skills[0].title).not.toBe(portfolioContent.en.skills[0].title);
-    expect(skillTechnology(portfolioContent.fr, 'rest-apis')?.name).toBe('API REST');
+    expect(skillTechnology(portfolioContent.en, 'sockets')?.name).toBe('Sockets');
+    expect(skillTechnology(portfolioContent.fr, 'sockets')?.name).toBe('Sockets');
+    expect(skillTechnology(portfolioContent.fr, 'codex-coding-agents')?.name).toBe(
+      'Codex / agents de code',
+    );
   });
 
-  it('represents AI-assisted engineering without overstating expertise', () => {
+  it('represents AI-assisted engineering without overstating the role', () => {
     const content = portfolioContent.en;
     const aiGroup = content.skills.find((group) => group.id === 'ai-assisted-engineering');
     const text = stringifyContent(content);
 
-    expect(aiGroup?.summary).toContain('software engineering workflows');
+    expect(aiGroup?.summary).toContain('software-development assistants');
     expect(aiGroup?.domains[0]?.importance).toBe('secondary');
     expect(text).toContain('AI-assisted Engineering');
     expect(text).toContain('ChatGPT');
@@ -177,35 +299,26 @@ describe('portfolioContent', () => {
     expect(text.toLowerCase()).not.toContain('expert');
   });
 
-  it('omits unconfirmed PCF, custom connector, and .NET integration claims', () => {
-    const renderedFacts = stringifyContent(portfolioContent.en);
-
-    expect(renderedFacts).not.toContain('PCF');
-    expect(renderedFacts).not.toContain('Custom Connector');
-    expect(renderedFacts).not.toContain('Custom Connectors');
-    expect(renderedFacts).not.toContain('.NET integrations');
-  });
-
   it('describes PostgreSQL as portfolio project experience only', () => {
-    const postgres = portfolioContent.en.skills
-      .flatMap((group) => group.domains)
-      .flatMap((domain) => domain.technologies)
-      .find((technology) => technology.name === 'PostgreSQL');
+    const postgres = skillTechnology(portfolioContent.en, 'postgresql');
 
     expect(postgres?.note).toContain('portfolio');
     expect(postgres?.note).toContain('Spring Boot / PostgreSQL');
     expect(JSON.stringify(portfolioContent.en.experience)).not.toContain('PostgreSQL');
   });
 
-  it('keeps visitor-facing content free of internal review wording', () => {
+  it('keeps visitor-facing content free of internal or unapproved wording', () => {
     const renderedContent =
       stringifyContent(portfolioContent.en) +
       stringifyContent(portfolioContent.fr) +
       JSON.stringify(translations);
 
     expect(renderedContent).not.toMatch(
-      /confirmed|approved content|awaiting confirmation|before later|role detail is not yet available|content pending|TODO|temporary routing placeholder/i,
+      /confirmed|approved content|owner-approved|awaiting confirmation|before later|role detail is not yet available|content pending|TODO|temporary routing placeholder/i,
     );
+    expect(renderedContent).not.toContain('P-FWWV9GV6');
+    expect(renderedContent).not.toContain('father');
+    expect(renderedContent).not.toContain('salary');
   });
 });
 
@@ -213,7 +326,7 @@ function ids(entries: readonly { id: string }[]): string[] {
   return entries.map((entry) => entry.id);
 }
 
-function stringifyContent(content: LocalizedPortfolioContent): string {
+function stringifyContent(content: unknown): string {
   return JSON.stringify(content);
 }
 
@@ -235,14 +348,20 @@ function periodDatetimes(
   );
 }
 
+function technologyLists(entries: readonly ExperienceEntry[]): (readonly string[] | undefined)[] {
+  return entries.map((entry) => entry.technologies);
+}
+
+function locationMap(entries: readonly { id: string; location?: string }[]) {
+  return Object.fromEntries(entries.map((entry) => [entry.id, entry.location]));
+}
+
 function logoSources(entries: readonly { id: string; logo?: { src: string } }[]) {
   return Object.fromEntries(entries.map((entry) => [entry.id, entry.logo?.src]));
 }
 
-function factLogoSources(
-  entries: readonly { id: string; affiliation?: { logo?: { src: string } } }[],
-) {
-  return Object.fromEntries(entries.map((entry) => [entry.id, entry.affiliation?.logo?.src]));
+function byId(entries: readonly ExperienceEntry[]): Map<string, ExperienceEntry> {
+  return new Map(entries.map((entry) => [entry.id, entry]));
 }
 
 function skillDomains(content: LocalizedPortfolioContent): readonly SkillDomain[] {

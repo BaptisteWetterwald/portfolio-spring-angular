@@ -28,6 +28,7 @@
           [class.timeline-page__entry--has-logo]="entry.logo"
           [class.timeline-start]="entryIndex % 2 === 0"
           [class.timeline-end]="entryIndex % 2 !== 0"
+          [attr.data-timeline-entry-id]="entry.id"
         >
           <div class="timeline-page__meta">
             <div class="timeline-page__period">
@@ -45,6 +46,10 @@
                   }
                   <time [attr.datetime]="period.end.datetime">
                     {{ period.end.label }}
+                  </time>
+                } @else if (period.start && period.label) {
+                  <time [attr.datetime]="period.start.datetime">
+                    {{ period.label }}
                   </time>
                 } @else if (period.label) {
                   <span>{{ period.label }}</span>
@@ -117,6 +122,9 @@
                 </span>
               }
             </h2>
+            @if (entry.location) {
+              <p class="timeline-page__location">{{ entry.location }}</p>
+            }
             <p class="timeline-page__degree">
               {{ entry.degree }}
               @if (entry.field) {

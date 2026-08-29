@@ -105,7 +105,7 @@ Milestone 5 uses a lightweight Angular-native runtime translation layer:
 
 The initial dictionaries only cover the routing shell, locale switcher, metadata, placeholders, and 404 text. Dynamic backend project translations are deliberately not represented in frontend translation files.
 
-Milestone 8 adds structured frontend-owned static content for biography, Education, Experience, and Skills under `core/content`. Locale-neutral facts such as timeline IDs, date values, shared technologies, skill group/domain/technology ordering, importance classifications, and mostly stable organization names are centralized, while localized human-readable copy stays per locale. Project content remains backend-owned.
+Milestone 8 adds structured frontend-owned static content for biography, Education, Experience, Skills, and Languages under `core/content`. Locale-neutral facts such as timeline IDs, date values, locations, shared technologies, skill group/domain/technology ordering, importance classifications, organization names, logo paths, and official links are centralized, while localized human-readable copy stays per locale. Project content remains backend-owned.
 
 ## Localized SEO Metadata
 
@@ -277,14 +277,14 @@ Project detail not-found states reuse the localized not-found foundation and set
 
 Milestone 8 introduces:
 
-- `HomePageComponent` for identity, backend/full-stack positioning, concise About copy, primary stack highlights, section links, and the main skills/domain presentation.
-- `EducationPageComponent` for a semantic ordered timeline of ENSISA, IUT Robert Schuman, and UQAC.
+- `HomePageComponent` for identity, backend/full-stack positioning, concise About copy, primary stack highlights, skills/domain presentation, and secondary language facts.
+- `EducationPageComponent` for a semantic ordered timeline of ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand.
 - `ExperiencePageComponent` for a semantic ordered timeline of confirmed professional roles.
 - `core/content/portfolio-content.models.ts` and `core/content/portfolio-content.ts` as the typed localized static content source.
 
-The static content model supports localized labels, paragraphs, timeline periods with semantic `datetime` values, optional role context, restrained responsibility bullets, technology tags, and optional timeline affiliation metadata for official organization/school links and approved logo assets. Skill topology is built from `skillGroupFacts`, which centralizes group/domain/technology IDs, ordering, membership, and importance values; localized skill copy provides group/domain labels, localized technology labels where needed, notes, and summaries. Skill groups, domains, and individual technologies can carry an importance value: `primary`, `professional-complementary`, `secondary`, or `exploratory-historical`. This keeps primary backend/full-stack skills visually separable from broader professional, older, niche, or exploratory knowledge. It deliberately omits unconfirmed social URLs, downloadable CVs, contact methods, project records, PCF/custom connector/.NET integration claims, and role metrics.
+The static content model supports localized labels, paragraphs, timeline periods with semantic `datetime` values, locations, optional role context, restrained responsibility bullets, technology tags, structured language facts, and optional timeline affiliation metadata for official organization/school links and approved logo assets. Skill topology is built from `skillGroupFacts`, which centralizes group/domain/technology IDs, ordering, membership, and importance values; localized skill copy provides group/domain labels, localized technology labels where needed, notes, and summaries. Skill groups, domains, and individual technologies can carry an importance value: `primary`, `professional-complementary`, `secondary`, or `exploratory-historical`. This keeps primary backend/full-stack skills visually separable from broader professional, enterprise, older, niche, or exploratory knowledge. It deliberately omits unconfirmed social URLs, downloadable CVs, contact methods, project records, unsupported metrics, unpublished supporting documents, and private personal context.
 
-The approved content architecture is hybrid. Identity, biography, Education, Experience, Skills, skill hierarchy, organization/school logo references, and official organization/school links remain typed, frontend-owned, and version-controlled because they change infrequently and benefit from Git review. Projects remain backend/PostgreSQL-owned with project translations, technologies, publication/archive/featured state, and project-domain media. Do not add profile/CV CMS tables, Education/Experience/Skill database tables, or admin CRUD unless future requirements materially change, such as runtime editing, many dynamic clients, significantly more locales, or external content-management needs.
+The approved content architecture is hybrid. Identity, biography, Education, Experience, Skills, Languages, skill hierarchy, organization/school logo references, and official organization/school links remain typed, frontend-owned, and version-controlled because they change infrequently and benefit from Git review. Projects remain backend/PostgreSQL-owned with project translations, technologies, publication/archive/featured state, and project-domain media. Do not add profile/CV CMS tables, Education/Experience/Skill/Language database tables, or admin CRUD unless future requirements materially change, such as runtime editing, many dynamic clients, significantly more locales, or external content-management needs.
 
 AI-assisted engineering is represented as a secondary developer-tooling area: ChatGPT, Codex / coding agents, MCP concepts, and early agentic workflow exploration. The content must not position Baptiste as an AI, ML, LLM, agentic AI, or MCP expert.
 
@@ -329,18 +329,18 @@ Milestone 9 keeps the M6-M8 routing, SSR, content, and project API architecture 
 
 Component ownership for M9:
 
-| Component area | DaisyUI role | Custom role |
-| --- | --- | --- |
-| Header | `navbar`, `menu`, `btn` primitives | responsive shell composition, exact active styles, maritime surface, skip link behavior |
-| Footer | `footer`, `link` primitives | chart/footer texture, route state, compact identity layout |
-| Locale switcher | `join`, `btn` anchors | locale persistence and current-locale state |
-| Lighthouse theme toggle | `btn` foundation | lighthouse icon, illuminated lantern, theme service integration; beam deferred |
-| Sonar/compass navigation | None for the core instrument | semantic route links, evenly spaced SVG rings, symmetrical axes, active waypoint state |
-| Home portrait slot | None | approved portrait displayed in a circular porthole/navigation frame using CSS object cropping from the original image asset |
-| Skills | `card`, `badge` | importance classes and hierarchy-specific treatment |
-| Experience/Education | `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, `<hr>` | daisyUI central-route geometry first; custom plotted-route/waypoint styling second |
-| Projects | `card`, `badge`, `btn` | featured/standard/archive visual weight, media-safe presentation |
-| Contact | `card` | conservative empty public-contact state and lighthouse/contact visual |
+| Component area           | DaisyUI role                                                            | Custom role                                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Header                   | `navbar`, `menu`, `btn` primitives                                      | responsive shell composition, exact active styles, maritime surface, skip link behavior                                     |
+| Footer                   | `footer`, `link` primitives                                             | chart/footer texture, route state, compact identity layout                                                                  |
+| Locale switcher          | `join`, `btn` anchors                                                   | locale persistence and current-locale state                                                                                 |
+| Lighthouse theme toggle  | `btn` foundation                                                        | lighthouse icon, illuminated lantern, theme service integration; beam deferred                                              |
+| Sonar/compass navigation | None for the core instrument                                            | semantic route links, evenly spaced SVG rings, symmetrical axes, active waypoint state                                      |
+| Home portrait slot       | None                                                                    | approved portrait displayed in a circular porthole/navigation frame using CSS object cropping from the original image asset |
+| Skills                   | `card`, `badge`                                                         | importance classes and hierarchy-specific treatment                                                                         |
+| Experience/Education     | `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, `<hr>` | daisyUI central-route geometry first; custom plotted-route/waypoint styling second                                          |
+| Projects                 | `card`, `badge`, `btn`                                                  | featured/standard/archive visual weight, media-safe presentation                                                            |
+| Contact                  | `card`                                                                  | conservative empty public-contact state and lighthouse/contact visual                                                       |
 
 The project card contract remains based on `ProjectSummaryDto`; the detail page remains based on `ProjectDetailDto`. M9 may style `featured`, `PUBLISHED`, and `ARCHIVED` differently, but it must not add a persistence field solely for visual importance.
 
@@ -354,7 +354,7 @@ Owner-review correction: Home does not render secondary route cards because they
 
 Education and Experience timelines must keep ordered DOM content while using daisyUI's timeline structure for geometry. Desktop alternates entries with `timeline-start` and `timeline-end`; narrow viewports use `max-md:timeline-compact` for one-sided rendering. Custom CSS must not create a separate detached rail.
 
-Timeline affiliation metadata remains frontend-owned static content. Official website URLs are optional and should point to organization or school websites, not LinkedIn substitutes. Logo assets are optional and must only be added when approved files exist. The renderer places logos below the period in the desktop metadata column, reflows them beside the organization or school name on mobile, applies `target="_blank"` plus `rel="noopener noreferrer"` to scoped logo/name links, and leaves the rest of each timeline card non-interactive. The preferred logo asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; until existing owner-supplied files are normalized, facts should reference their exact current filenames.
+Timeline affiliation metadata remains frontend-owned static content. Official website URLs are optional and should point to organization or school websites, not LinkedIn substitutes. Logo assets are optional and must only be added when approved files exist. The renderer places logos below the period in the desktop metadata column, reflows them beside the organization or school name on mobile, applies `target="_blank"` plus `rel="noopener noreferrer"` to scoped logo/name links, and leaves the rest of each timeline card non-interactive. Education cards keep a compact metadata/content split. Experience cards keep the metadata/content split only for the header identity area; context, responsibility lists, and technology badges render in a full-width details section below so long professional roles remain readable without changing the daisyUI timeline geometry. The preferred logo asset convention is `frontend/public/assets/logos/<organization-slug>.<ext>`; until existing owner-supplied files are normalized, facts should reference their exact current filenames.
 
 ## Theme Handling
 
@@ -414,7 +414,7 @@ Do not let any future loading labels resize cards or navigation controls.
 
 V1 media modelling is intentionally minimal.
 
-Project records may provide one `logoMediaRef` or general media reference. The frontend should treat it as an optional display asset, not as evidence of a full media gallery domain.
+Project records may provide one `logoMediaRef` or general media reference. Store public project media refs as canonical root-relative paths beginning with `/`, such as `/assets/projects/my-project/screenshot.webp`, or as approved absolute `https://` URLs. Bare relative paths, protocol-relative URLs, `http://`, and unsafe schemes are rejected. The frontend should treat the reference as an optional display asset, not as evidence of a full media gallery domain.
 
 Frontend requirements:
 

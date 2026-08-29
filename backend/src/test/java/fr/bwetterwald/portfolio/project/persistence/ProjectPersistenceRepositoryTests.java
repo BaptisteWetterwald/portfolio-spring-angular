@@ -10,6 +10,8 @@ import fr.bwetterwald.portfolio.support.PostgresTestDatabase;
 import fr.bwetterwald.portfolio.technology.persistence.TechnologyEntity;
 import fr.bwetterwald.portfolio.technology.persistence.TechnologyRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,7 +47,7 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 
 		ProjectEntity project = project("portfolio-demo", ProjectStatus.PUBLISHED, 20);
 		project.setFeatured(true);
-		project.setLogoMediaRef("media/projects/portfolio-demo-logo.svg");
+		project.setLogoMediaRef("/assets/projects/portfolio-demo-logo.svg");
 		project.setGithubUrl("https://example.test/portfolio-demo.git");
 		project.setDemoUrl("https://demo.example.test/portfolio-demo");
 		project.setPublishedAt(Instant.parse("2026-01-15T10:00:00Z"));
@@ -60,7 +62,7 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 		assertThat(persistedProject.getId()).isNotNull();
 		assertThat(persistedProject.getCreatedAt()).isNotNull();
 		assertThat(persistedProject.getUpdatedAt()).isNotNull();
-		assertThat(persistedProject.getLogoMediaRef()).isEqualTo("media/projects/portfolio-demo-logo.svg");
+		assertThat(persistedProject.getLogoMediaRef()).isEqualTo("/assets/projects/portfolio-demo-logo.svg");
 		assertThat(persistedProject.getGithubUrl()).isEqualTo("https://example.test/portfolio-demo.git");
 		assertThat(persistedProject.getDemoUrl()).isEqualTo("https://demo.example.test/portfolio-demo");
 
@@ -154,6 +156,18 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	@Test
 	void invalidProjectSlugIsRejectedByDatabaseConstraint() {
 		ProjectEntity project = project("Invalid Slug", ProjectStatus.PUBLISHED, 10);
+
+		assertThatThrownBy(() -> projectRepository.saveAndFlush(project)).isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "media/projects/logo.svg", "//cdn.example.test/logo.svg",
+			"http://cdn.example.test/logo.svg", "javascript:alert(1)", "data:image/svg+xml;base64,AAAA",
+			" /assets/projects/logo.svg", "/assets/projects/logo with spaces.svg" })
+	void invalidProjectMediaRefsAreRejectedByDatabaseConstraint(String logoMediaRef) {
+		ProjectEntity project = project("invalid-media-ref-" + Integer.toUnsignedString(logoMediaRef.hashCode()),
+				ProjectStatus.PUBLISHED, 10);
+		project.setLogoMediaRef(logoMediaRef);
 
 		assertThatThrownBy(() -> projectRepository.saveAndFlush(project)).isInstanceOf(DataIntegrityViolationException.class);
 	}

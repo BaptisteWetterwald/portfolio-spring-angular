@@ -23,9 +23,20 @@
     var(--color-surface);
 }
 
-.home-page__skill-group--secondary,
-.home-page__skill-group--exploratory-historical {
+.home-page__skill-group--professional-complementary {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 24%, var(--color-border));
+  background: var(--color-surface);
+}
+
+.home-page__skill-group--secondary {
+  border-color: color-mix(in srgb, var(--color-border) 82%, transparent);
   background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+.home-page__skill-group--exploratory-historical {
+  border-color: color-mix(in srgb, var(--color-border) 68%, transparent);
+  background: color-mix(in srgb, var(--color-surface-subtle) 76%, var(--color-surface));
   box-shadow: none;
 }
 
@@ -59,7 +70,53 @@
 
 .home-page__skill--exploratory-historical .home-page__skill-badge {
   background: color-mix(in srgb, var(--color-surface-subtle) 62%, transparent);
+  color: color-mix(in srgb, var(--color-text) 62%, var(--color-text-muted));
+}
+
+.home-page__skill-group--secondary .home-page__skill-badge {
+  background: color-mix(in srgb, var(--color-surface) 68%, transparent);
+  font-weight: 600;
+}
+
+.home-page__skill-group--exploratory-historical .home-page__skill-badge {
+  border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+  background: transparent;
+  color: color-mix(in srgb, var(--color-text) 62%, var(--color-text-muted));
+  font-weight: 600;
+}
+
+.home-page__languages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  margin: var(--space-5) 0 0;
+  list-style: none;
+}
+
+.home-page__language-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-page__language-name {
+  font-weight: 700;
+}
+
+.home-page__language-level {
   color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.home-page__language-certification {
+  width: fit-content;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 28%, var(--color-border));
+  color: var(--color-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

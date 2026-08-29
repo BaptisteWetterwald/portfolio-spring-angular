@@ -61,13 +61,13 @@ const englishTranslations = {
   'pages.notFound.homeLink': 'Go to home',
   'metadata.home.title': 'Baptiste Wetterwald | Software Engineer',
   'metadata.home.description':
-    'Baptiste Wetterwald, Software Engineer with backend and full-stack positioning across Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+    'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
   'metadata.education.title': 'Education | Baptiste Wetterwald',
   'metadata.education.description':
-    'Education for Baptiste Wetterwald: Engineering Degree in Computer Science and Networks, DUT Computer Science, and international semester at UQAC.',
+    'Education for Baptiste Wetterwald: Engineering Degree in Computer Science and Networks, UQAC semester, DUT Computer Science, INSA Lyon, and Baccalauréat STI2D.',
   'metadata.experience.title': 'Experience | Baptiste Wetterwald',
   'metadata.experience.description':
-    'Professional experience for Baptiste Wetterwald, including software engineering, .NET, Power Platform, Angular, and enterprise application roles.',
+    'Professional experience for Baptiste Wetterwald across software engineering, SAP, Angular, .NET, Power Platform, API integration, and industrial software environments.',
   'metadata.projects.title': 'Projects | Baptiste Wetterwald',
   'metadata.projects.description': 'Published and archived projects for Baptiste Wetterwald.',
   'metadata.contact.title': 'Contact | Baptiste Wetterwald',
@@ -145,10 +145,10 @@ export const translations: Record<SupportedLocale, Record<TranslationKey, string
       'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
     'metadata.education.title': 'Formation | Baptiste Wetterwald',
     'metadata.education.description':
-      "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, DUT informatique et semestre international à l'UQAC.",
+      "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, semestre UQAC, DUT informatique, INSA Lyon et baccalauréat STI2D.",
     'metadata.experience.title': 'Expérience | Baptiste Wetterwald',
     'metadata.experience.description':
-      "Expérience professionnelle de Baptiste Wetterwald, incluant développement logiciel, .NET, Power Platform, Angular et applications d'entreprise.",
+      'Expérience professionnelle de Baptiste Wetterwald en développement logiciel, SAP, Angular, .NET, Power Platform, intégration API et environnements logiciels industriels.',
     'metadata.projects.title': 'Projets | Baptiste Wetterwald',
     'metadata.projects.description': 'Projets publiés et archivés de Baptiste Wetterwald.',
     'metadata.contact.title': 'Contact | Baptiste Wetterwald',

@@ -6,66 +6,189 @@ import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import { ExperiencePageComponent } from './experience-page.component';
 
 describe('ExperiencePageComponent', () => {
-  it('renders confirmed experience entries in reverse chronological order', async () => {
+  it('renders experience entries in reverse chronological order', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
 
+    expect(entryIds(page)).toEqual([
+      'plansee-group-functions',
+      'plansee-internship',
+      'bureau-veritas-laboratories',
+      'groupe-ies',
+      'lif-uqac-internship',
+    ]);
     expect(entryHeadings(page)).toEqual([
       'Plansee Group Functions',
-      'Plansee',
+      'Plansee Group Functions',
       'Bureau Veritas Laboratories',
       'Groupe IES',
-      'UQAC',
+      'Laboratoire d’Informatique Formelle (LIF), UQAC',
     ]);
     expect(page.textContent).toContain('Software Developer');
-    expect(page.textContent).toContain('Software Engineering Internship');
-    expect(page.textContent).toContain('Power Platform Developer Apprentice');
-    expect(page.textContent).toContain('Full Stack .NET Developer Intern');
     expect(page.textContent).toContain('Software Developer Intern');
+    expect(page.textContent).toContain('Power Platform Developer Apprentice');
+    expect(page.textContent).toContain('.NET Full-stack Developer Intern');
   });
 
-  it('keeps Plansee internship and employment distinct with only confirmed internship technologies', async () => {
+  it('keeps Plansee current role and internship distinct with correct technology boundaries', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
-    const employment = entryText(page, 'Plansee Group Functions');
-    const internship = entryText(page, 'Plansee');
+    const employment = entryTextById(page, 'plansee-group-functions');
+    const internship = entryTextById(page, 'plansee-internship');
 
-    expect(employment).toContain('planned end');
-    expect(employment).not.toContain('Angular');
-    expect(employment).not.toContain('DaisyUI');
+    expect(employment).toContain('Since 1 December 2025');
+    expect(employment).toContain('Planned end: end of November 2026');
+    expect(employment).toContain('SAP S/4HANA');
+    expect(employment).toContain('ABAP');
+    expect(employment).toContain('Node.js');
+    expect(employment).toContain('Express');
+    expect(employment).toContain('OAuth 2.0');
+    expect(employment).toContain('HTTP/API integration');
+    expect(employment).toContain('powder-recipe calculations');
+    expect(technologyLabelsByEntry(page, 'plansee-group-functions')).toEqual([
+      'ABAP',
+      'SAP S/4HANA',
+      'Angular',
+      'TypeScript',
+      'Node.js',
+      'Express',
+      'REST',
+      'OAuth 2.0',
+      'C#',
+      '.NET',
+    ]);
+    expect(technologyLabelsByEntry(page, 'plansee-group-functions')).not.toContain('HTTP');
+    expect(internship).toContain('1 July 2025');
+    expect(internship).toContain('mid-September 2025');
     expect(internship).toContain('11 weeks');
     expect(internship).toContain('Angular');
-    expect(internship).toContain('DaisyUI');
-    expect(internship).toContain('did not include ABAP development');
+    expect(internship).toContain('TypeScript');
+    expect(internship).toContain('without ABAP development');
+    expect(internship).not.toContain('DaisyUI');
   });
 
-  it('renders Bureau Veritas Microsoft ecosystem technologies without unconfirmed additions', async () => {
+  it('renders Bureau Veritas dates and Microsoft Power Platform technologies without unapproved additions', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
-    const bureauVeritas = entryText(page, 'Bureau Veritas Laboratories');
+    const bureauVeritas = entryTextById(page, 'bureau-veritas-laboratories');
 
-    expect(bureauVeritas).toContain('Power Platform');
-    expect(bureauVeritas).toContain('Power Apps');
+    expect(bureauVeritas).toContain('September 2023');
+    expect(bureauVeritas).toContain('30 September 2025');
+    expect(bureauVeritas).toContain('Microsoft Power Apps');
     expect(bureauVeritas).toContain('Power Automate');
     expect(bureauVeritas).toContain('Dataverse');
-    expect(bureauVeritas).toContain('Microsoft 365');
+    expect(bureauVeritas).toContain('Microsoft Power Platform');
+    expect(bureauVeritas).toContain('without internal technical Power Platform mentorship');
     expect(bureauVeritas).not.toContain('PCF');
     expect(bureauVeritas).not.toContain('Custom Connectors');
+  });
+
+  it('keeps the Experience card header compact and details in a full-width section', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+    const plansee = entryArticleById(page, 'plansee-group-functions');
+    const bureauVeritas = entryArticleById(page, 'bureau-veritas-laboratories');
+
+    expect(plansee?.querySelector('.timeline-page__meta')).not.toBeNull();
+    expect(plansee?.querySelector('.timeline-page__identity-panel h2')?.textContent).toContain(
+      'Plansee Group Functions',
+    );
+    expect(plansee?.querySelector('.timeline-page__identity-panel .timeline-page__role')).not.toBe(
+      null,
+    );
+    expect(
+      plansee?.querySelector('.timeline-page__identity-panel .timeline-page__location'),
+    ).not.toBeNull();
+
+    const planseeDetails = plansee?.querySelector('.timeline-page__details');
+
+    expect(planseeDetails?.querySelector('.timeline-page__context')).not.toBeNull();
+    expect(planseeDetails?.querySelectorAll('.timeline-page__responsibilities li').length).toBe(4);
+    expect(planseeDetails?.querySelector('.timeline-page__technologies')).not.toBeNull();
+    expect(
+      plansee?.querySelector('.timeline-page__identity-panel .timeline-page__technologies'),
+    ).toBeNull();
+
+    const bureauDetails = bureauVeritas?.querySelector('.timeline-page__details');
+
+    expect(bureauDetails?.querySelector('.timeline-page__context')).not.toBeNull();
+    expect(bureauDetails?.querySelectorAll('.timeline-page__responsibilities li').length).toBe(3);
+    expect(bureauDetails?.querySelectorAll('.timeline-page__technology.badge').length).toBe(4);
+  });
+
+  it('renders responsibilities as semantic, distinct list items for every experience entry', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(
+      [
+        'plansee-group-functions',
+        'plansee-internship',
+        'bureau-veritas-laboratories',
+        'groupe-ies',
+        'lif-uqac-internship',
+      ].map((id) => responsibilityTextsByEntry(page, id).length),
+    ).toEqual([4, 2, 3, 3, 2]);
+
+    const planseeResponsibilities = responsibilityTextsByEntry(page, 'plansee-group-functions');
+
+    expect(planseeResponsibilities[0]).toContain('Angular application');
+    expect(planseeResponsibilities[1]).toContain('SAP S/4HANA');
+    expect(planseeResponsibilities[1]).toContain('HTTP/API integration');
+    expect(planseeResponsibilities[2]).toContain('C#/.NET industrial measurement application');
+    expect(planseeResponsibilities[3]).toContain('Node.js/Express middleware');
+  });
+
+  it('renders Groupe IES and LIF internship details with supplied logos', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+    const groupeIes = entryArticleById(page, 'groupe-ies');
+    const lif = entryArticleById(page, 'lif-uqac-internship');
+
+    expect(groupeIes?.textContent).toContain('July 2023');
+    expect(groupeIes?.textContent).toContain('August 2023');
+    expect(groupeIes?.textContent).toContain('2 months');
+    expect(groupeIes?.textContent).toContain('ASP.NET Blazor');
+    expect(groupeIes?.textContent).toContain('VB.NET');
+    expect(groupeIes?.querySelector<HTMLImageElement>('.timeline-page__logo')?.src).toContain(
+      '/assets/logos/logo_groupe_ies.jpeg',
+    );
+
+    expect(lif?.textContent).toContain('approximately April 2022');
+    expect(lif?.textContent).toContain('July 2022');
+    expect(lif?.textContent).toContain('approximately 3 months');
+    expect(lif?.textContent).toContain('BeamNG.drive');
+    expect(lif?.textContent).toContain('BeepBeep 3');
+    expect(technologyLabelsByEntry(page, 'lif-uqac-internship')).toContain('Sockets');
+    expect(technologyLabelsByEntry(page, 'lif-uqac-internship')).not.toContain('sockets');
+    expect(lif?.querySelector<HTMLImageElement>('.timeline-page__logo')?.src).toContain(
+      '/assets/logos/logo_lif.png',
+    );
+    expect(lif?.querySelector('a.timeline-page__identity-link')).toBeNull();
+    expect(lif?.querySelector('a.timeline-page__logo-link')).toBeNull();
   });
 
   it('renders localized French experience content with the same factual entries', async () => {
     const fixture = await createFixture('fr');
     const page = fixture.nativeElement as HTMLElement;
 
+    expect(entryIds(page)).toEqual([
+      'plansee-group-functions',
+      'plansee-internship',
+      'bureau-veritas-laboratories',
+      'groupe-ies',
+      'lif-uqac-internship',
+    ]);
     expect(entryHeadings(page)).toEqual([
       'Plansee Group Functions',
-      'Plansee',
+      'Plansee Group Functions',
       'Bureau Veritas Laboratoires',
       'Groupe IES',
-      'UQAC',
+      'Laboratoire d’Informatique Formelle (LIF), UQAC',
     ]);
-    expect(page.textContent).toContain('Apprenti développeur Power Platform');
+    expect(page.textContent).toContain('Alternant Développeur Power Platform');
     expect(page.textContent).toContain('sans développement ABAP');
+    expect(page.textContent).toContain('environ 3 mois');
   });
 
   it('uses semantic time elements for confirmed experience periods', async () => {
@@ -75,13 +198,15 @@ describe('ExperiencePageComponent', () => {
     );
 
     expect(times.map((time) => time.getAttribute('datetime'))).toEqual([
-      '2025-12',
-      '2026-11',
-      '2025',
-      '2023',
-      '2025',
-      '2023',
-      '2022',
+      '2025-12-01',
+      '2025-07-01',
+      '2025-09',
+      '2023-09',
+      '2025-09-30',
+      '2023-07',
+      '2023-08',
+      '2022-04',
+      '2022-07',
     ]);
   });
 
@@ -103,12 +228,12 @@ describe('ExperiencePageComponent', () => {
       'end',
       'start',
     ]);
-    expect(entryHeadings(page)).toEqual([
-      'Plansee Group Functions',
-      'Plansee',
-      'Bureau Veritas Laboratories',
-      'Groupe IES',
-      'UQAC',
+    expect(entryIds(page)).toEqual([
+      'plansee-group-functions',
+      'plansee-internship',
+      'bureau-veritas-laboratories',
+      'groupe-ies',
+      'lif-uqac-internship',
     ]);
     expect(page.querySelectorAll('.timeline-page__technology.badge').length).toBeGreaterThan(0);
   });
@@ -127,7 +252,6 @@ describe('ExperiencePageComponent', () => {
       'https://plansee-group.com/en',
       'https://www.plansee.com/',
       'https://www.bureauveritas.fr/',
-      'https://www.uqac.ca/',
     ]);
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
@@ -138,7 +262,6 @@ describe('ExperiencePageComponent', () => {
       'https://plansee-group.com/en',
       'https://www.plansee.com/',
       'https://www.bureauveritas.fr/',
-      'https://www.uqac.ca/',
     ]);
     expect(logoLinks.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(logoLinks.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(
@@ -150,7 +273,6 @@ describe('ExperiencePageComponent', () => {
       '/assets/logos/logo_plansee.png',
       '/assets/logos/logo_plansee.png',
       '/assets/logos/logo_bureau_veritas.svg',
-      '/assets/logos/logo_uqac.png',
     ]);
     expect(
       Array.from(page.querySelectorAll<HTMLImageElement>('.timeline-page__logo')).every(
@@ -158,12 +280,11 @@ describe('ExperiencePageComponent', () => {
       ),
     ).toBe(true);
     expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(5);
-    expect(entryText(page, 'Groupe IES')).toContain('Full Stack .NET Developer Intern');
     expect(
-      entryArticle(page, 'Groupe IES')?.querySelector('a.timeline-page__identity-link'),
+      entryArticleById(page, 'groupe-ies')?.querySelector('a.timeline-page__identity-link'),
     ).toBeNull();
     expect(
-      entryArticle(page, 'Groupe IES')
+      entryArticleById(page, 'groupe-ies')
         ?.querySelector<HTMLImageElement>('.timeline-page__meta img.timeline-page__logo')
         ?.getAttribute('src'),
     ).toBe('/assets/logos/logo_groupe_ies.jpeg');
@@ -183,7 +304,7 @@ describe('ExperiencePageComponent', () => {
     );
 
     const page = fixture.nativeElement as HTMLElement;
-    const groupeIesEntry = entryArticle(page, 'Groupe IES');
+    const groupeIesEntry = entryArticleById(page, 'groupe-ies');
 
     expect(groupeIesEntry?.querySelector('.timeline-page__logo')).toBeNull();
     expect(groupeIesEntry?.querySelector('.timeline-page__identity-name')?.textContent).toContain(
@@ -239,14 +360,34 @@ async function createFixture(
   return fixture;
 }
 
+function entryIds(page: HTMLElement): string[] {
+  return Array.from(page.querySelectorAll<HTMLElement>('article.timeline-page__entry')).map(
+    (entry) => entry.dataset['timelineEntryId'] ?? '',
+  );
+}
+
 function entryHeadings(page: HTMLElement): string[] {
   return Array.from(page.querySelectorAll('article h2')).map(
     (element) => element.textContent?.trim() ?? '',
   );
 }
 
-function entryText(page: HTMLElement, heading: string): string {
-  return entryArticle(page, heading)?.textContent ?? '';
+function entryTextById(page: HTMLElement, id: string): string {
+  return entryArticleById(page, id)?.textContent ?? '';
+}
+
+function responsibilityTextsByEntry(page: HTMLElement, id: string): string[] {
+  return Array.from(
+    entryArticleById(page, id)?.querySelectorAll<HTMLElement>(
+      'ul.timeline-page__responsibilities > li',
+    ) ?? [],
+  ).map((item) => item.textContent?.trim() ?? '');
+}
+
+function technologyLabelsByEntry(page: HTMLElement, id: string): string[] {
+  return Array.from(
+    entryArticleById(page, id)?.querySelectorAll<HTMLElement>('.timeline-page__technology') ?? [],
+  ).map((technology) => technology.textContent?.trim() ?? '');
 }
 
 function timelineSide(entry: HTMLElement): 'start' | 'end' | 'none' {
@@ -257,11 +398,9 @@ function timelineSide(entry: HTMLElement): 'start' | 'end' | 'none' {
   return entry.classList.contains('timeline-end') ? 'end' : 'none';
 }
 
-function entryArticle(page: HTMLElement, heading: string): HTMLElement | null {
-  return (
-    Array.from(page.querySelectorAll('article h2'))
-      .find((element) => element.textContent?.trim() === heading)
-      ?.closest('article') ?? null
+function entryArticleById(page: HTMLElement, id: string): HTMLElement | null {
+  return page.querySelector<HTMLElement>(
+    `article.timeline-page__entry[data-timeline-entry-id="${id}"]`,
   );
 }
 

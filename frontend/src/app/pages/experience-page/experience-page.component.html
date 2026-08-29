@@ -28,6 +28,7 @@
           [class.timeline-page__entry--has-logo]="entry.logo"
           [class.timeline-start]="entryIndex % 2 === 0"
           [class.timeline-end]="entryIndex % 2 !== 0"
+          [attr.data-timeline-entry-id]="entry.id"
         >
           <div class="timeline-page__meta">
             <div class="timeline-page__period">
@@ -44,6 +45,10 @@
                 }
                 <time [attr.datetime]="entry.period.end.datetime">
                   {{ entry.period.end.label }}
+                </time>
+              } @else if (entry.period.start && entry.period.label) {
+                <time [attr.datetime]="entry.period.start.datetime">
+                  {{ entry.period.label }}
                 </time>
               } @else if (entry.period.label) {
                 <span>{{ entry.period.label }}</span>
@@ -94,57 +99,67 @@
           </div>
 
           <div class="timeline-page__body">
-            <h2>
-              @if (entry.officialWebsiteUrl) {
-                <a
-                  class="link link-hover timeline-page__identity-link"
-                  [href]="entry.officialWebsiteUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  [attr.aria-label]="
-                    entry.organization +
-                    ' - ' +
-                    content.experiencePage.officialWebsiteLabel +
-                    ' (' +
-                    content.experiencePage.opensInNewTabLabel +
-                    ')'
-                  "
-                >
-                  <span class="timeline-page__identity-name">{{ entry.organization }}</span>
-                </a>
-              } @else {
-                <span class="timeline-page__identity">
-                  <span class="timeline-page__identity-name">{{ entry.organization }}</span>
-                </span>
-              }
-            </h2>
-            <p class="timeline-page__role">{{ entry.role }}</p>
-            @if (entry.context) {
-              <p class="timeline-page__context">{{ entry.context }}</p>
-            }
-
-            @if (entry.responsibilities?.length) {
-              <ul class="timeline-page__responsibilities">
-                @for (responsibility of entry.responsibilities; track responsibility) {
-                  <li>{{ responsibility }}</li>
+            <div class="timeline-page__identity-panel">
+              <h2>
+                @if (entry.officialWebsiteUrl) {
+                  <a
+                    class="link link-hover timeline-page__identity-link"
+                    [href]="entry.officialWebsiteUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="
+                      entry.organization +
+                      ' - ' +
+                      content.experiencePage.officialWebsiteLabel +
+                      ' (' +
+                      content.experiencePage.opensInNewTabLabel +
+                      ')'
+                    "
+                  >
+                    <span class="timeline-page__identity-name">{{ entry.organization }}</span>
+                  </a>
+                } @else {
+                  <span class="timeline-page__identity">
+                    <span class="timeline-page__identity-name">{{ entry.organization }}</span>
+                  </span>
                 }
-              </ul>
-            }
+              </h2>
+              @if (entry.location) {
+                <p class="timeline-page__location">{{ entry.location }}</p>
+              }
+              <p class="timeline-page__role">{{ entry.role }}</p>
+            </div>
 
-            @if (entry.technologies?.length) {
-              <div class="timeline-page__technologies">
-                <h3 class="sr-only" [id]="entry.id + '-technologies'">
-                  {{ t('projects.technologies') }}
-                </h3>
-                <ul [attr.aria-labelledby]="entry.id + '-technologies'">
-                  @for (technology of entry.technologies; track technology) {
-                    <li>
-                      <span class="badge badge-outline timeline-page__technology">
-                        {{ technology }}
-                      </span>
-                    </li>
-                  }
-                </ul>
+            @if (entry.context || entry.responsibilities?.length || entry.technologies?.length) {
+              <div class="timeline-page__details">
+                @if (entry.context) {
+                  <p class="timeline-page__context">{{ entry.context }}</p>
+                }
+
+                @if (entry.responsibilities?.length) {
+                  <ul class="timeline-page__responsibilities">
+                    @for (responsibility of entry.responsibilities; track responsibility) {
+                      <li>{{ responsibility }}</li>
+                    }
+                  </ul>
+                }
+
+                @if (entry.technologies?.length) {
+                  <div class="timeline-page__technologies">
+                    <h3 class="sr-only" [id]="entry.id + '-technologies'">
+                      {{ t('projects.technologies') }}
+                    </h3>
+                    <ul [attr.aria-labelledby]="entry.id + '-technologies'">
+                      @for (technology of entry.technologies; track technology) {
+                        <li>
+                          <span class="badge badge-outline timeline-page__technology">
+                            {{ technology }}
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
               </div>
             }
           </div>

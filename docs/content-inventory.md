@@ -1,106 +1,153 @@
 # Content Inventory
 
-This document tracks portfolio content needed for V1. It separates confirmed facts from copy that still needs rewriting and content that remains missing. Long-term positioning and content hierarchy rules live in [Content strategy](content-strategy.md).
+This document tracks owner-provided portfolio source material for V1 and later content passes. Strategy and visual hierarchy rules live in [Content strategy](content-strategy.md).
 
-Primary source: `docs/product-vision.md`.
+## Content Ownership
 
-## Status Definitions
+Frontend-static, typed, and version-controlled content:
 
-| Status | Meaning |
+- identity, biography, Home positioning, profile/portrait metadata;
+- Education, Professional Experience, Skills, Languages;
+- school/organization logo references and official website URLs.
+
+Backend/PostgreSQL-owned content:
+
+- Projects, project translations, project technologies, project publication/archive/featured state, and project-owned media/data.
+
+Do not move CV/profile content into PostgreSQL, create profile CMS tables, or add admin CRUD unless future requirements materially change.
+
+## Current Public Identity
+
+| Area | Public content direction |
 | --- | --- |
-| Confirmed | Approved factual content that may be used as source material. |
-| Requires rewriting | Factual source exists, but portfolio-ready French and English copy still needs to be written. |
-| Missing / TODO | Source content does not exist in the repository yet. Do not invent it. |
+| Name | Baptiste Wetterwald |
+| Role | Software Engineer |
+| Positioning | Backend & Full-stack |
+| Primary stack | Java / Spring, C# / .NET, TypeScript / Node.js, Angular |
+| Home copy | Concise engineering-graduate positioning with backend systems, API-oriented architectures, full-stack applications, Angular, system integration, SAP, Microsoft Power Platform, and industrial software environments. |
+| Portrait | Approved original portrait asset rendered from `frontend/public/assets/portrait/baptiste-wetterwald-portrait.png` with CSS object cropping inside the porthole frame. |
+| Social/contact/CV | Not published until real URLs, contact method, or CV files are supplied. |
 
-## Confirmed Product Context
+## Education
 
-| Area | Confirmed |
+Reverse chronological public Education entries:
+
+| ID | Period | Institution | Location | Public content | Logo | Official URL |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ensisa` | 2022-2025 | ENSISA | Mulhouse, France | Engineering Degree in Computer Science and Networks / Diplôme d'Ingénieur en Informatique et Réseaux; graduated / diplômé. | `frontend/public/assets/logos/logo_ensisa.svg` | `https://www.ensisa.uha.fr/` |
+| `uqac-semester` | 2022 | Université du Québec à Chicoutimi | Chicoutimi, Canada | Study semester abroad / semestre international; fourth semester of the DUT completed at UQAC. Do not invent exact semester dates. | `frontend/public/assets/logos/logo_uqac.png` | `https://www.uqac.ca/` |
+| `iut-robert-schuman` | 2020-2022 | IUT Robert Schuman | Illkirch, France | DUT Informatique; fourth semester completed abroad at UQAC in Canada. | `frontend/public/assets/logos/logo_iut_robert_schuman.png` | `https://iutrs.unistra.fr/` |
+| `insa-lyon` | 2019-2020 | INSA Lyon | Lyon, France | First year of the integrated engineering preparatory cycle in Engineering Sciences / Première année du cycle préparatoire intégré en Sciences de l'Ingénieur. | none supplied | none |
+| `lycee-louis-armand` | 2019 | Lycée Louis Armand | Mulhouse, France | Baccalauréat STI2D, specialization SIN / spécialité SIN, Mention Très Bien. | `frontend/public/assets/logos/logo_lycée_louis_armand.jpeg` | none |
+
+## Professional Experience
+
+Reverse chronological public Experience entries:
+
+| ID | Period | Organization | Location | Role | Public scope | Technologies | Logo | Official URL |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `plansee-group-functions` | Since 1 December 2025; planned end: end of November 2026 | Plansee Group Functions | Mamer, Luxembourg | Software Developer | Continued Angular application development; SAP S/4HANA and ABAP transaction/API work; HTTP/API integration; SAP transaction to AI-team API in a powder-recipe calculation workflow; adaptation of a C#/.NET industrial measurement application after equipment relocation; Node.js/Express middleware around Minew electronic-label API for SAP PI with REST-oriented wrapping and OAuth 2.0. Do not position this as SAP specialist career targeting. | ABAP, SAP S/4HANA, Angular, TypeScript, Node.js, Express, REST, HTTP, OAuth 2.0, C#, .NET | `frontend/public/assets/logos/logo_plansee.png` | `https://plansee-group.com/en` |
+| `plansee-internship` | 1 July 2025 to approximately mid-September 2025; 11 weeks | Plansee Group Functions | Mamer, Luxembourg | Software Developer Intern | Complete modernization/redevelopment of an internal ordering website used by company departments. The internship was in a SAP department/environment but did not include ABAP development. | Angular, TypeScript | `frontend/public/assets/logos/logo_plansee.png` | `https://www.plansee.com/` |
+| `bureau-veritas-laboratories` | September 2023 to 30 September 2025 | Bureau Veritas Laboratories / Bureau Veritas Laboratoires | Sausheim, France | Power Platform Developer Apprentice / Alternant Développeur Power Platform | Engineering apprenticeship alternating roughly two to three weeks between school and company. Independently developed an application to replace the laboratory vehicle-fleet management system, covering reception, workflow tracking, maceration room, test bench, and return/restitution. Learned Power Platform independently and worked largely autonomously without local specialized Power Platform supervision. | Microsoft Power Apps, Power Automate, Dataverse, Microsoft Power Platform | `frontend/public/assets/logos/logo_bureau_veritas.svg` | `https://www.bureauveritas.fr/` |
+| `groupe-ies` | July-August 2023; 2 months | Groupe IES | Colmar, France | .NET Full-stack Developer Intern / Stagiaire développeur full-stack .NET | Web development in C# with ASP.NET Blazor; development and consumption of REST APIs; work with existing database/service layers implemented in VB.NET/.NET. Do not mention personal/family context. | C#, .NET, ASP.NET Blazor, VB.NET, REST | `frontend/public/assets/logos/logo_groupe_ies.jpeg` | none |
+| `lif-uqac-internship` | Approximately April-July 2022; approximately 3 months | Laboratoire d'Informatique Formelle (LIF), UQAC | Chicoutimi, Canada | Software Developer Intern / academic research-oriented internship | Two-person project connecting BeamNG.drive with BeepBeep 3, an Event Stream Processing engine developed at LIF. Work involved simulator/integration communication, network/socket programming, Java, and Python. Do not invent research results or publications. | Java, Python, Sockets, BeamNG.drive, BeepBeep 3 | `frontend/public/assets/logos/logo_lif.png` | none |
+
+## Languages
+
+| Language | Public level |
 | --- | --- |
-| Site type | Personal portfolio for Baptiste Wetterwald. |
-| Positioning | Software Engineer - Backend / Full-stack. |
-| Languages | French and English from the beginning. |
-| Main sections | Home, Education, Experience, Projects, Project details, Contact. |
-| Visual identity | Modern software engineering portfolio x French naval / maritime inspiration. |
-| Project data | Projects are backed by Spring Boot and PostgreSQL. |
-| Deployment target | `bwetterwald.fr` on a Linux VPS, with Nginx host reverse proxy and Docker Compose for frontend/backend/PostgreSQL. |
+| French | Native language / Langue maternelle |
+| English | C1, TOEIC 975 |
+| German | B1 |
 
-## Milestone 8 Implementation Status
+Do not use progress bars, percentages, star ratings, gauges, or invented proficiency scores.
 
-Structured static personal content for Home, Education, Experience, and Skills is implemented in `frontend/src/app/core/content/portfolio-content.ts` with typed models in `frontend/src/app/core/content/portfolio-content.models.ts`. Timeline facts and skill topology are locale-neutral; localized records provide visitor-facing labels, notes, and prose.
+## Skills
 
-| Area | M8 Status |
+Public skills should stay grouped by importance:
+
+| Importance | Groups / technologies |
 | --- | --- |
-| Home | Implemented with name, Software Engineer identity, Backend / Full-stack positioning, concise introduction, primary stack, portfolio entry links, and skill domains. |
-| Education | Implemented with ENSISA, IUT Robert Schuman, and UQAC entries. ENSISA and IUT use confirmed year ranges; UQAC is identified as an international semester during the DUT without invented semester dates. |
-| Experience | Implemented with confirmed role titles, organizations, periods, limited confirmed context, and role-specific technologies only where confirmed. Plansee employment and internship remain separate entries. |
-| Skills | Implemented as technical domains without percentages. Group/domain/technology ordering, membership, and importance are centralized in shared skill facts. The model supports primary, professional/complementary, secondary, and exploratory/historical importance levels. Primary hierarchy is Java / Spring, C# / .NET, TypeScript / Node.js, then Angular. Microsoft enterprise experience and AI-assisted engineering are presented as subordinate/supporting areas. |
-| Social profiles | Not implemented because actual GitHub and LinkedIn URLs are still missing. |
-| Portrait/media | Approved Home portrait implemented as an original asset cropped responsively in the porthole frame. Approved Education/Experience organization logos are wired from local frontend public assets. OpenGraph image assets and project logos/media remain pending. |
-| Projects on Home | No fake featured projects are shown. Project records remain backend-owned and await approved real project content. |
-| Contact | No real contact method is published because the final public contact method is still missing. |
+| Primary software engineering | Backend & application development: Java, Spring, Spring Boot, C#, .NET, TypeScript, Node.js, Express. Frontend & full-stack: Angular, TypeScript, HTML, CSS, Tailwind CSS, daisyUI. APIs & integration: REST, HTTP, OAuth 2.0, Sockets. |
+| Professional / complementary data | SQL, PostgreSQL, MySQL, SQLite, Oracle, PL/SQL. PostgreSQL should remain framed as portfolio project experience unless professional use is supplied. |
+| Professional / complementary enterprise and industrial | SAP S/4HANA, ABAP, Power Apps, Power Automate, Dataverse, Microsoft Power Platform, ASP.NET Blazor, VB.NET. |
+| Secondary AI-assisted engineering | ChatGPT, Codex / coding agents, MCP concepts, early agentic workflow exploration. Do not use AI/ML/LLM role positioning. |
+| Secondary broader software experience | C, C++, Python, Django, PHP, Laravel, Android / Java, Kotlin, JavaFX, Swing, Unreal Engine, Blueprint, MATLAB. |
+| Exploratory / historical | Arduino, LabVIEW, Flowcode, LaTeX, UML, SolidWorks, Solid Edge, Git, Perforce, Apache Subversion, Docker, Windows, Linux. |
 
-## Inventory
+Do not prominently publish Microsoft Office or the old PIX score/code. The PIX verification code must not appear in public content.
 
-| Content Area | Confirmed Content | Requires Rewriting | Missing / TODO | Notes |
-| --- | --- | --- | --- | --- |
-| Identity | Baptiste Wetterwald; graduated Engineer in Computer Science and Networks; Software Engineer; target positioning Backend / Full-stack. | First bilingual public headline and identity statement implemented; owner tone may still be refined. | Pronunciation if desired, location visibility preference, availability status. | Do not infer additional personal details from local machine paths, Git config, or usernames. |
-| Professional introduction | Backend/full-stack software engineer positioning; primary technologies Java/Spring, C#/.NET, TypeScript/Node.js, Angular. | First concise About/Home copy implemented in French and English. | Personal tone preference, target roles, preferred industries, availability wording. | Keep the positioning software-engineering first, not frontend-only or low-code-only. |
-| Professional experiences | Plansee Group Functions - Software Developer - December 2025 to planned end November 2026; Plansee - Software Engineering internship - 11 weeks during summer 2025; Bureau Veritas Laboratories / Bureau Veritas Laboratoires - Power Platform Developer apprenticeship - 2023-2025; Groupe IES - Full Stack .NET Developer internship - 2023; UQAC - Software Developer internship - 2022. | First concise bilingual timeline implemented with optional official website fields and approved local logos for current organizations. Richer responsibilities, outcomes, and role descriptions still require source details. | Exact locations, team names if public, approved project details, measurable outcomes, remaining links or references. | Use French company name "Bureau Veritas Laboratoires" in French public copy. Do not invent responsibilities, metrics, outcomes, or logos. |
-| Plansee internship detail | Redesign of an internal e-commerce-like catalogue using Angular and DaisyUI inside an SAP-related team; no ABAP development during that internship. | First bilingual internship summary implemented. | Approved screenshots, project confidentiality boundaries, exact technology context beyond Angular/DaisyUI. | Do not position this as ABAP development. |
-| Education | Engineering Degree in Computer Science and Networks - ENSISA - graduated - 2022-2025; DUT Computer Science - IUT Robert Schuman - 2020-2022; semester abroad at UQAC during DUT studies. | First bilingual education timeline implemented with optional official school website fields and approved local school logos. | Exact locations, coursework, honors, credential URLs, exact UQAC semester dates if public. | Keep degree naming accurate in both locales. Do not add school logos unless approved assets exist. |
-| Skills - primary | Java / Spring; C# / .NET; TypeScript / Node.js; Angular; REST APIs; backend/full-stack engineering. | Implemented as prioritized technical domains without percentages. | Evidence examples and project associations. | These are the primary technologies to emphasize. |
-| Skills - Microsoft / enterprise | Power Platform; Power Apps; Power Automate; Dataverse; Microsoft 365. | Implemented as professional/complementary enterprise application experience. | Confirmation of Custom Connectors, PCF, ABAP, and .NET integrations where genuinely used. | Mention Custom Connectors, PCF, ABAP, and .NET integrations only where factual use is confirmed. |
-| Skills - AI-assisted engineering | ChatGPT for software-development/problem-solving workflows; Codex / coding agents; familiarity with MCP concepts; early exploration of agentic workflows. | Implemented as secondary developer tooling with explicit non-expert positioning. | Concrete examples, boundaries for professional usage, and public phrasing refinements. | Do not position Baptiste as AI Engineer, ML Engineer, LLM Engineer, agentic AI expert, or MCP expert. |
-| Database experience | Oracle; SQL Server; SQLite; SAP S/4HANA; MongoDB; SQL / relational database concepts. | Implemented as a professional/complementary Data & Databases group. PostgreSQL is labelled as portfolio implementation experience. | Specific project associations and depth of usage. | PostgreSQL is introduced through this portfolio project and must not be described as previous professional PostgreSQL experience. |
-| Skills - older/niche/historical | Architecture now supports secondary and exploratory/historical skills. | Awaiting owner-supplied inventory. | LabVIEW, older school technologies, high-school experiments, small academic exercises, and other older/self-taught knowledge. | Absence from the current public page does not imply lack of knowledge. Add later with lower visual prominence unless promoted by owner-approved evidence. |
-| Projects | Project section, project detail pages, backend-managed records, featured projects, archived projects. | Project titles, short descriptions, optional detailed descriptions, technology associations in both locales. | Actual project list, slugs, GitHub URLs, demo URLs, logo/media references, featured flags, statuses, display order, and future project-importance classification. | V1 uses structured project entities, not a generic CMS. No fake records should be seeded. |
-| Languages | French and English UI/content support. | Personal language proficiency copy if displayed. | Spoken/written proficiency levels and approved wording. | UI locale support is separate from personal language proficiency. |
-| Social profiles | GitHub and LinkedIn links are required conceptually on Home. | Link labels and aria labels. | Actual GitHub URL, actual LinkedIn URL, other approved public profiles. | Do not fabricate profile URLs. |
-| Portrait/media | Home portrait uses the approved original image asset and porthole treatment. Timeline school/organization logos use approved local frontend assets. | Localized portrait alt text implemented; timeline logo references are locale-neutral facts. | Approved project logos/media and OpenGraph image assets. | Crop the portrait with CSS object positioning rather than a manual square derivative. V1 project media remains a single logo/media reference owned by the Project domain. |
-| Contact information | Contact page and contact CTA are required. | Contact copy, CTA labels, response expectation text. | Public email or form preference, location/timezone disclosure, availability, future contact form policy. | Email delivery secrets must remain server-side. |
-| Downloadable CV | Downloadable CV is part of the planned portfolio content. | CV link labels and locale-specific download copy. | CV file(s), language variants, file naming, update date, public/private fields. | Do not create placeholder PDFs with fabricated content. |
-| Optional GitHub activity | Optional home-page content. | Section heading and summary if enabled. | Whether to include it, what data to show, whether a token is needed. | Server-side integration if tokens are required. |
+## Logo Assets
 
-## Experience Source Template
+Current supplied logo files under `frontend/public/assets/logos`:
 
-```text
-Organization:
-Role:
-Dates:
-Location:
-Contract type:
-Confirmed responsibilities:
-Confirmed technologies:
-Confirmed outcomes:
-Confidentiality limits:
-French draft:
-English draft:
-```
+| File | Appears to correspond to | Current mapping |
+| --- | --- | --- |
+| `logo_bureau_veritas.svg` | Bureau Veritas | Bureau Veritas Laboratoires experience |
+| `logo_ensisa.svg` | ENSISA | ENSISA education |
+| `logo_groupe_ies.jpeg` | Groupe IES | Groupe IES experience |
+| `logo_iut_robert_schuman.png` | IUT Robert Schuman | IUT Robert Schuman education |
+| `logo_lif.png` | Laboratoire d'Informatique Formelle | LIF/UQAC internship |
+| `logo_lycée_louis_armand.jpeg` | Lycée Louis Armand | Baccalauréat entry |
+| `logo_plansee.png` | Plansee | Plansee current role and internship |
+| `logo_uqac.png` | UQAC | UQAC study semester |
 
-## Project Content Template
+Preferred convention for future assets is `frontend/public/assets/logos/<organization-slug>.<ext>`. Existing owner-supplied filenames are referenced exactly until a safe normalization pass is explicitly requested.
 
-```text
-Name:
-Stable slug:
-Status: DRAFT | PUBLISHED | ARCHIVED
-Featured: yes | no
-Display order:
-Short description, fr:
-Short description, en:
-Detailed description, fr:
-Detailed description, en:
-Technologies:
-GitHub URL:
-Demo URL:
-Logo/media reference:
-Known confidentiality limits:
-```
+Timeline logo rules:
 
-## Copy Requirements
+- desktop: date/period in the metadata column, logo plaque below;
+- mobile: compact reflow beside the organization/school name;
+- logo image uses `object-fit: contain` inside a normalized white plaque;
+- no crop, stretch, arbitrary recolor, fabricated fallback, or hotlinked logos;
+- organization/logo links are scoped to the identity areas only, never the whole card.
 
-- Every public content item must have an explicit locale strategy: translated, locale-specific, shared, or intentionally hidden in one locale.
-- English is the primary authoring language for future source copy.
-- French pages should be written as natural localized adaptations, not mechanically mirrored sentence by sentence.
-- Missing content must remain visibly tracked as TODO in documentation until supplied.
-- Public copy should avoid unsupported claims, invented metrics, unverified dates, and private client information.
-- PostgreSQL may be described as part of the portfolio implementation, not as prior professional database experience.
+## Project Inventory Backlog
+
+Projects are backend/PostgreSQL records and are not seeded during this content consolidation pass.
+
+### Featured / Flagship Candidates
+
+| Candidate | Type | Status | Notes |
+| --- | --- | --- | --- |
+| This portfolio | Personal / open-source project | Active / in development until complete | Strong first project once public and mature. Technologies may include Angular, TypeScript, Spring Boot, Java, PostgreSQL, Flyway, SSR, REST, Tailwind CSS, daisyUI, and Docker only if actually implemented when published. GitHub Actions only after CI/CD exists. Candidate for browser, mobile, and code mockups when real media exists. |
+| WakomMUTE | Personal Android/mobile project | Unfinished / in development | Adaptive commute alarm intended to adjust wake-up decisions based on public-transport disruptions. Do not publish architecture or technology details beyond what the source actually confirms when added. |
+
+### Significant Candidates
+
+| Candidate | Source | Technologies / notes |
+| --- | --- | --- |
+| BeamNG.drive x BeepBeep 3 | UQAC/LIF academic research-oriented work | Java, Python, sockets, BeamNG.drive, BeepBeep 3. Project page can eventually explain implementation more deeply than the Experience timeline. |
+| Educational Unreal Engine game | UQAC academic project | Unreal Engine, Blueprint; collaboration with NAD-UQAC digital-design students. |
+| Connect Four / Blaze4 | ENSISA academic project | Java, JavaFX, AI using alpha-beta search/pruning. |
+| Abalone | ENSISA two-week intensive project | C, AI, multiplayer, sockets. |
+
+### Archive / Historical Candidates
+
+| Candidate | Source | Technologies / notes |
+| --- | --- | --- |
+| Educational 2D game | DUT academic project | Java, LibGDX, HyperLap2D. |
+| Kingdomino | DUT academic project | Java, Swing. |
+| Instant-messaging website | ENSISA academic project | Python, Django, HTML, JavaScript, CSS. |
+| Folder synchronization tool | ENSISA academic project | Java, sockets. |
+| Android applications | DUT/ENSISA academic projects | Java / Android. Keep separate from WakomMUTE. |
+| Holiday expense-management Windows Forms application | DUT academic project | C# / Windows Forms / database management. |
+| Ant-colony simulation | DUT academic project | Java / UML. |
+| Discord bots | Personal projects | Node.js, discord.js, Puppeteer, including web scraping. |
+| Minecraft server administration/community project | Volunteer/personal, 2014-2018 | Event organization and server database management. Candidate for an "Origins" or early-projects treatment, not the main Experience timeline. |
+
+## Supporting Material Not Published
+
+- Bureau Veritas school report, approximately 40 pages: may become supporting material later only with Bureau Veritas permission.
+- Bureau Veritas recommendation letter: may become supporting material later only with appropriate permission/approval.
+- Do not add download links, screenshots, metrics, testimonials, or quotations from these materials in the public portfolio until permission and public copy are explicitly approved.
+
+## Missing Or Deferred Public Content
+
+- real GitHub profile URL;
+- real LinkedIn profile URL;
+- public contact method or contact form policy;
+- downloadable CV file(s);
+- project records, slugs, final bilingual copy, GitHub/demo URLs, and media;
+- approved OpenGraph images beyond the existing portrait where applicable;
+- INSA Lyon logo or official link, if a local asset/URL is supplied later.

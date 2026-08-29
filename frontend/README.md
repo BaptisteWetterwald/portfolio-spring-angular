@@ -2,11 +2,11 @@
 
 Angular SSR frontend for the portfolio.
 
-Milestone 9 currently implements canonical `/fr` and `/en` route trees, localized static route segments, root locale redirects, lightweight runtime translations, localized metadata, request-time SSR, localized 404 handling, API-backed project pages, approved static Home/Education/Experience content, and the maritime visual-system baseline.
+Milestone 9 currently implements canonical `/fr` and `/en` route trees, localized static route segments, root locale redirects, lightweight runtime translations, localized metadata, request-time SSR, localized 404 handling, API-backed project pages, frontend-static Home/Education/Experience/Skills/Languages content, and the maritime visual-system baseline.
 
 The shell uses semantic navigation, responsive mobile navigation, locale switching, light/dark theme preference, a custom lighthouse theme control, and a custom sonar/compass navigation enhancement. DaisyUI is used selectively for reusable primitives such as buttons, badges, cards, menu/navbar/footer structures, timeline structure, and join controls. Custom CSS/SVG remains responsible for the maritime identity.
 
-Home intentionally does not render secondary navigation cards. Its right-hand hero area renders the approved portrait in a circular porthole frame, using CSS object cropping from the original portrait asset rather than a manually cropped derivative. Education and Experience entries use frontend-owned static facts for official website links and approved logo assets. Mockup project showcases, hover-3d surfaces, real contact forms, social links, CV downloads, lighthouse beam work, and advanced motion remain deferred until approved content or later milestones justify them.
+Home intentionally does not render secondary navigation cards. Its right-hand hero area renders the approved portrait in a circular porthole frame, using CSS object cropping from the original portrait asset rather than a manually cropped derivative. Education, Experience, Skills, Languages, and organization/school logo mappings use frontend-owned static facts; Projects remain backend/PostgreSQL-owned. Mockup project showcases, hover-3d surfaces, real contact forms, social links, CV downloads, lighthouse beam work, and advanced motion remain deferred until approved content or later milestones justify them.
 
 ## Commands
 

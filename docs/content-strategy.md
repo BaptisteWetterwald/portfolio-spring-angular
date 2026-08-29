@@ -1,100 +1,123 @@
 # Content Strategy
 
-This document is the source of truth for how portfolio content should grow after the first Milestone 8 content pass.
+This document is the durable source of truth for portfolio positioning, content ownership, and public-copy rules.
 
 ## Positioning
 
-The portfolio presents Baptiste Wetterwald as:
+The portfolio presents Baptiste Wetterwald primarily as:
 
 - Software Engineer;
-- backend and full-stack first;
-- primarily oriented around Java / Spring, C# / .NET, and TypeScript / Node.js;
-- able to use Angular as a relevant full-stack/frontend capability;
-- experienced with Microsoft and enterprise application ecosystems as a complementary specialization.
+- backend and full-stack oriented;
+- focused first on Java / Spring / Spring Boot, C# / .NET, TypeScript / Node.js, and Angular;
+- broadly experienced, but without giving every technology equal weight.
 
-The portfolio must not flatten every known technology into the same visual priority. Broad technical background can remain visible, but the main page hierarchy should continue to emphasize the current backend/full-stack direction.
+The first-glance hierarchy should read:
 
-Absence from the current public portfolio does not prove lack of knowledge. The current inventory is intentionally incomplete and will be enriched over time as owner-approved details are supplied.
+```text
+Software Engineer -> Java/Spring + C#/.NET + TypeScript/Node.js -> backend/full-stack -> real industrial/professional experience -> Angular as the main frontend/full-stack framework.
+```
+
+Deeper pages and lower-importance skill groups may show SAP, API/integration work, OAuth 2.0, Power Platform, databases, AI-assisted engineering, international experience, and older academic or exploratory technologies.
+
+Old, niche, academic, or self-taught technologies can remain discoverable, but they must not visually compete with the current backend/full-stack direction.
+
+## Content Ownership
+
+The approved architecture is intentionally hybrid.
+
+Frontend-static, typed, and version-controlled:
+
+- identity and biography;
+- Home positioning copy;
+- Education;
+- Professional Experience;
+- Skills and skill hierarchy;
+- Languages;
+- profile/portrait metadata;
+- organization/school logo references;
+- official organization/school website URLs.
+
+Backend/PostgreSQL-owned:
+
+- Projects;
+- project translations;
+- project technologies;
+- project publication/archive/featured state;
+- project-owned media/data.
+
+Do not migrate CV/profile content into PostgreSQL or introduce Education, Experience, Skill, Language, biography, or generic CMS tables unless future requirements materially change. Valid triggers would include runtime editing/admin, many dynamic clients, substantially more locales, or an external content-management workflow.
+
+Shared locale-neutral frontend facts should include IDs, dates, ordering, organizations, locations, technologies, importance, logo paths, and official URLs where practical. Localized prose and labels should remain in localized records.
 
 ## Skill Hierarchy
 
-Skills should use importance levels rather than percentages, star ratings, years-of-experience claims, or vague expert/intermediate/beginner labels.
+Skills use importance levels, not percentages, star ratings, fake proficiency scores, gauges, or vague expert/intermediate/beginner labels.
 
 | Level | Meaning | Current examples |
 | --- | --- | --- |
-| Primary | Central to the current professional positioning and strongest visual emphasis. | Java, Spring, C#, .NET, TypeScript, Node.js, Angular, REST APIs, backend/full-stack engineering. |
-| Professional / complementary | Used professionally or relevant to enterprise/business application experience, but not the main positioning. | Power Platform, Power Apps, Power Automate, Dataverse, Microsoft 365, SQL/data platforms, SAP S/4HANA where relevant. |
-| Secondary | Previously used or useful supporting technologies/tools that should not dominate the page. | Tailwind CSS, DaisyUI, Docker, Git, Oracle, SQL Server, SQLite, MongoDB. |
-| Exploratory / historical | Older, niche, educational, self-taught, lightly explored, or experimental knowledge. | Future owner-supplied items such as LabVIEW, older school technologies, high-school experiments, small academic exercises. |
+| Primary | Central to the current professional positioning and strongest visual emphasis. | Java, Spring, Spring Boot, C#, .NET, TypeScript, Node.js, Express, Angular, REST, HTTP, OAuth 2.0, Sockets. |
+| Professional / complementary | Real professional or enterprise context, but subordinate to the main positioning. | SQL, PostgreSQL as portfolio experience, MySQL, SQLite, Oracle, PL/SQL, SAP S/4HANA, ABAP, Power Apps, Power Automate, Dataverse, Microsoft Power Platform, ASP.NET Blazor, VB.NET. |
+| Secondary | Useful supporting or broader software experience that should remain visible but quieter. | C, C++, Python, Django, PHP, Laravel, Android / Java, Kotlin, JavaFX, Swing, Unreal Engine, Blueprint, MATLAB, Git, Docker. |
+| Exploratory / historical | Older, niche, academic, self-taught, or lightly explored knowledge. | Arduino, LabVIEW, Flowcode, LaTeX, UML, SolidWorks, Solid Edge, Perforce, Apache Subversion, Windows, Linux. |
 
-Future additions such as LabVIEW or older school technologies should use the lower levels unless the owner supplies a reason to promote them. Small or older skills should not be deleted merely because they are no longer central.
+PostgreSQL should be framed as portfolio/personal project experience unless professional usage is later supplied. Microsoft Office and the old PIX score/code are intentionally not part of the public skill positioning.
 
-Milestone 9 visual treatment must reinforce this hierarchy. Primary backend/full-stack skills may use the strongest surfaces, route-like accents, and highest-contrast badges. Professional/complementary skills should remain clearly visible but quieter. Secondary and exploratory/historical skills should be discoverable without competing with the primary stack. Visual weight must never imply unsupported expertise or flatten every technology into the same priority. Skill cards are informational surfaces, not navigation; do not add fake click behavior, pointer cursors, or strong interactive transforms.
+Skill cards remain informational surfaces. Do not add fake click behavior, pointer cursors, strong scaling, or effects that imply navigation.
 
 ## AI-Assisted Engineering
 
-AI-assisted software engineering is relevant to the portfolio, but it must remain subordinate to the backend/full-stack positioning for now.
+AI-assisted software engineering belongs in the portfolio only as a secondary developer-tooling area.
 
-Current conservative facts that may be represented:
+Current public scope:
 
-- practical use of ChatGPT in software-development and problem-solving workflows;
-- practical use of Codex / coding agents;
-- Codex beginning to appear in the professional environment;
+- ChatGPT as a software-development and problem-solving assistant;
+- Codex / coding agents for repository work;
 - familiarity with MCP concepts;
-- early exploration of agentic development workflows.
+- early practical exploration of agentic development workflows.
 
-Do not present Baptiste as:
+Do not present Baptiste as an AI Engineer, ML Engineer, LLM Engineer, Agentic AI specialist, MCP specialist, or equivalent unsupported role.
 
-- AI Engineer;
-- ML Engineer;
-- LLM Engineer;
-- Agentic AI expert;
-- MCP expert.
+## Languages
 
-Preferred wording:
+Languages are frontend-static profile content and are visually secondary to technical skills.
 
-- AI-assisted software engineering;
-- AI-assisted development workflows;
-- coding agents;
-- developer tooling with LLMs;
-- familiarity or early exploration of MCP;
-- early exploration of agentic workflows.
+Current public facts:
 
-## Project Hierarchy
+- French: native language / langue maternelle;
+- English: C1, TOEIC 975;
+- German: B1.
 
-Project prominence must follow importance. The project system should eventually distinguish:
+Do not use progress bars, percentages, star ratings, gauges, or invented language scores.
 
-| Level | Meaning |
+## Project Strategy
+
+Projects remain backend/PostgreSQL-owned. Do not hardcode project records into the frontend and do not seed fake records.
+
+Future project presentation should support at least three prominence levels:
+
+| Level | Intended use |
 | --- | --- |
-| Featured | Major projects that demonstrate the target backend/full-stack engineering profile. |
-| Standard | Meaningful projects worth presenting normally. |
-| Minor / archive | Small academic projects, old experiments, niche demonstrations, and historical exercises. |
+| Featured / flagship | Large, polished, current projects aligned with the target backend/full-stack profile. |
+| Significant | Meaningful technical projects worth explaining normally. |
+| Archive / historical | Small academic projects, old experiments, niche demonstrations, and historical exercises. |
 
-The existing backend project status model (`PUBLISHED`, `ARCHIVED`, `DRAFT`) is not the same thing as visual/project importance. `featured` currently covers the strongest public emphasis. A richer project-importance field may be added later if real project content proves the need.
+The existing backend `featured` flag and `PUBLISHED` / `ARCHIVED` statuses are sufficient for now. Do not add a project-importance persistence field until real project content proves that this model is insufficient.
 
-Do not modify persistence solely to anticipate this hierarchy. Document the requirement until the content model needs it.
+Candidate future inventory:
 
-Milestone 9 may style existing `featured`, standard published, and `ARCHIVED` project groups with different visual weight. It must not invent project records, screenshots, demos, repository URLs, or a new persistence field for project importance. DaisyUI mockup treatments should wait until real project media is supplied and its type is known.
+- Featured / flagship: this portfolio once public and mature; WakomMUTE when implementation facts are ready.
+- Significant: BeamNG.drive x BeepBeep 3; educational Unreal Engine game; Connect Four / Blaze4; Abalone.
+- Archive / historical: educational 2D game; Kingdomino; instant-messaging website; folder synchronization tool; academic Android apps; holiday expense-management Windows Forms app; ant-colony simulation; Discord bots; Minecraft server administration/community project.
 
-The portfolio application itself is expected to become an important open-source project once it has enough real content, visual polish, and deployment maturity to be presented as such. Do not create a fake project record before approved project copy exists.
+DaisyUI mockups, Aura, and Hover 3D treatments should only be used for future project content when real media, project type, and importance justify them. Do not fabricate screenshots, media, URLs, metrics, or repository/demo links.
 
-## Content Evolution
+## Supporting Materials
 
-The portfolio should be able to grow without redesigning the pages:
-
-- skills can be progressively enriched with owner-approved older, niche, academic, and professional knowledge;
-- projects can include major portfolio projects, academic work, small experiments, and archives with different visual weights;
-- experience entries can receive richer responsibilities, outcomes, and technologies only when confirmed;
-- static identity, biography, education, experience, skill hierarchy, organization/school links, and organization/school logo references remain frontend-owned, typed, and version-controlled;
-- project records, project translations, project technologies, project publication/archive/featured state, and project-owned media remain backend-owned.
-
-Do not move CV/profile content into PostgreSQL or introduce profile CMS tables unless future requirements materially change. Valid triggers would include runtime editing/admin needs, many dynamic clients, substantially more locales, or an external content-management workflow.
-
-Documentation may contain TODOs, confidence notes, missing-content labels, and confirmation status. Visitor-facing content must not expose internal milestone, review, confirmation, or TODO language.
+Bureau Veritas supporting material exists as owner-provided context: an approximately 40-page school report and a recommendation letter from a former manager. These may become portfolio supporting material later, but must not be published without appropriate permission and approval.
 
 ## Public-Copy Rule
 
-Public pages must avoid phrases such as:
+Visitor-facing pages must avoid internal process wording such as:
 
 - confirmed roles;
 - approved content exists;
@@ -103,4 +126,4 @@ Public pages must avoid phrases such as:
 - role detail is not yet available;
 - TODO.
 
-Use concise professional copy instead. If a public field is missing, omit the block or use a plain user-facing empty state that does not expose internal process.
+Public copy must also avoid unsupported metrics, inflated ownership claims, reasons for leaving employers, salary/job-search information, private personal relationships, unpublished reports, unpublished recommendation letters, social URLs that have not been supplied, and the old PIX verification code.
