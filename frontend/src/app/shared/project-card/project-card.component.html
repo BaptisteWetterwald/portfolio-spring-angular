@@ -3,6 +3,7 @@
   [class.project-card--with-media]="mediaSrc()"
   [class.project-card--featured]="project().featured"
   [class.project-card--archived]="project().status === 'ARCHIVED'"
+  [class.project-card--has-detail]="hasDetailPage()"
 >
   @if (mediaSrc(); as src) {
     <figure class="project-card__media-frame">
@@ -19,14 +20,12 @@
 
   <div class="card-body project-card__body">
     <div class="project-card__heading-row">
-      <h3 class="card-title project-card__title">
-        <a [routerLink]="detailPath()" [attr.aria-label]="detailsAriaLabel()">
-          {{ project().title }}
-        </a>
-      </h3>
-      <span class="badge badge-outline project-card__status">
-        {{ t('projects.status.' + project().status) }}
-      </span>
+      <h3 class="card-title project-card__title">{{ project().title }}</h3>
+      @if (project().status === 'ARCHIVED') {
+        <span class="badge badge-outline project-card__status">
+          {{ t('projects.status.' + project().status) }}
+        </span>
+      }
     </div>
 
     <p class="project-card__description">{{ project().shortDescription }}</p>
@@ -43,28 +42,39 @@
       </ul>
     }
 
-    @if (project().githubUrl || project().demoUrl) {
+    @if (hasDetailPage() || project().githubUrl || project().demoUrl) {
       <nav class="card-actions project-card__links" [attr.aria-label]="t('projects.links')">
+        @if (hasDetailPage()) {
+          <a
+            class="btn btn-sm project-card__action project-card__action--detail"
+            [routerLink]="detailPath()"
+            [attr.aria-label]="detailsAriaLabel()"
+          >
+            {{ t('projects.links.details') }}
+          </a>
+        }
         @if (project().githubUrl; as githubUrl) {
           <a
-            class="btn btn-sm btn-outline project-card__action"
+            class="btn btn-sm btn-ghost project-card__action project-card__action--external"
             [href]="githubUrl"
             target="_blank"
             rel="noopener noreferrer"
             [attr.aria-label]="externalLinkAria('github')"
           >
             {{ externalLinkLabel('github') }}
+            <span class="project-card__external-mark" aria-hidden="true"></span>
           </a>
         }
         @if (project().demoUrl; as demoUrl) {
           <a
-            class="btn btn-sm btn-outline project-card__action"
+            class="btn btn-sm btn-ghost project-card__action project-card__action--external"
             [href]="demoUrl"
             target="_blank"
             rel="noopener noreferrer"
             [attr.aria-label]="externalLinkAria('demo')"
           >
             {{ externalLinkLabel('demo') }}
+            <span class="project-card__external-mark" aria-hidden="true"></span>
           </a>
         }
       </nav>

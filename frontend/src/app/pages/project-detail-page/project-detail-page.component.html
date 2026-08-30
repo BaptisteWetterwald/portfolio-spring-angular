@@ -23,75 +23,110 @@
           {{ t('projects.backToProjects') }}
         </a>
 
-        <header
-          class="project-detail__header"
-          [class.project-detail__header--with-media]="mediaSrc()"
-        >
-          @if (mediaSrc(); as src) {
-            <figure class="project-detail__media-frame">
-              <img
-                class="project-detail__media"
-                [src]="src"
-                width="112"
-                height="112"
-                [alt]="project.title"
-              />
-            </figure>
-          }
-
-          <div class="project-detail__intro">
-            <p class="badge badge-outline project-detail__status">
-              {{ t('projects.status.' + project.status) }}
-            </p>
+        <header class="project-detail__hero">
+          <div class="project-detail__hero-copy">
+            @if (project.status === 'ARCHIVED') {
+              <p class="badge badge-outline project-detail__status">
+                {{ t('projects.status.' + project.status) }}
+              </p>
+            }
             <h1 id="project-title">{{ project.title }}</h1>
-            <p>{{ project.shortDescription }}</p>
+            <p class="project-detail__pitch">{{ project.shortDescription }}</p>
+
+            @if (project.githubUrl || project.demoUrl) {
+              <nav
+                class="project-detail__actions card-actions"
+                [attr.aria-label]="t('projects.links')"
+              >
+                @if (project.githubUrl; as githubUrl) {
+                  <a
+                    class="btn btn-outline project-detail__action project-detail__action--external"
+                    [href]="githubUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="externalLinkAria('github')"
+                  >
+                    {{ externalLinkLabel('github') }}
+                    <span class="project-detail__external-mark" aria-hidden="true"></span>
+                  </a>
+                }
+                @if (project.demoUrl; as demoUrl) {
+                  <a
+                    class="btn btn-outline project-detail__action project-detail__action--external"
+                    [href]="demoUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="externalLinkAria('demo')"
+                  >
+                    {{ externalLinkLabel('demo') }}
+                    <span class="project-detail__external-mark" aria-hidden="true"></span>
+                  </a>
+                }
+              </nav>
+            }
           </div>
+
+          <aside class="project-detail__overview" aria-labelledby="project-overview-title">
+            @if (mediaSrc(); as src) {
+              <figure class="project-detail__media-frame">
+                <img
+                  class="project-detail__media"
+                  [src]="src"
+                  width="112"
+                  height="112"
+                  [alt]="project.title"
+                />
+              </figure>
+            }
+
+            <h2 id="project-overview-title">{{ t('projectDetail.overview.heading') }}</h2>
+
+            @if (project.technologies.length > 0) {
+              <div class="project-detail__overview-block">
+                <h3>{{ t('projectDetail.overview.stack') }}</h3>
+                <ul
+                  class="project-detail__technologies"
+                  [attr.aria-label]="t('projects.technologies')"
+                >
+                  @for (technology of project.technologies; track technology.slug) {
+                    <li>
+                      <span class="badge badge-outline project-detail__technology">
+                        {{ technology.name }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (hasStructuredSections()) {
+              <div class="project-detail__overview-block">
+                <h3>{{ t('projectDetail.overview.sections') }}</h3>
+                <ol class="project-detail__section-index">
+                  @for (section of sections(); track $index) {
+                    <li>{{ section.title }}</li>
+                  }
+                </ol>
+              </div>
+            }
+          </aside>
         </header>
 
-        @if (project.technologies.length > 0) {
-          <section class="project-detail__section" aria-labelledby="project-technologies-title">
-            <h2 id="project-technologies-title">{{ t('projects.technologies') }}</h2>
-            <ul class="project-detail__technologies">
-              @for (technology of project.technologies; track technology.slug) {
-                <li>
-                  <span class="badge badge-outline project-detail__technology">
-                    {{ technology.name }}
-                  </span>
-                </li>
-              }
-            </ul>
-          </section>
-        }
-
-        @if (project.githubUrl || project.demoUrl) {
-          <nav class="project-detail__links card-actions" [attr.aria-label]="t('projects.links')">
-            @if (project.githubUrl; as githubUrl) {
-              <a
-                class="btn btn-outline project-detail__action"
-                [href]="githubUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                [attr.aria-label]="externalLinkAria('github')"
+        @if (hasStructuredSections()) {
+          <div class="project-detail__sections">
+            @for (section of sections(); track $index; let sectionIndex = $index) {
+              <section
+                class="project-detail__section"
+                [attr.aria-labelledby]="sectionId(sectionIndex)"
               >
-                {{ externalLinkLabel('github') }}
-              </a>
+                <h2 [id]="sectionId(sectionIndex)">{{ section.title }}</h2>
+                <p>{{ section.content }}</p>
+              </section>
             }
-            @if (project.demoUrl; as demoUrl) {
-              <a
-                class="btn btn-outline project-detail__action"
-                [href]="demoUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                [attr.aria-label]="externalLinkAria('demo')"
-              >
-                {{ externalLinkLabel('demo') }}
-              </a>
-            }
-          </nav>
-        }
-
-        @if (project.detailedDescription) {
-          <section class="project-detail__section">
+          </div>
+        } @else if (project.detailedDescription) {
+          <section class="project-detail__fallback" aria-labelledby="project-details-title">
+            <h2 id="project-details-title">{{ t('projectDetail.fallbackDetails.heading') }}</h2>
             <p class="project-detail__description">{{ project.detailedDescription }}</p>
           </section>
         }

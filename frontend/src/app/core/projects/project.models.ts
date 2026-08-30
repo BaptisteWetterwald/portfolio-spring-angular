@@ -2,6 +2,8 @@ import { SupportedLocale } from '../i18n/locales';
 
 export type ProjectStatus = 'PUBLISHED' | 'ARCHIVED';
 
+export type ProjectPresentationMode = 'CARD_ONLY' | 'DETAIL';
+
 export interface TechnologyDto {
   readonly slug: string;
   readonly name: string;
@@ -18,12 +20,19 @@ export interface ProjectSummaryDto {
   readonly demoUrl: string | null;
   readonly featured: boolean;
   readonly status: ProjectStatus;
+  readonly presentationMode: ProjectPresentationMode;
   readonly displayOrder: number;
   readonly technologies: readonly TechnologyDto[];
 }
 
+export interface ProjectSectionDto {
+  readonly title: string;
+  readonly content: string;
+}
+
 export interface ProjectDetailDto extends ProjectSummaryDto {
   readonly detailedDescription: string | null;
+  readonly sections: readonly ProjectSectionDto[];
   readonly availableLocales: readonly SupportedLocale[];
 }
 

@@ -90,7 +90,7 @@ Deliverables:
 - Flyway migrations for project tables;
 - JPA entities and repositories;
 - `DRAFT`, `PUBLISHED`, `ARCHIVED` status handling;
-- optional `detailedDescription`;
+- optional `detailedDescription` compatibility field;
 - seed or fixture strategy for development data;
 - validation constraints.
 
@@ -183,7 +183,7 @@ Deliverables:
 
 Non-goals:
 
-- rich case-study builder;
+- generic CMS or page-builder;
 - authenticated editing;
 - full media gallery;
 - live GitHub metadata.
@@ -193,7 +193,7 @@ Validation criteria:
 - `DRAFT` projects are not public;
 - `PUBLISHED` projects render in both locales when translations exist;
 - `ARCHIVED` projects render as public archive content;
-- project detail pages work with optional detailed descriptions;
+- project detail pages work with ordered localized sections and optional deprecated detailed-description fallback;
 - project detail pages have localized metadata and canonical URLs.
 
 ## 8. Education, Experience, and Content

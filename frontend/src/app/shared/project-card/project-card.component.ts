@@ -21,20 +21,21 @@ export class ProjectCardComponent {
   protected readonly detailPath = computed(() =>
     localizedProjectDetailPath(this.locale(), this.project().slug),
   );
+  protected readonly hasDetailPage = computed(() => this.project().presentationMode === 'DETAIL');
   protected readonly mediaSrc = computed(() => projectMediaSrc(this.project().logoMediaRef));
 
   readonly #translations = inject(TranslationService);
 
   protected t(key: string): string {
-    return this.#translations.translate(key);
+    return this.#translations.translateFor(this.locale(), key);
   }
 
   protected externalLinkLabel(kind: 'github' | 'demo'): string {
-    return this.#translations.translate(`projects.links.${kind}`);
+    return this.t(`projects.links.${kind}`);
   }
 
   protected externalLinkAria(kind: 'github' | 'demo'): string {
-    return `${this.externalLinkLabel(kind)}: ${this.project().title}`;
+    return `${this.externalLinkLabel(kind)} (${this.t('projects.links.opensInNewTab')}): ${this.project().title}`;
   }
 
   protected detailsAriaLabel(): string {

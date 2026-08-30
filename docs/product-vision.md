@@ -143,7 +143,16 @@ Project statuses:
 | `PUBLISHED` | Publicly visible and eligible to be featured. |
 | `ARCHIVED` | Publicly visible but belongs to an older or secondary archive. |
 
-Featured projects may have richer detail pages. Smaller archived projects may have only a title and short description.
+Project presentation modes:
+
+| Mode | Meaning |
+| --- | --- |
+| `CARD_ONLY` | Public project represented completely by its Projects card, with no dedicated detail page. |
+| `DETAIL` | Public project with a dedicated localized detail page. |
+
+Publication status and presentation mode are independent. Featured or significant projects may have richer detail pages when their mode is `DETAIL`; smaller public projects may remain useful as `CARD_ONLY` entries with only a title, short description, technologies, and optional external links.
+
+Rich `DETAIL` pages should use ordered localized case-study sections. Section titles and copy belong to project content rather than hard-coded backend categories, so each project can present the narrative supported by its real implementation evidence.
 
 Do not introduce a generic CMS for V1.
 

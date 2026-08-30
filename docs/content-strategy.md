@@ -93,6 +93,10 @@ Do not use progress bars, percentages, star ratings, gauges, or invented languag
 
 Projects remain backend/PostgreSQL-owned. Do not hardcode project records into the frontend and do not seed fake records.
 
+Project publication status and presentation mode are separate editorial decisions. `DRAFT`, `PUBLISHED`, and `ARCHIVED` describe visibility and lifecycle. `CARD_ONLY` and `DETAIL` describe whether a public project should have a dedicated page. Do not infer detail-page availability from status, media, repository links, or detailed-description text.
+
+`DETAIL` projects use ordered localized content sections as the canonical case-study model. Section headings and body copy are project content, not backend enums, so each project can use the narrative structure that fits its real evidence. The legacy `detailedDescription` field is kept only as a staged fallback for older records and should not be authored for new rich detail pages.
+
 Future project presentation should support at least three prominence levels:
 
 | Level | Intended use |
@@ -101,13 +105,14 @@ Future project presentation should support at least three prominence levels:
 | Significant | Meaningful technical projects worth explaining normally. |
 | Archive / historical | Small academic projects, old experiments, niche demonstrations, and historical exercises. |
 
-The existing backend `featured` flag and `PUBLISHED` / `ARCHIVED` statuses are sufficient for now. Do not add a project-importance persistence field until real project content proves that this model is insufficient.
+The existing backend `featured` flag, `PUBLISHED` / `ARCHIVED` statuses, and `CARD_ONLY` / `DETAIL` presentation modes are sufficient for now. Do not add a separate project-importance persistence field until real project content proves that this model is insufficient.
 
 Candidate future inventory:
 
-- Featured / flagship: this portfolio once public and mature; WakomMUTE when implementation facts are ready.
-- Significant: BeamNG.drive x BeepBeep 3; educational Unreal Engine game; Connect Four / Blaze4; Abalone.
-- Archive / historical: educational 2D game; Kingdomino; instant-messaging website; folder synchronization tool; academic Android apps; holiday expense-management Windows Forms app; ant-colony simulation; Discord bots; Minecraft server administration/community project.
+- Featured / flagship: WakomMUTE when implementation facts are ready.
+- Seeded published projects in public display order: Portfolio Spring Angular (`DETAIL`, display order `10`); Blaze4 (`DETAIL`, `20`); Frequensisa (`CARD_ONLY`, `30`); SummerCamp (`CARD_ONLY`, `40`); Bot Discord IR (`CARD_ONLY`, `50`); BeamNG.drive x BeepBeep 3 (`CARD_ONLY`, `60`).
+- Remaining significant candidates: educational Unreal Engine game; Abalone.
+- Archive / historical: educational 2D game; Puissance 4 JavaFX; Fourmilière; Kingdomino; EnsiBlog; Cloner Kebab; folder synchronization tool; holiday expense-management Windows Forms app; ant-colony simulation; other Discord bots; Minecraft server administration/community project. These may later need a compact "Autres projets" / "Archives" presentation, but no separate presentation mode or archive UI exists yet.
 
 DaisyUI mockups, Aura, and Hover 3D treatments should only be used for future project content when real media, project type, and importance justify them. Do not fabricate screenshots, media, URLs, metrics, or repository/demo links.
 

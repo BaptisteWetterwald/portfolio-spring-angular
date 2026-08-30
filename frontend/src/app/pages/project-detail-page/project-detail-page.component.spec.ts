@@ -23,11 +23,17 @@ describe('ProjectDetailPageComponent', () => {
     expect(page.querySelector('article')).not.toBeNull();
     expect(page.querySelector('h1')?.textContent).toContain('Portfolio API');
     expect(page.textContent).toContain('A public API fixture.');
-    expect(page.textContent).toContain('Detailed plain text description.');
-    expect(Array.from(page.querySelectorAll('li')).map((item) => item.textContent?.trim())).toEqual(
-      ['Angular'],
-    );
-    expect(page.querySelector('.project-detail__status.badge')).not.toBeNull();
+    expect(page.textContent).toContain('Technical overview');
+    expect(page.textContent).toContain('Context');
+    expect(page.textContent).toContain('Architecture');
+    expect(page.textContent).toContain('Context section body.');
+    expect(page.textContent).not.toContain('Detailed plain text description.');
+    expect(
+      Array.from(page.querySelectorAll('.project-detail__technologies li')).map((item) =>
+        item.textContent?.trim(),
+      ),
+    ).toEqual(['Angular']);
+    expect(page.querySelector('.project-detail__status.badge')).toBeNull();
     expect(page.querySelector('.project-detail__technology.badge')).not.toBeNull();
     expect(
       Array.from(page.querySelectorAll<HTMLAnchorElement>('nav a')).map((link) => link.href),
@@ -35,19 +41,81 @@ describe('ProjectDetailPageComponent', () => {
       'https://example.test/portfolio-api.git',
       'https://demo.example.test/portfolio-api',
     ]);
+    expect(page.querySelector<HTMLAnchorElement>('nav a')?.getAttribute('aria-label')).toBe(
+      'GitHub (opens in a new tab): Portfolio API',
+    );
   });
 
-  it('renders cleanly when detailedDescription is absent', async () => {
+  it('renders an archived badge when historical context is meaningful', async () => {
     const fixture = await createFixture({
       kind: 'loaded',
-      project: detailProject({ detailedDescription: null }),
+      project: detailProject({ status: 'ARCHIVED' }),
+    });
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('.project-detail__status.badge')?.textContent).toContain('Archived');
+  });
+
+  it('renders detailedDescription only as a fallback when structured sections are absent', async () => {
+    const fixture = await createFixture({
+      kind: 'loaded',
+      project: detailProject({
+        detailedDescription: 'Legacy detailed description.',
+        sections: [],
+      }),
+    });
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.textContent).toContain('Project details');
+    expect(page.textContent).toContain('Legacy detailed description.');
+    expect(page.querySelector('.project-detail__sections')).toBeNull();
+  });
+
+  it('renders cleanly when detailedDescription and media are absent', async () => {
+    const fixture = await createFixture({
+      kind: 'loaded',
+      project: detailProject({ detailedDescription: null, sections: [] }),
     });
     const page = fixture.nativeElement as HTMLElement;
 
     expect(page.querySelector('h1')?.textContent).toContain('Portfolio API');
-    expect(page.querySelector('.project-detail__header--with-media')).toBeNull();
+    expect(page.querySelector('.project-detail__overview')).not.toBeNull();
+    expect(page.querySelector('.project-detail__media-frame')).toBeNull();
     expect(page.querySelector('.project-detail__description')).toBeNull();
     expect(page.textContent).not.toContain('undefined');
+  });
+
+  it('keeps semantic heading order for structured sections', async () => {
+    const fixture = await createFixture({
+      kind: 'loaded',
+      project: detailProject(),
+    });
+    const page = fixture.nativeElement as HTMLElement;
+    const headings = Array.from(page.querySelectorAll('h1, h2')).map(
+      (heading) => `${heading.tagName}:${heading.textContent?.trim()}`,
+    );
+
+    expect(headings).toEqual([
+      'H1:Portfolio API',
+      'H2:Technical overview',
+      'H2:Context',
+      'H2:Architecture',
+    ]);
+  });
+
+  it('does not nest interactive controls inside other interactive controls', async () => {
+    const fixture = await createFixture({
+      kind: 'loaded',
+      project: detailProject({
+        githubUrl: 'https://example.test/portfolio-api.git',
+        demoUrl: 'https://demo.example.test/portfolio-api',
+      }),
+    });
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('a a')).toBeNull();
+    expect(page.querySelector('button a')).toBeNull();
+    expect(page.querySelector('a button')).toBeNull();
   });
 
   it('applies project metadata from the loaded DTO', async () => {
@@ -156,6 +224,7 @@ function detailProject(overrides: Partial<ProjectDetailDto> = {}): ProjectDetail
     demoUrl: null,
     featured: true,
     status: 'PUBLISHED',
+    presentationMode: 'DETAIL',
     displayOrder: 10,
     technologies: [
       {
@@ -163,6 +232,16 @@ function detailProject(overrides: Partial<ProjectDetailDto> = {}): ProjectDetail
         name: 'Angular',
         iconRef: null,
         category: 'framework',
+      },
+    ],
+    sections: [
+      {
+        title: 'Context',
+        content: 'Context section body.',
+      },
+      {
+        title: 'Architecture',
+        content: 'Architecture section body.',
       },
     ],
     availableLocales: ['en', 'fr'],

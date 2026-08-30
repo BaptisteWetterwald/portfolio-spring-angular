@@ -29,17 +29,17 @@ describe('TranslationService', () => {
   });
 
   it('keeps visible French project UI copy accented and natural', () => {
-    expect(translations.fr['pages.projects.introduction']).toContain('publiés');
-    expect(translations.fr['pages.projects.introduction']).toContain('archivés');
-    expect(translations.fr['pages.projects.introduction']).toContain('apparaîtront');
+    expect(translations.fr['pages.projects.introduction']).toContain('sélection');
+    expect(translations.fr['pages.projects.introduction']).toContain('académiques');
+    expect(translations.fr['pages.projects.introduction']).toContain("j'ai travaillé");
     expect(translations.fr['projects.error.heading']).toContain('être chargés');
-    expect(translations.fr['projects.links.details']).toContain('détail');
+    expect(translations.fr['projects.links.details']).toBe('Voir le projet');
     expect(translations.fr['projects.status.PUBLISHED']).toBe('Publié');
     expect(translations.fr['projects.status.ARCHIVED']).toBe('Archivé');
     expect(translations.fr['metadata.experience.description']).toContain('développement logiciel');
 
     expect(Object.values(translations.fr).join('\n')).not.toMatch(
-      /publies|apparaitront|etre charge|Voir le detail|Publie\b|software engineering/i,
+      /publies|apparaitront ici|etre charge|Voir le detail|Publie\b|software engineering/i,
     );
   });
 });

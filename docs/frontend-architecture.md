@@ -159,7 +159,7 @@ GET /api/v1/projects?locale=fr|en
 GET /api/v1/projects?locale=fr|en&status=PUBLISHED
 GET /api/v1/projects?locale=fr|en&status=ARCHIVED
 GET /api/v1/projects/featured?locale=fr|en
-GET /api/v1/projects/{slug}?locale=fr|en
+GET /api/v1/projects/{slug}?locale=fr|en  # only for DETAIL projects
 GET /api/v1/technologies
 ```
 
@@ -168,7 +168,9 @@ Frontend behavior:
 - `DRAFT` projects are never public and should behave as 404;
 - `PUBLISHED` projects are public and may be featured;
 - `ARCHIVED` projects are public but belong to an older/secondary archive;
-- archived projects may render compact detail pages when no detailed description exists.
+- `CARD_ONLY` projects appear on public lists but have no detail route affordance;
+- `DETAIL` projects appear on public lists and may resolve localized detail pages;
+- archived projects may render compact detail pages when no detailed description exists, but only when their presentation mode is `DETAIL`.
 
 Frontend services should:
 
@@ -196,8 +198,10 @@ Project DTO interfaces live in `core/projects/project.models.ts` and mirror the 
 
 - `ProjectSummaryDto`;
 - `ProjectDetailDto`;
+- `ProjectSectionDto`;
 - `TechnologyDto`;
 - `ProjectStatus = "PUBLISHED" | "ARCHIVED"`.
+- `ProjectPresentationMode = "CARD_ONLY" | "DETAIL"`.
 
 Route resolvers in `core/projects/project-resolvers.ts` load project data before route activation. Listing resolvers return real post-resolution `loaded` or `error` states. Detail resolvers return `loaded`, `notFound`, or `error` states. They do not synthesize a `loading` state because normal routed rendering waits for resolver completion before activation. Detail 404 responses become a localized not-found state; non-404 failures become a generic API failure state.
 
@@ -267,9 +271,9 @@ The Projects page renders:
 - an empty state when no localized public projects exist;
 - a generic API failure state if project data cannot be loaded.
 
-Project cards are reusable semantic `article` elements with a title link, short description, status, ordered technology labels, and optional GitHub/demo links only when URLs exist.
+Project cards are reusable semantic `article` elements with a title, short description, ordered technology labels, optional archived status badge, optional GitHub/demo links when URLs exist, and a localized detail action only when `presentationMode = "DETAIL"`. `CARD_ONLY` cards stay visually normal but do not link to project detail routes or imply that more page content exists. The card body keeps actions in a stable bottom row when actions exist, without padding `CARD_ONLY` entries with fake content.
 
-The detail page renders only fields present in `ProjectDetailDto`: title, short description, optional detailed description, optional media reference, technologies, and optional external links. `detailedDescription` is rendered as plain text with preserved line breaks; Markdown, unsafe HTML, page-builder blocks, and media galleries remain deferred.
+The detail page renders only fields present in `ProjectDetailDto`: title, short description, optional media reference, technologies, optional archived status badge, optional external links, and ordered localized sections. A compact technical overview near the hero is derived from the existing technology list and section headings; no separate project-fact metadata model exists yet. `detailedDescription` remains a deprecated fallback and is rendered only when a DETAIL response has no structured sections. Markdown, unsafe HTML, page-builder blocks, and media galleries remain deferred.
 
 Project detail not-found states reuse the localized not-found foundation and set SSR response status 404 through `RESPONSE_INIT` when Angular SSR is handling the request. The generic not-found page links to Home, while project-detail misses link back to the localized Projects page.
 
@@ -339,10 +343,10 @@ Component ownership for M9:
 | Home portrait slot       | None                                                                    | approved portrait displayed in a circular porthole/navigation frame using CSS object cropping from the original image asset |
 | Skills                   | `card`, `badge`                                                         | importance classes and hierarchy-specific treatment                                                                         |
 | Experience/Education     | `timeline`, `timeline-start`, `timeline-middle`, `timeline-end`, `<hr>` | daisyUI central-route geometry first; custom plotted-route/waypoint styling second                                          |
-| Projects                 | `card`, `badge`, `btn`                                                  | featured/standard/archive visual weight, media-safe presentation                                                            |
+| Projects                 | `card`, `badge`, `btn`                                                  | featured/standard/archive visual weight, media-safe card presentation, section-based detail case-study rendering            |
 | Contact                  | `card`                                                                  | conservative empty public-contact state and lighthouse/contact visual                                                       |
 
-The project card contract remains based on `ProjectSummaryDto`; the detail page remains based on `ProjectDetailDto`. M9 may style `featured`, `PUBLISHED`, and `ARCHIVED` differently, but it must not add a persistence field solely for visual importance.
+The project card contract remains based on `ProjectSummaryDto`; the detail page remains based on `ProjectDetailDto` with ordered localized `ProjectSectionDto` entries. M9 may style `featured`, `PUBLISHED`, and `ARCHIVED` differently, but it must not add a persistence field solely for visual importance.
 
 Mockup support is architecture-ready but deferred in rendering. The current API exposes only `logoMediaRef`, which may be a logo or other generic media. DaisyUI mockups should only be used when a future media contract or owner-supplied asset identifies browser screenshots, phone screenshots, or code samples.
 
@@ -415,6 +419,8 @@ Do not let any future loading labels resize cards or navigation controls.
 V1 media modelling is intentionally minimal.
 
 Project records may provide one `logoMediaRef` or general media reference. Store public project media refs as canonical root-relative paths beginning with `/`, such as `/assets/projects/my-project/screenshot.webp`, or as approved absolute `https://` URLs. Bare relative paths, protocol-relative URLs, `http://`, and unsafe schemes are rejected. The frontend should treat the reference as an optional display asset, not as evidence of a full media gallery domain.
+
+Project detail layout must remain complete when `logoMediaRef` is absent. The current page does not render an empty media placeholder. Future screenshots or diagrams should be added through an explicit media contract rather than overloading the current single reference.
 
 Frontend requirements:
 

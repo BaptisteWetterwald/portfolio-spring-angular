@@ -9,6 +9,7 @@ import java.util.Set;
 
 import fr.bwetterwald.portfolio.common.persistence.TimestampedEntity;
 import fr.bwetterwald.portfolio.project.domain.ProjectLocale;
+import fr.bwetterwald.portfolio.project.domain.ProjectPresentationMode;
 import fr.bwetterwald.portfolio.project.domain.ProjectStatus;
 import fr.bwetterwald.portfolio.technology.persistence.TechnologyEntity;
 import jakarta.persistence.CascadeType;
@@ -51,6 +52,10 @@ public class ProjectEntity extends TimestampedEntity {
 	@Column(name = "status", nullable = false, length = 32)
 	private ProjectStatus status = ProjectStatus.DRAFT;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "presentation_mode", nullable = false, length = 32)
+	private ProjectPresentationMode presentationMode = ProjectPresentationMode.DETAIL;
+
 	@Column(name = "display_order", nullable = false)
 	private int displayOrder;
 
@@ -64,12 +69,17 @@ public class ProjectEntity extends TimestampedEntity {
 	@OrderBy("displayOrder ASC")
 	private List<ProjectTechnologyEntity> projectTechnologies = new ArrayList<>();
 
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("displayOrder ASC")
+	private List<ProjectSectionEntity> sections = new ArrayList<>();
+
 	protected ProjectEntity() {
 	}
 
-	public ProjectEntity(String slug, ProjectStatus status, int displayOrder) {
+	public ProjectEntity(String slug, ProjectStatus status, ProjectPresentationMode presentationMode, int displayOrder) {
 		this.slug = slug;
 		this.status = status;
+		this.presentationMode = presentationMode;
 		this.displayOrder = displayOrder;
 	}
 
@@ -125,6 +135,14 @@ public class ProjectEntity extends TimestampedEntity {
 		this.status = status;
 	}
 
+	public ProjectPresentationMode getPresentationMode() {
+		return this.presentationMode;
+	}
+
+	public void setPresentationMode(ProjectPresentationMode presentationMode) {
+		this.presentationMode = presentationMode;
+	}
+
 	public int getDisplayOrder() {
 		return this.displayOrder;
 	}
@@ -149,6 +167,10 @@ public class ProjectEntity extends TimestampedEntity {
 		return Collections.unmodifiableList(this.projectTechnologies);
 	}
 
+	public List<ProjectSectionEntity> getSections() {
+		return Collections.unmodifiableList(this.sections);
+	}
+
 	public ProjectTranslationEntity addTranslation(ProjectLocale locale, String title, String shortDescription,
 			String detailedDescription) {
 		ProjectTranslationEntity translation = new ProjectTranslationEntity(this, locale, title, shortDescription,
@@ -161,6 +183,12 @@ public class ProjectEntity extends TimestampedEntity {
 		ProjectTechnologyEntity projectTechnology = new ProjectTechnologyEntity(this, technology, displayOrder);
 		this.projectTechnologies.add(projectTechnology);
 		return projectTechnology;
+	}
+
+	public ProjectSectionEntity addSection(int displayOrder) {
+		ProjectSectionEntity section = new ProjectSectionEntity(this, displayOrder);
+		this.sections.add(section);
+		return section;
 	}
 
 }

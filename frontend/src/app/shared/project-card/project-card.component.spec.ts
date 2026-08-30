@@ -8,10 +8,11 @@ import { ProjectCardComponent } from './project-card.component';
 
 @Component({
   imports: [ProjectCardComponent],
-  template: `<app-project-card [project]="project" locale="en" />`,
+  template: `<app-project-card [project]="project" [locale]="locale" />`,
 })
 class ProjectCardHostComponent {
   project: ProjectSummaryDto = projectFixture();
+  locale: 'fr' | 'en' = 'en';
 }
 
 describe('ProjectCardComponent', () => {
@@ -29,17 +30,60 @@ describe('ProjectCardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders a semantic project link and technology labels', () => {
+  it('renders semantic project content and technology labels', () => {
     const card = fixture.nativeElement as HTMLElement;
-    const titleLink = card.querySelector<HTMLAnchorElement>('h3 a');
 
     expect(card.querySelector('article')).not.toBeNull();
-    expect(titleLink?.textContent).toContain('Portfolio API');
-    expect(titleLink?.getAttribute('href')).toBe('/en/projects/portfolio-api');
-    expect(titleLink?.getAttribute('aria-label')).toContain('Portfolio API');
+    expect(card.querySelector('h3')?.textContent).toContain('Portfolio API');
     expect(Array.from(card.querySelectorAll('li')).map((item) => item.textContent?.trim())).toEqual(
       ['Angular', 'Spring Boot'],
     );
+  });
+
+  it('exposes an accessible localized detail affordance for detail projects', async () => {
+    const card = fixture.nativeElement as HTMLElement;
+    const detailLink = card.querySelector<HTMLAnchorElement>('.project-card__action--detail');
+
+    expect(detailLink?.textContent?.trim()).toBe('View project');
+    expect(detailLink?.getAttribute('href')).toBe('/en/projects/portfolio-api');
+    expect(detailLink?.getAttribute('aria-label')).toBe('View project: Portfolio API');
+
+    const frenchFixture = TestBed.createComponent(ProjectCardHostComponent);
+
+    frenchFixture.componentInstance.locale = 'fr';
+    frenchFixture.detectChanges();
+    await frenchFixture.whenStable();
+    frenchFixture.detectChanges();
+
+    const frenchCard = frenchFixture.nativeElement as HTMLElement;
+    const frenchDetailLink = frenchCard.querySelector<HTMLAnchorElement>(
+      '.project-card__action--detail',
+    );
+
+    expect(frenchDetailLink?.textContent?.trim()).toBe('Voir le projet');
+    expect(frenchDetailLink?.getAttribute('href')).toBe('/fr/projets/portfolio-api');
+  });
+
+  it('renders card-only projects without project detail navigation', () => {
+    const cardOnlyFixture = TestBed.createComponent(ProjectCardHostComponent);
+
+    cardOnlyFixture.componentInstance.project = {
+      ...projectFixture(),
+      presentationMode: 'CARD_ONLY',
+      githubUrl: null,
+      demoUrl: null,
+    };
+    cardOnlyFixture.detectChanges();
+
+    const card = cardOnlyFixture.nativeElement as HTMLElement;
+
+    expect(card.querySelector('article')).not.toBeNull();
+    expect(card.textContent).toContain('Portfolio API');
+    expect(
+      card.querySelector<HTMLAnchorElement>('a[href="/en/projects/portfolio-api"]'),
+    ).toBeNull();
+    expect(card.querySelector('.project-card__action--detail')).toBeNull();
+    expect(card.querySelector('nav')).toBeNull();
   });
 
   it('uses card and badge primitives with media-safe layout hooks', () => {
@@ -49,17 +93,47 @@ describe('ProjectCardComponent', () => {
     expect(article?.classList.contains('card')).toBe(true);
     expect(article?.classList.contains('project-card--featured')).toBe(true);
     expect(article?.classList.contains('project-card--with-media')).toBe(true);
-    expect(card.querySelector('.project-card__status.badge')).not.toBeNull();
+    expect(article?.classList.contains('project-card--has-detail')).toBe(true);
     expect(card.querySelectorAll('.project-card__technology.badge').length).toBe(2);
+  });
+
+  it('omits the public published badge and keeps the archived badge', () => {
+    const publishedCard = fixture.nativeElement as HTMLElement;
+
+    expect(publishedCard.textContent).not.toContain('Published');
+    expect(publishedCard.querySelector('.project-card__status.badge')).toBeNull();
+
+    const archivedFixture = TestBed.createComponent(ProjectCardHostComponent);
+
+    archivedFixture.componentInstance.project = {
+      ...projectFixture(),
+      status: 'ARCHIVED',
+    };
+    archivedFixture.detectChanges();
+
+    const archivedCard = archivedFixture.nativeElement as HTMLElement;
+
+    expect(archivedCard.querySelector('.project-card__status.badge')?.textContent).toContain(
+      'Archived',
+    );
   });
 
   it('renders optional external links only when present', () => {
     const card = fixture.nativeElement as HTMLElement;
     const externalLinks = Array.from(card.querySelectorAll<HTMLAnchorElement>('nav a'));
 
-    expect(externalLinks.map((link) => link.textContent?.trim())).toEqual(['GitHub', 'Demo']);
-    expect(externalLinks[0]?.target).toBe('_blank');
-    expect(externalLinks[0]?.rel).toContain('noopener');
+    expect(externalLinks.map((link) => link.textContent?.trim())).toEqual([
+      'View project',
+      'GitHub',
+      'Demo',
+    ]);
+    expect(externalLinks[1]?.target).toBe('_blank');
+    expect(externalLinks[1]?.rel).toContain('noopener');
+    expect(externalLinks[1]?.getAttribute('aria-label')).toBe(
+      'GitHub (opens in a new tab): Portfolio API',
+    );
+    expect(externalLinks[1]?.classList.contains('project-card__action--external')).toBe(true);
+    expect(externalLinks[0]?.classList.contains('project-card__action--detail')).toBe(true);
 
     const noLinksFixture = TestBed.createComponent(ProjectCardHostComponent);
 
@@ -70,7 +144,19 @@ describe('ProjectCardComponent', () => {
     };
     noLinksFixture.detectChanges();
 
-    expect((noLinksFixture.nativeElement as HTMLElement).querySelector('nav')).toBeNull();
+    expect(
+      Array.from(
+        (noLinksFixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('nav a'),
+      ).map((link) => link.textContent?.trim()),
+    ).toEqual(['View project']);
+  });
+
+  it('does not nest interactive controls inside other interactive controls', () => {
+    const card = fixture.nativeElement as HTMLElement;
+
+    expect(card.querySelector('a a')).toBeNull();
+    expect(card.querySelector('button a')).toBeNull();
+    expect(card.querySelector('a button')).toBeNull();
   });
 
   it('accepts only safe project media references', () => {
@@ -97,6 +183,7 @@ function projectFixture(): ProjectSummaryDto {
     demoUrl: 'https://demo.example.test/portfolio-api',
     featured: true,
     status: 'PUBLISHED',
+    presentationMode: 'DETAIL',
     displayOrder: 10,
     technologies: [
       {

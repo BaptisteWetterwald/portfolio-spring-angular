@@ -44,6 +44,8 @@ export class ProjectDetailPageComponent {
 
     return state.kind === 'loaded' ? state.project : undefined;
   });
+  protected readonly sections = computed(() => this.project()?.sections ?? []);
+  protected readonly hasStructuredSections = computed(() => this.sections().length > 0);
   protected readonly mediaSrc = computed(() => projectMediaSrc(this.project()?.logoMediaRef));
 
   readonly #localeContext = inject(LocaleContextService);
@@ -77,14 +79,18 @@ export class ProjectDetailPageComponent {
   }
 
   protected externalLinkLabel(kind: 'github' | 'demo'): string {
-    return this.#translations.translate(`projects.links.${kind}`);
+    return this.#translations.translateFor(this.locale, `projects.links.${kind}`);
   }
 
   protected externalLinkAria(kind: 'github' | 'demo'): string {
     const project = this.project();
 
     return project
-      ? `${this.externalLinkLabel(kind)}: ${project.title}`
+      ? `${this.externalLinkLabel(kind)} (${this.t('projects.links.opensInNewTab')}): ${project.title}`
       : this.externalLinkLabel(kind);
+  }
+
+  protected sectionId(index: number): string {
+    return `project-section-${index + 1}`;
   }
 }

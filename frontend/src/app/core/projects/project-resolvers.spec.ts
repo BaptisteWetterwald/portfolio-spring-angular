@@ -134,6 +134,7 @@ function summaryProject(): ProjectSummaryDto {
     demoUrl: null,
     featured: true,
     status: 'PUBLISHED',
+    presentationMode: 'DETAIL',
     displayOrder: 10,
     technologies: [],
   };
@@ -143,6 +144,7 @@ function detailProject(): ProjectDetailDto {
   return {
     ...summaryProject(),
     detailedDescription: null,
+    sections: [],
     availableLocales: ['en'],
   };
 }

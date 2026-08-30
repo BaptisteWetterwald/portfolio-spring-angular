@@ -68,11 +68,11 @@ Initial public endpoints:
 | `GET` | `/api/v1/projects?locale=fr|en&status=PUBLISHED` | List published projects. |
 | `GET` | `/api/v1/projects?locale=fr|en&status=ARCHIVED` | List archived projects. |
 | `GET` | `/api/v1/projects/featured?locale=fr|en` | List featured `PUBLISHED` projects. |
-| `GET` | `/api/v1/projects/{slug}?locale=fr|en` | Fetch localized detail for `PUBLISHED` or `ARCHIVED` project. |
+| `GET` | `/api/v1/projects/{slug}?locale=fr|en` | Fetch localized detail for a public project configured as `DETAIL`. |
 | `GET` | `/api/v1/technologies` | List technologies. |
 | `GET` | `/api/v1/health` or Actuator health | Basic health, if not using Actuator path directly. |
 
-`DRAFT` projects are private and must not be returned by public endpoints.
+`DRAFT` projects are private and must not be returned by public endpoints. `CARD_ONLY` projects remain visible in public lists when their status is public, but they are unavailable from the public detail endpoint.
 
 Locale should be explicit. The API may inspect `Accept-Language` as a fallback, but frontend SSR should pass locale explicitly.
 
@@ -88,6 +88,7 @@ project
     PublicProjectController
     ProjectSummaryDto
     ProjectDetailDto
+    ProjectSectionDto
     TechnologyDto
   application
     PublicProjectService
@@ -97,6 +98,7 @@ project
     UnsupportedPublicProjectStatusException
   persistence
     ProjectTranslationRepository
+    ProjectSectionTranslationRepository
     ProjectTechnologyRepository
 common
   error
@@ -106,7 +108,7 @@ common
 
 `PublicProjectController` only handles HTTP routing and parameter binding. `PublicProjectService` owns public visibility, locale parsing, status-filter validation, missing-translation behavior, and transactional mapping. The public API never exposes JPA entities.
 
-The list endpoint returns public projects with the requested translation only. Public projects missing the requested translation are omitted from localized lists. Detail lookup for an unknown slug, `DRAFT` slug, non-public project, or missing requested translation returns 404.
+The list endpoint returns public projects with the requested translation only, including both `CARD_ONLY` and `DETAIL` presentation modes. Public projects missing the requested translation are omitted from localized lists. Detail lookup for an unknown slug, `DRAFT` slug, non-public project, `CARD_ONLY` project, or missing requested translation returns 404.
 
 The service accepts only `fr` and `en` locale query values and only `PUBLISHED` or `ARCHIVED` status filters. `DRAFT` is rejected as an invalid public filter and is never returned by public queries.
 
@@ -126,7 +128,7 @@ Initial DTOs:
 
 DTOs should include already-localized fields for the requested locale.
 
-`ProjectDetailDto.detailedDescription` should be nullable or omitted when not present.
+`ProjectDetailDto.detailedDescription` is nullable and deprecated as a compatibility/fallback field. Ordered localized `sections` are the canonical rich-detail body for `DETAIL` projects.
 
 Milestone 7 DTO contracts:
 
@@ -140,13 +142,19 @@ ProjectSummaryDto
   demoUrl: string | null
   featured: boolean
   status: "PUBLISHED" | "ARCHIVED"
+  presentationMode: "CARD_ONLY" | "DETAIL"
   displayOrder: number
   technologies: TechnologyDto[]
 
 ProjectDetailDto
   all ProjectSummaryDto fields
   detailedDescription: string | null
+  sections: ProjectSectionDto[]
   availableLocales: ("fr" | "en")[]
+
+ProjectSectionDto
+  title: string
+  content: string
 
 TechnologyDto
   slug: string
@@ -161,6 +169,8 @@ ApiErrorDto
 ```
 
 `availableLocales` is included on detail responses so the frontend can emit `hreflang` alternates only for localized detail pages that actually exist.
+
+List responses remain compact and must not include section bodies. Structured sections are returned by the detail endpoint only.
 
 ## Mapping
 
@@ -211,7 +221,55 @@ Milestone 4 created:
 backend/src/main/resources/db/migration/V1__create_project_domain.sql
 ```
 
-The V1 migration is structural only. It creates `projects`, `project_translations`, `technologies`, and `project_technologies`; no production seed data is inserted because approved real portfolio content has not been supplied.
+The V1 migration is structural only. It creates `projects`, `project_translations`, `technologies`, and `project_technologies`.
+
+The focused project data pass after Milestone 9 adds:
+
+```text
+backend/src/main/resources/db/migration/V3__seed_real_portfolio_projects.sql
+```
+
+`V3` seeds the first real public project, `BeamNG.drive x BeepBeep 3`, with bilingual translations and ordered technologies. Optional media, GitHub, and demo fields remain null because the repository does not contain authoritative values for them.
+
+The Projects domain-model refinement adds:
+
+```text
+backend/src/main/resources/db/migration/V4__add_project_presentation_mode.sql
+```
+
+`V4` adds `projects.presentation_mode`, constrains it to `CARD_ONLY` or `DETAIL`, and sets the existing BeamNG project to `CARD_ONLY` because its current authoritative content is better represented on the Projects list than on a sparse detail page.
+
+The Blaze4 content pass adds:
+
+```text
+backend/src/main/resources/db/migration/V5__seed_blaze4_project.sql
+```
+
+`V5` seeds `Blaze4` from the canonical public repository at <https://github.com/BaptisteWetterwald/ecole-ntiers-projet-blaze4>. It is `PUBLISHED` + `DETAIL`, bilingual, links to the GitHub repository, and uses the normalized technology model for C#, .NET, ASP.NET Core, Blazor WebAssembly, Entity Framework Core, and SQLite. The public copy describes domain/business-logic separation inside the repository's documented N-tier architecture; it does not claim formal Domain-Driven Design.
+
+The Projects detail architecture pass adds:
+
+```text
+backend/src/main/resources/db/migration/V6__add_project_detail_sections.sql
+```
+
+`V6` creates `project_sections` and `project_section_translations`, then migrates the authoritative Blaze4 long-form copy into four ordered bilingual sections. The old `project_translations.detailed_description` column is retained as a staged fallback, but new rich DETAIL content should be authored as sections.
+
+The Portfolio content pass adds:
+
+```text
+backend/src/main/resources/db/migration/V7__seed_portfolio_project.sql
+```
+
+`V7` seeds this current portfolio from the local repository implementation, durable docs, and git origin at <https://github.com/BaptisteWetterwald/portfolio-spring-angular>. It is `PUBLISHED` + `DETAIL`, bilingual, links to the GitHub repository, has no demo URL or media reference, and uses ordered structured sections without authoring the deprecated `detailed_description` body.
+
+The card-only project content pass adds:
+
+```text
+backend/src/main/resources/db/migration/V8__seed_card_only_projects_and_reorder.sql
+```
+
+`V8` seeds Frequensisa, SummerCamp, and Bot Discord IR as real `PUBLISHED` + `CARD_ONLY` projects from their canonical public repositories. It adds bilingual card copy, canonical GitHub URLs, normalized technology links, no structured detail sections, and reorders the public project list through existing `projects.display_order` values.
 
 Approved V1 production strategy:
 
@@ -245,6 +303,7 @@ Expected responses:
 | Unknown route | `404` |
 | Unknown project slug | `404` |
 | `DRAFT` project requested publicly | `404` |
+| `CARD_ONLY` project requested through detail endpoint | `404` |
 | Missing translation for requested locale | `404` or fallback only by explicit policy |
 | Invalid locale/query parameter | `400` |
 | Invalid public status filter | `400` |
@@ -277,6 +336,7 @@ Locale-neutral:
 - demo URL;
 - featured flag;
 - status: `DRAFT`, `PUBLISHED`, `ARCHIVED`;
+- presentation mode: `CARD_ONLY`, `DETAIL`;
 - display order;
 - timestamps.
 
@@ -284,7 +344,8 @@ Localized:
 
 - title, required;
 - short description, required;
-- detailed description, optional.
+- detailed description, optional and deprecated for rich pages;
+- ordered section title/content translations for structured DETAIL pages.
 
 Technologies are shared across locales in V1.
 
@@ -298,9 +359,12 @@ project
   persistence
     ProjectEntity
     ProjectTranslationEntity
+    ProjectSectionEntity
+    ProjectSectionTranslationEntity
     ProjectTechnologyEntity
     ProjectRepository
     ProjectTranslationRepository
+    ProjectSectionTranslationRepository
     ProjectTechnologyRepository
 technology
   persistence
@@ -308,15 +372,16 @@ technology
     TechnologyRepository
 ```
 
-`ProjectStatus` is persisted as a string enum. `ProjectLocale` is a small enum persisted through an attribute converter as `fr` or `en`. The project-to-technology relationship is an explicit association entity because the join table owns `display_order`.
+`ProjectStatus` and `ProjectPresentationMode` are persisted as string enums. `ProjectLocale` is a small enum persisted through an attribute converter as `fr` or `en`. The project-to-technology relationship is an explicit association entity because the join table owns `display_order`.
 
 Entity timestamps use a small JPA lifecycle callback superclass that sets `created_at` and `updated_at` on persist and updates `updated_at` on update. The migration also defines database defaults as a fallback for non-JPA inserts.
 
 Milestone 7 public API query strategy:
 
 - list queries select `ProjectTranslationEntity` for the requested locale and `join fetch` the owning project;
-- detail queries select the requested translation for a public slug and `join fetch` the owning project;
+- detail queries select the requested translation for a public `DETAIL` slug and `join fetch` the owning project;
 - technologies are loaded in display order through `ProjectTechnologyRepository`;
+- structured sections are loaded for detail responses through `ProjectSectionTranslationRepository` using the requested locale and deterministic section ordering;
 - list endpoints batch-load technologies for all returned project IDs in one query to avoid one query per project;
 - no collection fetch join is used for project technologies, avoiding `MultipleBagFetchException` and duplicate project rows.
 

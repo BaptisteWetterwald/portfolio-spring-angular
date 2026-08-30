@@ -26,7 +26,9 @@ describe('ProjectsPageComponent', () => {
     expect(page.querySelector('.projects-page__group--featured')).not.toBeNull();
     expect(page.querySelector('.projects-page__group--archived')).not.toBeNull();
     expect(
-      page.querySelector<HTMLAnchorElement>('app-project-card h3 a')?.getAttribute('href'),
+      page
+        .querySelector<HTMLAnchorElement>('app-project-card .project-card__action--detail')
+        ?.getAttribute('href'),
     ).toBe('/en/projects/featured-project');
   });
 
@@ -39,6 +41,35 @@ describe('ProjectsPageComponent', () => {
 
     expect(page.textContent).toContain('No public projects yet');
     expect(page.querySelector('app-project-card')).toBeNull();
+  });
+
+  it('renders the English project introduction without placeholder wording', async () => {
+    const fixture = await createFixture({
+      kind: 'loaded',
+      projects: [],
+    });
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.textContent).toContain(
+      'A selection of personal and academic projects showcasing the technologies and software architectures I have worked with.',
+    );
+    expect(page.textContent).not.toContain('will appear here');
+  });
+
+  it('renders the French project introduction without placeholder wording', async () => {
+    const fixture = await createFixture(
+      {
+        kind: 'loaded',
+        projects: [],
+      },
+      'fr',
+    );
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.textContent).toContain(
+      "Une sélection de projets personnels et académiques illustrant les technologies et architectures avec lesquelles j'ai travaillé.",
+    );
+    expect(page.textContent).not.toContain('apparaîtront ici');
   });
 
   it('renders a generic API failure state without raw server details', async () => {
@@ -132,6 +163,7 @@ function projectFixture(
     demoUrl: null,
     featured,
     status,
+    presentationMode: 'DETAIL',
     displayOrder: 10,
     technologies: [],
   };

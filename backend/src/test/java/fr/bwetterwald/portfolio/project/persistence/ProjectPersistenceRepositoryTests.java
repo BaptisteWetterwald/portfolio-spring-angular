@@ -4,11 +4,13 @@ import java.time.Instant;
 import java.util.List;
 
 import fr.bwetterwald.portfolio.project.domain.ProjectLocale;
+import fr.bwetterwald.portfolio.project.domain.ProjectPresentationMode;
 import fr.bwetterwald.portfolio.project.domain.ProjectStatus;
 import fr.bwetterwald.portfolio.support.AbstractPostgresSpringTest;
 import fr.bwetterwald.portfolio.support.PostgresTestDatabase;
 import fr.bwetterwald.portfolio.technology.persistence.TechnologyEntity;
 import fr.bwetterwald.portfolio.technology.persistence.TechnologyRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -35,10 +37,18 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	private ProjectTechnologyRepository projectTechnologyRepository;
 
 	@Autowired
+	private ProjectSectionTranslationRepository projectSectionTranslationRepository;
+
+	@Autowired
 	private TechnologyRepository technologyRepository;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@BeforeEach
+	void removeProductionSeedDataFromFixtureTests() {
+		deleteAllProjectData();
+	}
 
 	@Test
 	void persistsProjectWithTranslationsAndOrderedTechnologies() {
@@ -54,6 +64,12 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 		project.addTranslation(ProjectLocale.EN, "Portfolio demo", "English short description", null);
 		project.addTranslation(ProjectLocale.FR, "Demo portfolio", "Description courte francaise",
 				"Description detaillee francaise");
+		ProjectSectionEntity architecture = project.addSection(20);
+		architecture.addTranslation(ProjectLocale.EN, "Architecture", "English architecture section");
+		architecture.addTranslation(ProjectLocale.FR, "Architecture", "Section d'architecture francaise");
+		ProjectSectionEntity context = project.addSection(10);
+		context.addTranslation(ProjectLocale.EN, "Context", "English context section");
+		context.addTranslation(ProjectLocale.FR, "Contexte", "Section de contexte francaise");
 		project.addTechnology(springBoot, 20);
 		project.addTechnology(angular, 10);
 
@@ -65,6 +81,7 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 		assertThat(persistedProject.getLogoMediaRef()).isEqualTo("/assets/projects/portfolio-demo-logo.svg");
 		assertThat(persistedProject.getGithubUrl()).isEqualTo("https://example.test/portfolio-demo.git");
 		assertThat(persistedProject.getDemoUrl()).isEqualTo("https://demo.example.test/portfolio-demo");
+		assertThat(persistedProject.getPresentationMode()).isEqualTo(ProjectPresentationMode.DETAIL);
 
 		ProjectTranslationEntity englishTranslation = projectTranslationRepository
 			.findByProjectIdAndLocale(persistedProject.getId(), ProjectLocale.EN)
@@ -75,6 +92,13 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 			.findByProjectIdInDisplayOrder(persistedProject.getId());
 		assertThat(orderedTechnologies).extracting((projectTechnology) -> projectTechnology.getTechnology().getSlug())
 			.containsExactly("angular", "spring-boot");
+
+		List<ProjectSectionTranslationEntity> orderedSections = projectSectionTranslationRepository
+			.findByProjectIdAndLocaleInDisplayOrder(persistedProject.getId(), ProjectLocale.EN);
+		assertThat(orderedSections).extracting(ProjectSectionTranslationEntity::getTitle)
+			.containsExactly("Context", "Architecture");
+		assertThat(orderedSections).extracting(ProjectSectionTranslationEntity::getContent)
+			.containsExactly("English context section", "English architecture section");
 	}
 
 	@Test
@@ -129,6 +153,42 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	}
 
 	@Test
+	void publicTranslationListsIncludeCardOnlyAndDetailProjectsByStatus() {
+		ProjectEntity publishedCardOnly = saveTranslatedProject("published-card-only", ProjectStatus.PUBLISHED,
+				ProjectPresentationMode.CARD_ONLY, 10);
+		ProjectEntity archivedCardOnly = saveTranslatedProject("archived-card-only", ProjectStatus.ARCHIVED,
+				ProjectPresentationMode.CARD_ONLY, 20);
+		ProjectEntity publishedDetail = saveTranslatedProject("published-detail", ProjectStatus.PUBLISHED,
+				ProjectPresentationMode.DETAIL, 30);
+		saveTranslatedProject("draft-detail", ProjectStatus.DRAFT, ProjectPresentationMode.DETAIL, 40);
+
+		assertThat(projectTranslationRepository.findPublicTranslations(ProjectLocale.EN))
+			.extracting((translation) -> translation.getProject().getSlug())
+			.containsExactly(publishedCardOnly.getSlug(), archivedCardOnly.getSlug(), publishedDetail.getSlug());
+	}
+
+	@Test
+	void publicDetailTranslationLookupRequiresDetailPresentationMode() {
+		ProjectEntity publishedCardOnly = saveTranslatedProject("published-card-only", ProjectStatus.PUBLISHED,
+				ProjectPresentationMode.CARD_ONLY, 10);
+		ProjectEntity publishedDetail = saveTranslatedProject("published-detail", ProjectStatus.PUBLISHED,
+				ProjectPresentationMode.DETAIL, 20);
+		ProjectEntity archivedDetail = saveTranslatedProject("archived-detail", ProjectStatus.ARCHIVED,
+				ProjectPresentationMode.DETAIL, 30);
+		ProjectEntity draftDetail = saveTranslatedProject("draft-detail", ProjectStatus.DRAFT,
+				ProjectPresentationMode.DETAIL, 40);
+
+		assertThat(projectTranslationRepository.findPublicDetailTranslationBySlug(publishedCardOnly.getSlug(),
+				ProjectLocale.EN)).isEmpty();
+		assertThat(projectTranslationRepository.findPublicDetailTranslationBySlug(publishedDetail.getSlug(),
+				ProjectLocale.EN)).isPresent();
+		assertThat(projectTranslationRepository.findPublicDetailTranslationBySlug(archivedDetail.getSlug(),
+				ProjectLocale.EN)).isPresent();
+		assertThat(projectTranslationRepository.findPublicDetailTranslationBySlug(draftDetail.getSlug(),
+				ProjectLocale.EN)).isEmpty();
+	}
+
+	@Test
 	void duplicateProjectSlugIsRejected() {
 		saveProject("duplicate-slug", ProjectStatus.PUBLISHED, false, 10);
 
@@ -146,10 +206,45 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	}
 
 	@Test
+	void duplicateProjectSectionDisplayOrderIsRejected() {
+		ProjectEntity project = project("duplicate-section-order", ProjectStatus.PUBLISHED, 10);
+		project.addSection(10).addTranslation(ProjectLocale.EN, "Context", "Context content");
+		project.addSection(10).addTranslation(ProjectLocale.EN, "Architecture", "Architecture content");
+
+		assertThatThrownBy(() -> projectRepository.saveAndFlush(project)).isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
+	void duplicateProjectSectionLocaleTranslationIsRejected() {
+		ProjectEntity project = project("duplicate-section-locale", ProjectStatus.PUBLISHED, 10);
+		ProjectSectionEntity section = project.addSection(10);
+		section.addTranslation(ProjectLocale.EN, "Context", "Context content");
+		section.addTranslation(ProjectLocale.EN, "Context duplicate", "Duplicate content");
+
+		assertThatThrownBy(() -> projectRepository.saveAndFlush(project)).isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
+	void blankProjectSectionContentIsRejectedByDatabaseConstraint() {
+		ProjectEntity project = project("blank-section-content", ProjectStatus.PUBLISHED, 10);
+		project.addSection(10).addTranslation(ProjectLocale.EN, "Context", "   ");
+
+		assertThatThrownBy(() -> projectRepository.saveAndFlush(project)).isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
 	void unsupportedProjectStatusIsRejectedByDatabaseConstraint() {
 		assertThatThrownBy(() -> this.jdbcTemplate.update("""
-				insert into %s.projects (slug, featured, status, display_order, created_at, updated_at)
-				values ('unsupported-status', false, 'DELETED', 0, now(), now())
+				insert into %s.projects (slug, featured, status, presentation_mode, display_order, created_at, updated_at)
+				values ('unsupported-status', false, 'DELETED', 'DETAIL', 0, now(), now())
+				""".formatted(isolatedPostgresSchema()))).isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	@Test
+	void unsupportedProjectPresentationModeIsRejectedByDatabaseConstraint() {
+		assertThatThrownBy(() -> this.jdbcTemplate.update("""
+				insert into %s.projects (slug, featured, status, presentation_mode, display_order, created_at, updated_at)
+				values ('unsupported-presentation-mode', false, 'PUBLISHED', 'SUMMARY', 0, now(), now())
 				""".formatted(isolatedPostgresSchema()))).isInstanceOf(DataIntegrityViolationException.class);
 	}
 
@@ -185,7 +280,12 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	}
 
 	private ProjectEntity saveTranslatedProject(String slug, ProjectStatus status, int displayOrder) {
-		ProjectEntity project = project(slug, status, displayOrder);
+		return saveTranslatedProject(slug, status, ProjectPresentationMode.DETAIL, displayOrder);
+	}
+
+	private ProjectEntity saveTranslatedProject(String slug, ProjectStatus status, ProjectPresentationMode presentationMode,
+			int displayOrder) {
+		ProjectEntity project = project(slug, status, presentationMode, displayOrder);
 		project.addTranslation(ProjectLocale.EN, slug + " EN", "English short description", null);
 		project.addTranslation(ProjectLocale.FR, slug + " FR", "Description courte francaise", null);
 		return projectRepository.saveAndFlush(project);
@@ -198,7 +298,12 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 	}
 
 	private static ProjectEntity project(String slug, ProjectStatus status, int displayOrder) {
-		ProjectEntity project = new ProjectEntity(slug, status, displayOrder);
+		return project(slug, status, ProjectPresentationMode.DETAIL, displayOrder);
+	}
+
+	private static ProjectEntity project(String slug, ProjectStatus status, ProjectPresentationMode presentationMode,
+			int displayOrder) {
+		ProjectEntity project = new ProjectEntity(slug, status, presentationMode, displayOrder);
 		project.setPublishedAt(Instant.parse("2026-01-15T10:00:00Z"));
 		return project;
 	}
@@ -208,6 +313,17 @@ class ProjectPersistenceRepositoryTests extends AbstractPostgresSpringTest {
 		technology.setCategory("fixture");
 		technology.setIconRef("icons/" + slug + ".svg");
 		return technology;
+	}
+
+	private void deleteAllProjectData() {
+		String schema = isolatedPostgresSchema();
+
+		this.jdbcTemplate.update("delete from %s.project_technologies".formatted(schema));
+		this.jdbcTemplate.update("delete from %s.project_section_translations".formatted(schema));
+		this.jdbcTemplate.update("delete from %s.project_sections".formatted(schema));
+		this.jdbcTemplate.update("delete from %s.project_translations".formatted(schema));
+		this.jdbcTemplate.update("delete from %s.projects".formatted(schema));
+		this.jdbcTemplate.update("delete from %s.technologies".formatted(schema));
 	}
 
 }

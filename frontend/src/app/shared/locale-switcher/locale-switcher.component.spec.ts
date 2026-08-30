@@ -133,6 +133,7 @@ function summaryProject(): ProjectSummaryDto {
     demoUrl: null,
     featured: true,
     status: 'PUBLISHED',
+    presentationMode: 'DETAIL',
     displayOrder: 10,
     technologies: [],
   };
@@ -142,6 +143,7 @@ function detailProject(overrides: Partial<ProjectDetailDto> = {}): ProjectDetail
   return {
     ...summaryProject(),
     detailedDescription: null,
+    sections: [],
     availableLocales: ['fr', 'en'],
     ...overrides,
   };

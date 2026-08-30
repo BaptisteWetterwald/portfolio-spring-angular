@@ -14,7 +14,7 @@ backend/   Spring Boot application
 docs/      Product and architecture documentation
 ```
 
-The backend now contains the PostgreSQL-backed project persistence domain and the first public localized project API. The frontend now has the localized public shell, semantic navigation, locale switching, light/dark theme foundation, static sonar/compass navigation enhancement, API-backed project listing/detail pages, and the first confirmed bilingual Home, Education, Experience, and Skills content. CI/CD, production deployment, real project records, contact handling, GitHub integration, media management, and final visual polish are still future milestones.
+The backend now contains the PostgreSQL-backed project persistence domain, the first public localized project API, and three version-controlled real project records seeded through Flyway. The frontend now has the localized public shell, semantic navigation, locale switching, light/dark theme foundation, static sonar/compass navigation enhancement, API-backed project listing/detail pages, and the first confirmed bilingual Home, Education, Experience, and Skills content. CI/CD, production deployment, contact handling, global GitHub/LinkedIn links, richer media management, and final visual polish are still future milestones.
 
 Milestone 2 adds only Angular to Spring Boot communication plumbing:
 
@@ -61,7 +61,7 @@ Milestone 7 adds public project API and page rendering:
 - `GET /api/v1/projects?locale=fr|en` lists public `PUBLISHED` and `ARCHIVED` projects with the requested translation;
 - `GET /api/v1/projects?locale=fr|en&status=PUBLISHED|ARCHIVED` filters the public project list;
 - `GET /api/v1/projects/featured?locale=fr|en` lists featured `PUBLISHED` projects only;
-- `GET /api/v1/projects/{slug}?locale=fr|en` returns localized detail for a public project;
+- `GET /api/v1/projects/{slug}?locale=fr|en` returns localized detail for a public project configured as `DETAIL`;
 - `DRAFT`, unknown, and untranslated project detail requests return 404;
 - Angular Projects and project detail routes resolve project data during request-time SSR and render empty/error/not-found states without inventing portfolio content.
 
@@ -71,7 +71,24 @@ Milestone 8 adds confirmed static portfolio content:
 - Education renders ENSISA, IUT Robert Schuman, and UQAC entries with semantic date markup where dates are confirmed;
 - Experience renders roles for Plansee Group Functions, Plansee, Bureau Veritas Laboratories / Bureau Veritas Laboratoires, Groupe IES, and UQAC without invented metrics or responsibilities;
 - Skills are grouped by software engineering, Microsoft / enterprise applications, AI-assisted engineering, data/databases, and engineering/infrastructure, with importance levels instead of fake proficiency percentages;
-- GitHub/LinkedIn links, downloadable CV, contact method, and public project records remain unimplemented until approved content exists.
+- GitHub/LinkedIn links, downloadable CV, contact method, and most project records remain unimplemented until approved content exists.
+
+A focused project data pass after Milestone 9 adds the first real public project records:
+
+- `BeamNG.drive x BeepBeep 3` is seeded by `V3__seed_real_portfolio_projects.sql` from owner-provided repository documentation and bilingual Experience content;
+- `BeamNG.drive x BeepBeep 3` is explicitly marked `CARD_ONLY` by `V4__add_project_presentation_mode.sql`;
+- no GitHub URL, demo URL, or project-owned media reference is published for that project because no authoritative source for those fields exists in the repository.
+- `Blaze4` is seeded by `V5__seed_blaze4_project.sql` from the canonical public repository at `https://github.com/BaptisteWetterwald/ecole-ntiers-projet-blaze4`;
+- `Blaze4` is explicitly `PUBLISHED` + `DETAIL`, with bilingual card/detail content, the stored GitHub URL, and C#, .NET, ASP.NET Core, Blazor WebAssembly, Entity Framework Core, and SQLite technologies.
+
+The focused Projects detail architecture pass adds ordered localized case-study sections:
+
+- `V6__add_project_detail_sections.sql` creates `project_sections` and `project_section_translations`;
+- DETAIL project rich content is now modeled as ordered localized sections instead of one long body string;
+- the legacy `detailedDescription` field remains available as a deprecated compatibility/fallback field, but structured sections are the canonical model for rich DETAIL pages;
+- Blaze4 is the first real structured DETAIL project and BeamNG.drive x BeepBeep 3 remains `CARD_ONLY` with no public detail route;
+- `V7__seed_portfolio_project.sql` adds this current portfolio as a real `PUBLISHED` + `DETAIL` project using the current repository implementation, documentation, and git origin as the source of truth. It has bilingual structured sections, ordered technologies, the repository GitHub URL, no demo URL, no media reference, and no legacy `detailedDescription` body.
+- `V8__seed_card_only_projects_and_reorder.sql` adds Frequensisa, SummerCamp, and Bot Discord IR as real `PUBLISHED` + `CARD_ONLY` projects from their canonical repositories, with bilingual card copy, GitHub actions, normalized technologies, no structured sections, and public ordering through existing `display_order` values.
 
 ## Frontend
 
@@ -116,7 +133,7 @@ Representative public frontend routes:
 /en/contact
 ```
 
-Project detail URLs use shared slugs across locales:
+Project detail URLs use shared slugs across locales for projects configured as `DETAIL`:
 
 ```text
 /fr/projets/:slug
@@ -177,7 +194,7 @@ GET http://localhost:8080/api/v1/projects?locale=en
 GET http://localhost:8080/api/v1/projects?locale=en&status=PUBLISHED
 GET http://localhost:8080/api/v1/projects?locale=en&status=ARCHIVED
 GET http://localhost:8080/api/v1/projects/featured?locale=en
-GET http://localhost:8080/api/v1/projects/{slug}?locale=en
+GET http://localhost:8080/api/v1/projects/{slug}?locale=en  # only for DETAIL projects; includes ordered localized sections
 ```
 
 For native backend development, provide a local PostgreSQL database matching those values. The Compose `postgres` service exposes PostgreSQL on `127.0.0.1:5432` by default for this purpose.

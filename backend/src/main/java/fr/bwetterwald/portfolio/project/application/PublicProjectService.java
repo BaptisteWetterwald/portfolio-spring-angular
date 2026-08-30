@@ -8,10 +8,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import fr.bwetterwald.portfolio.project.api.ProjectDetailDto;
+import fr.bwetterwald.portfolio.project.api.ProjectSectionDto;
 import fr.bwetterwald.portfolio.project.api.ProjectSummaryDto;
 import fr.bwetterwald.portfolio.project.api.TechnologyDto;
 import fr.bwetterwald.portfolio.project.domain.ProjectLocale;
 import fr.bwetterwald.portfolio.project.domain.ProjectStatus;
+import fr.bwetterwald.portfolio.project.persistence.ProjectSectionTranslationRepository;
 import fr.bwetterwald.portfolio.project.persistence.ProjectTechnologyEntity;
 import fr.bwetterwald.portfolio.project.persistence.ProjectTechnologyRepository;
 import fr.bwetterwald.portfolio.project.persistence.ProjectTranslationEntity;
@@ -26,12 +28,16 @@ public class PublicProjectService {
 
 	private final ProjectTechnologyRepository projectTechnologyRepository;
 
+	private final ProjectSectionTranslationRepository projectSectionTranslationRepository;
+
 	private final ProjectApiMapper projectApiMapper;
 
 	public PublicProjectService(ProjectTranslationRepository projectTranslationRepository,
-			ProjectTechnologyRepository projectTechnologyRepository, ProjectApiMapper projectApiMapper) {
+			ProjectTechnologyRepository projectTechnologyRepository,
+			ProjectSectionTranslationRepository projectSectionTranslationRepository, ProjectApiMapper projectApiMapper) {
 		this.projectTranslationRepository = projectTranslationRepository;
 		this.projectTechnologyRepository = projectTechnologyRepository;
+		this.projectSectionTranslationRepository = projectSectionTranslationRepository;
 		this.projectApiMapper = projectApiMapper;
 	}
 
@@ -58,14 +64,20 @@ public class PublicProjectService {
 	@Transactional(readOnly = true)
 	public ProjectDetailDto getProject(String slug, String localeCode) {
 		ProjectLocale locale = parseLocale(localeCode);
-		ProjectTranslationEntity translation = this.projectTranslationRepository.findPublicTranslationBySlug(slug, locale)
+		ProjectTranslationEntity translation = this.projectTranslationRepository.findPublicDetailTranslationBySlug(slug,
+				locale)
 			.orElseThrow(() -> new ProjectNotFoundException(slug));
 		Long projectId = translation.getProject().getId();
 		List<TechnologyDto> technologies = technologiesByProjectIds(List.of(projectId)).getOrDefault(projectId,
 				List.of());
+		List<ProjectSectionDto> sections = this.projectSectionTranslationRepository
+			.findByProjectIdAndLocaleInDisplayOrder(projectId, locale)
+			.stream()
+			.map(this.projectApiMapper::toSection)
+			.toList();
 		List<ProjectLocale> availableLocales = this.projectTranslationRepository.findLocalesByProjectId(projectId);
 
-		return this.projectApiMapper.toDetail(translation, technologies, availableLocales);
+		return this.projectApiMapper.toDetail(translation, technologies, sections, availableLocales);
 	}
 
 	private List<ProjectSummaryDto> toSummaries(List<ProjectTranslationEntity> translations) {

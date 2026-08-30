@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import fr.bwetterwald.portfolio.project.domain.ProjectLocale;
+import fr.bwetterwald.portfolio.project.domain.ProjectPresentationMode;
 import fr.bwetterwald.portfolio.project.domain.ProjectStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -54,10 +55,12 @@ public interface ProjectTranslationRepository extends JpaRepository<ProjectTrans
 			join fetch translation.project project
 			where project.slug = :slug
 			and project.status in :statuses
+			and project.presentationMode = :presentationMode
 			and translation.locale = :locale
 			""")
-	Optional<ProjectTranslationEntity> findByProjectSlugAndStatusesAndLocale(@Param("slug") String slug,
-			@Param("statuses") Collection<ProjectStatus> statuses, @Param("locale") ProjectLocale locale);
+	Optional<ProjectTranslationEntity> findByProjectSlugAndStatusesAndPresentationModeAndLocale(@Param("slug") String slug,
+			@Param("statuses") Collection<ProjectStatus> statuses,
+			@Param("presentationMode") ProjectPresentationMode presentationMode, @Param("locale") ProjectLocale locale);
 
 	@Query("""
 			select translation.locale
@@ -83,8 +86,9 @@ public interface ProjectTranslationRepository extends JpaRepository<ProjectTrans
 		return findFeaturedByProjectStatusAndLocale(ProjectStatus.PUBLISHED, locale);
 	}
 
-	default Optional<ProjectTranslationEntity> findPublicTranslationBySlug(String slug, ProjectLocale locale) {
-		return findByProjectSlugAndStatusesAndLocale(slug, ProjectStatus.publicStatuses(), locale);
+	default Optional<ProjectTranslationEntity> findPublicDetailTranslationBySlug(String slug, ProjectLocale locale) {
+		return findByProjectSlugAndStatusesAndPresentationModeAndLocale(slug, ProjectStatus.publicStatuses(),
+				ProjectPresentationMode.DETAIL, locale);
 	}
 
 }

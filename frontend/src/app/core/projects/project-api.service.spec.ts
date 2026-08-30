@@ -87,8 +87,10 @@ describe('ProjectApiService', () => {
       demoUrl: null,
       featured: false,
       status: 'PUBLISHED',
+      presentationMode: 'DETAIL',
       displayOrder: 10,
       technologies: [],
+      sections: [],
       availableLocales: ['en'],
     });
   });

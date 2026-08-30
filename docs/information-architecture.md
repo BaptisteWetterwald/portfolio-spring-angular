@@ -4,7 +4,7 @@ This document defines the routing, page hierarchy, and navigation model for the 
 
 ## Goals
 
-- Provide shareable, crawlable URLs for every primary section and project detail.
+- Provide shareable, crawlable URLs for every primary section and project that has an approved detail page.
 - Support French and English routes, content, and metadata from V1.
 - Make sonar/compass navigation a major visual navigation concept while preserving real semantic links.
 - Support SEO, SSR, localized metadata, and accessible fallback navigation.
@@ -44,7 +44,7 @@ Canonical URL examples should use this domain.
 | Education      | `/fr/formation`     | `/en/education`      | Education and semester abroad.                                   |
 | Experience     | `/fr/experience`    | `/en/experience`     | Professional timeline and roles.                                 |
 | Projects       | `/fr/projets`       | `/en/projects`       | Published and archived project listing.                          |
-| Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail.                                        |
+| Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail for public projects configured as `DETAIL`. |
 | Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                  |
 
 Milestone 5 implemented the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Milestone 7 replaces the Projects placeholder with an API-backed listing and implements project detail routing, data loading, and metadata for shared V1 slugs. Milestone 8 replaces the Home, Education, and Experience placeholders with bilingual professional content while leaving Contact without a fabricated public contact method.
@@ -78,7 +78,9 @@ Milestone 7 wires those detail paths into the Angular route table:
 /en/projects/:slug
 ```
 
-If a slug is unknown, private, non-public, or missing the requested translation, the localized project route renders the not-found foundation and links back to the localized Projects page. Locale switching preserves the same slug; if the target locale has no translation, that target route follows the same not-found behavior rather than showing fallback-language content.
+If a slug is unknown, private, non-public, configured as `CARD_ONLY`, or missing the requested translation, the localized project route renders the not-found foundation and links back to the localized Projects page. Locale switching preserves the same slug for loaded `DETAIL` pages; if the target locale has no translation, that target route follows the same not-found behavior rather than showing fallback-language content.
+
+The Projects list may include public `CARD_ONLY` and `DETAIL` projects. `CARD_ONLY` entries must not expose a detail-route affordance, but they remain complete public portfolio entries.
 
 ## Project Prominence Strategy
 
@@ -90,7 +92,7 @@ Project visual weight should eventually follow content importance:
 | Standard | Meaningful projects worth presenting normally. |
 | Minor / archive | Small academic projects, old experiments, niche demonstrations, or historical exercises. |
 
-The current backend has `status` and `featured`; that is sufficient for Milestone 7 and Milestone 8. Do not add a persistence field for project importance until real project content shows that `featured` plus `ARCHIVED` is insufficient.
+The current backend has `status`, `featured`, and `presentation_mode`; that is sufficient for this phase. Presentation mode controls detail-page availability, not visual importance. Do not add a separate persistence field for project importance until real project content shows that `featured` plus `ARCHIVED` is insufficient.
 
 Small or old projects should not be deleted only because they are old. They should receive lower visual prominence when they are useful for showing breadth or historical context.
 
@@ -172,7 +174,7 @@ Milestone 9 correction:
 | Education      | Semantic timeline/list with ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand entries. |
 | Experience     | Semantic timeline/list with Plansee current role, Plansee internship, Bureau Veritas Laboratoires apprenticeship, Groupe IES internship, and LIF/UQAC internship. |
 | Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |
-| Project detail | Title, short description, optional detailed description, logo/media reference, technologies, GitHub/demo links, related projects if useful. |
+| Project detail | For public `DETAIL` projects only: title, short description, ordered localized case-study sections, optional logo/media reference, technologies, GitHub/demo links, related projects if useful. |
 | Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                       |
 
 ## Metadata Requirements
@@ -186,7 +188,7 @@ Every canonical route needs localized:
 - alternate `hreflang` links;
 - structured data where relevant.
 
-Project detail metadata should be generated from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. Optional detailed descriptions should not be required for metadata.
+Project detail metadata should be generated from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. Structured sections and deprecated fallback detailed descriptions should not be required for metadata.
 
 ## Error and Redirect Routes
 
@@ -197,6 +199,7 @@ Project detail metadata should be generated from `ProjectTranslation.title` and 
 | Unknown page         | Localized 404 with semantic navigation.                                   |
 | Unknown project slug | Localized 404 with link back to Projects.                                 |
 | `DRAFT` project slug | 404 for public users.                                                     |
+| `CARD_ONLY` project slug | 404 for public detail URLs; the project remains visible on the Projects list. |
 | Old public route     | 301 redirect after a route has existed publicly.                          |
 
 Milestone 5 root redirect implementation:
@@ -214,7 +217,7 @@ Milestone 5 404 implementation:
 
 Milestone 7 update:
 
-- unknown project slugs, `DRAFT` slugs, non-public projects, and missing requested translations are normalized to localized project not-found behavior;
+- unknown project slugs, `DRAFT` slugs, non-public projects, `CARD_ONLY` projects, and missing requested translations are normalized to localized project not-found behavior;
 - project detail not-found responses set SSR HTTP 404 through `RESPONSE_INIT` where Angular SSR handles the request;
 - project-specific not-found pages recover to `/fr/projets` or `/en/projects` instead of Home.
 

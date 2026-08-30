@@ -12,7 +12,7 @@ Frontend-static, typed, and version-controlled content:
 
 Backend/PostgreSQL-owned content:
 
-- Projects, project translations, project technologies, project publication/archive/featured state, and project-owned media/data.
+- Projects, project translations, project technologies, project publication/archive/featured state, project presentation mode, and project-owned media/data.
 
 Do not move CV/profile content into PostgreSQL, create profile CMS tables, or add admin CRUD unless future requirements materially change.
 
@@ -104,22 +104,32 @@ Timeline logo rules:
 
 ## Project Inventory Backlog
 
-Projects are backend/PostgreSQL records and are not seeded during this content consolidation pass.
+Projects are backend/PostgreSQL records. Only records with enough authoritative repository content should be seeded.
+
+### Seeded Project Records
+
+Current public display order uses `projects.display_order` ascending: Portfolio Spring Angular (`10`), Blaze4 (`20`), Frequensisa (`30`), SummerCamp (`40`), Bot Discord IR (`50`), then BeamNG.drive x BeepBeep 3 (`60`).
+
+| Slug | Title | Status | Presentation mode | Source | GitHub URL | Technologies | Omitted fields |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `portfolio-spring-angular` | Portfolio Spring Angular | `PUBLISHED` | `DETAIL` | Current local repository implementation, durable docs, and git origin. Bilingual Angular SSR frontend, Spring Boot backend, PostgreSQL/Flyway project domain, localized project API, request-time SSR metadata, Docker Compose local stack, and structured project-detail sections are implemented. | <https://github.com/BaptisteWetterwald/portfolio-spring-angular> | Angular, TypeScript, Java, Spring Boot, PostgreSQL, Flyway, Angular SSR, Tailwind CSS, daisyUI, Docker Compose | Demo URL and project-owned media reference are not supplied. CI/CD and production deployment are not described as implemented. |
+| `blaze4` | Blaze4 | `PUBLISHED` | `DETAIL` | Canonical public repository README: <https://github.com/BaptisteWetterwald/ecole-ntiers-projet-blaze4>. School/academic C#/.NET Connect Four web application documented as an N-tier architecture with separated application, data access, presentation, DTO, and test projects. Bilingual card copy and four ordered bilingual detail sections are available. | <https://github.com/BaptisteWetterwald/ecole-ntiers-projet-blaze4> | C#, .NET, ASP.NET Core, Blazor WebAssembly, Entity Framework Core, SQLite | Demo URL is not supplied. Media is unset for now: the README logo is a GitHub user-attachment URL, and the repository class diagram is not a good fit for the current single `logo_media_ref` card/detail slot. |
+| `frequensisa` | Frequensisa | `PUBLISHED` | `CARD_ONLY` | Public repository README and source: <https://github.com/BaptisteWetterwald/ecole-ios-frequensisa>. Third-year academic iOS radio application with SwiftUI screens, SQLite persistence, saved-radio management, categories, detail view, and AVPlayer playback through `RadioPlayerManager`. | <https://github.com/BaptisteWetterwald/ecole-ios-frequensisa> | Swift, SwiftUI, SQLite | No detail sections, demo URL, or portfolio media reference are supplied. Repository-owned app icon/logo assets exist but are not integrated into the current portfolio media contract. |
+| `summercamp` | SummerCamp | `PUBLISHED` | `CARD_ONLY` | Public repository source: <https://github.com/BaptisteWetterwald/ecole-android-summercamp>. Academic Android summer-camp management application using Kotlin, Jetpack Compose screens, child/supervisor/activity models, and Room persistence. | <https://github.com/BaptisteWetterwald/ecole-android-summercamp> | Kotlin, Jetpack Compose, Android, Room | No detail sections, demo URL, or portfolio media reference are supplied. README media is a GitHub user-attachment URL and is not used. |
+| `bot-discord-ir` | Bot Discord IR | `PUBLISHED` | `CARD_ONLY` | Public repository source and package metadata: <https://github.com/BaptisteWetterwald/discord-bot-ensisa-ir>. Discord bot for the ENSISA Computer Science and Networks class, implemented with Node.js, JavaScript, discord.js commands/events, scheduled jobs, and SQLite-backed command data. | <https://github.com/BaptisteWetterwald/discord-bot-ensisa-ir> | Node.js, JavaScript, discord.js, SQLite | No detail sections, demo URL, or portfolio media reference are supplied. OpenAI is present in one command but is not surfaced as a primary project technology. |
+| `beamng-drive-beepbeep-3` | BeamNG.drive x BeepBeep 3 | `PUBLISHED` | `CARD_ONLY` | Project backlog plus bilingual LIF/UQAC Experience content in `frontend/src/app/core/content/portfolio-content.ts`. | none supplied | Java, Python, Sockets, BeamNG.drive, BeepBeep 3 | Demo URL and project-owned media/logo reference are not supplied. |
 
 ### Featured / Flagship Candidates
 
 | Candidate | Type | Status | Notes |
 | --- | --- | --- | --- |
-| This portfolio | Personal / open-source project | Active / in development until complete | Strong first project once public and mature. Technologies may include Angular, TypeScript, Spring Boot, Java, PostgreSQL, Flyway, SSR, REST, Tailwind CSS, daisyUI, and Docker only if actually implemented when published. GitHub Actions only after CI/CD exists. Candidate for browser, mobile, and code mockups when real media exists. |
 | WakomMUTE | Personal Android/mobile project | Unfinished / in development | Adaptive commute alarm intended to adjust wake-up decisions based on public-transport disruptions. Do not publish architecture or technology details beyond what the source actually confirms when added. |
 
 ### Significant Candidates
 
 | Candidate | Source | Technologies / notes |
 | --- | --- | --- |
-| BeamNG.drive x BeepBeep 3 | UQAC/LIF academic research-oriented work | Java, Python, sockets, BeamNG.drive, BeepBeep 3. Project page can eventually explain implementation more deeply than the Experience timeline. |
 | Educational Unreal Engine game | UQAC academic project | Unreal Engine, Blueprint; collaboration with NAD-UQAC digital-design students. |
-| Connect Four / Blaze4 | ENSISA academic project | Java, JavaFX, AI using alpha-beta search/pruning. |
 | Abalone | ENSISA two-week intensive project | C, AI, multiplayer, sockets. |
 
 ### Archive / Historical Candidates
@@ -148,6 +158,6 @@ Projects are backend/PostgreSQL records and are not seeded during this content c
 - real LinkedIn profile URL;
 - public contact method or contact form policy;
 - downloadable CV file(s);
-- project records, slugs, final bilingual copy, GitHub/demo URLs, and media;
+- additional project records, final bilingual copy, GitHub/demo URLs, and project-owned media;
 - approved OpenGraph images beyond the existing portrait where applicable;
 - INSA Lyon logo or official link, if a local asset/URL is supplied later.

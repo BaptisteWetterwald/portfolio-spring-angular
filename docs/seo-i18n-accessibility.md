@@ -111,7 +111,7 @@ Each route needs:
 - locale-specific `og:locale`;
 - alternate locale references where applicable.
 
-Project metadata should come from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. `detailedDescription` is optional and must not be required for metadata.
+Project metadata should come from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. Structured sections and the deprecated `detailedDescription` fallback are optional and must not be required for metadata.
 
 Milestone 5 metadata is centralized in `PageMetadataService`. Static placeholder pages receive SSR-rendered localized title, description, canonical URL, OpenGraph title/description/url/type/locale, and alternate locale metadata. Structured data is intentionally deferred until approved personal/project content exists.
 
@@ -147,10 +147,11 @@ Dynamic project pages require:
 - localized metadata;
 - correct status filtering so `DRAFT` projects are not public;
 - public visibility for `PUBLISHED` and `ARCHIVED` projects;
-- 404 for unknown, draft, or untranslated slugs;
+- detail-page availability only when presentation mode is `DETAIL`;
+- 404 for unknown, draft, card-only, or untranslated detail slugs;
 - sitemap entries only for public projects with required translations.
 
-Archived projects may have compact detail pages when no detailed description exists.
+Archived projects may have compact detail pages when no detailed description exists, but only when their presentation mode is `DETAIL`. Public `CARD_ONLY` projects are rendered on the Projects list and return localized not-found behavior for direct detail URLs.
 
 Dynamic project pages were not implemented in Milestone 5 because the public project REST API was a later milestone. At that stage, project-detail-like URLs returned localized not-found content rather than placeholder project data.
 
@@ -158,17 +159,18 @@ Milestone 7 implements dynamic project pages through request-time SSR:
 
 - `/fr/projets/:slug` and `/en/projects/:slug` load project detail data from the backend API before rendering;
 - `PUBLISHED` and `ARCHIVED` projects are crawlable when the requested translation exists;
-- unknown, `DRAFT`, non-public, and untranslated project detail requests render localized not-found content and set SSR HTTP 404 where Angular SSR handles the request;
+- unknown, `DRAFT`, non-public, `CARD_ONLY`, and untranslated project detail requests render localized not-found content and set SSR HTTP 404 where Angular SSR handles the request;
 - project detail metadata comes from the localized project title and short description;
 - project detail `hreflang` alternates are emitted only for locales returned by the API in `availableLocales`;
-- `detailedDescription` is optional and is not required for rendering or metadata.
+- ordered localized structured sections are SSR-rendered on detail pages;
+- `detailedDescription` is optional, deprecated, and used only as a rendering fallback when structured sections are absent.
 
 ## Sitemap
 
 Generate `sitemap.xml` with:
 
 - all public localized static routes;
-- all public project detail URLs for both locales when required translations exist;
+- all public `DETAIL` project URLs for both locales when required translations exist;
 - `PUBLISHED` and `ARCHIVED` project URLs;
 - last modification timestamps where reliable;
 - alternate language references if the sitemap generation approach supports them.
@@ -204,6 +206,8 @@ Each public page should define:
 
 Project pages should use the optional project logo/media reference when approved and properly sized. Do not use unapproved or fabricated imagery. The Home portrait is approved content and should render from the original portrait asset with localized alt text.
 
+Project detail pages must not emit `og:image` when the project has no valid media reference. A zero-media DETAIL project should still render a complete hero, technical overview, and structured sections.
+
 ## Structured Data
 
 Potential schema types:
@@ -224,7 +228,7 @@ Requirements:
 - one logical `h1` per page;
 - semantic `nav`, `main`, `section`, `article`, `footer`;
 - sonar/compass navigation built around real anchors;
-- project cards should use real links;
+- project cards should use real links when a project has a real detail page or external action;
 - timelines should remain readable as lists or sections;
 - buttons only for actions, links for navigation;
 - form labels explicitly associated with inputs when contact form exists.
