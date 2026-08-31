@@ -1,0 +1,55 @@
+.sonar-nav__marker {
+  position: relative;
+  transition:
+    border-color var(--motion-duration-standard) ease,
+    background-color var(--motion-duration-standard) ease,
+    box-shadow var(--motion-duration-theme) ease,
+    transform var(--motion-duration-fast) ease;
+}
+
+.sonar-nav__marker::after {
+  position: absolute;
+  inset: -9px;
+  border: 1px solid color-mix(in srgb, var(--color-accent-maritime) 40%, transparent);
+  border-radius: var(--radius-round);
+  opacity: 0;
+  transform: scale(0.58);
+  pointer-events: none;
+  content: '';
+}
+
+.sonar-nav__link:is(:hover, :focus-visible) .sonar-nav__marker {
+  transform: scale(1.08);
+}
+
+.sonar-nav__link:is(:hover, :focus-visible) .sonar-nav__marker::after {
+  animation: sonar-nav-ripple 860ms ease-out 1;
+}
+
+@keyframes sonar-nav-ripple {
+  0% {
+    opacity: 0.34;
+    transform: scale(0.58);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sonar-nav__marker {
+    transition: none;
+  }
+
+  .sonar-nav__link:is(:hover, :focus-visible) .sonar-nav__marker {
+    transform: none;
+  }
+
+  .sonar-nav__link:is(:hover, :focus-visible) .sonar-nav__marker::after {
+    animation: none;
+    opacity: 0.28;
+    transform: scale(1.55);
+  }
+}

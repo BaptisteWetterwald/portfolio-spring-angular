@@ -9,7 +9,7 @@ import { localizedPath, StaticPageId, staticPageIds } from '../../core/routing/l
   selector: 'app-sonar-navigation',
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './sonar-navigation.component.html',
-  styleUrl: './sonar-navigation.component.css',
+  styleUrls: ['./sonar-navigation.component.css', './sonar-navigation.motion.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SonarNavigationComponent {

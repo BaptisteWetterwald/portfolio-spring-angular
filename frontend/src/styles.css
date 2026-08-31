@@ -92,6 +92,17 @@
   --color-depth-line: rgb(10 26 47 / 8%);
   --color-beam: rgb(255 243 176 / 44%);
   --color-lighthouse-light: #fff3b0;
+  --motion-duration-fast: 120ms;
+  --motion-duration-standard: 180ms;
+  --motion-duration-theme: 240ms;
+  --lighthouse-beam-duration: 16s;
+  --lighthouse-beam-opacity: 0;
+  --lighthouse-beam-static-opacity: 0;
+  --lighthouse-beam-start-angle: -18deg;
+  --lighthouse-beam-reduced-angle: 10deg;
+  --lighthouse-beam-length: max(132vmax, 1180px);
+  --lighthouse-beam-width: clamp(180px, 22vmax, 340px);
+  --lighthouse-beam-falloff: 82%;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -124,6 +135,8 @@
   --color-depth-line: rgb(248 250 252 / 8%);
   --color-beam: rgb(255 243 176 / 16%);
   --color-lighthouse-light: #fff3b0;
+  --lighthouse-beam-opacity: 0.72;
+  --lighthouse-beam-static-opacity: 0.48;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 28%);
   --shadow-md: 0 16px 36px rgb(0 0 0 / 34%);
 }
@@ -137,6 +150,7 @@ html {
 body {
   min-height: 100%;
   margin: 0;
+  overflow-x: clip;
   background:
     radial-gradient(circle at 18% 0%, var(--color-chart-line), transparent 30rem),
     linear-gradient(135deg, transparent 0 42%, var(--color-depth-line) 42% 43%, transparent 43%),
@@ -247,7 +261,9 @@ button {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    transition-delay: 0s !important;
     transition-duration: 1ms !important;
+    animation-delay: 0s !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
   }

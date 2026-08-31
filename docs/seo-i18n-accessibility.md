@@ -310,6 +310,14 @@ Milestone 9 reduced-motion behavior:
 - active navigation, current locale, current route, project status, and skill importance must be understandable without animation;
 - hover-only effects need equivalent focus-visible treatment where they indicate an interactive state.
 
+Milestone 10 reduced-motion behavior:
+
+- the global baseline disables smooth scrolling and compresses long transitions/animations;
+- the lighthouse beam stops rotating and remains a static, low-opacity dark-mode decoration;
+- sonar hover/focus feedback changes from a one-shot ripple to a static marker emphasis;
+- no Home wave, parallax, bathymetric drift, or scroll-linked decorative motion is retained;
+- all decorative motion remains `aria-hidden` or pseudo-element based and does not add focusable controls.
+
 ## Accessible Fallback Navigation
 
 The sonar/compass navigation must have a conventional fallback:

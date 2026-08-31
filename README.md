@@ -140,7 +140,7 @@ Project detail URLs use shared slugs across locales for projects configured as `
 /en/projects/:slug
 ```
 
-The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls, the approved portrait renders in its porthole frame, and Education/Experience use the M9 nautical route timeline styling. Advanced beams, sonar sweeps, waves, and final motion polish remain deferred.
+The public shell is rendered by SSR for localized routes. The sonar/compass and lighthouse controls are functional navigation and preference controls, the approved portrait renders in its porthole frame, Education/Experience use the M9 nautical route timeline styling, and Milestone 10 adds restrained dark-mode lighthouse beam, sonar feedback, and reduced-motion behavior.
 
 For native development, start the backend on port `8080` and run `npm start`; frontend requests to `/api/*` are proxied to Spring Boot.
 

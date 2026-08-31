@@ -3,12 +3,13 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { SupportedLocale, toSupportedLocale } from '../../core/i18n/locales';
+import { LighthouseBeamComponent } from '../../shared/lighthouse-beam/lighthouse-beam.component';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
 
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterOutlet, SiteFooterComponent, SiteHeaderComponent],
+  imports: [LighthouseBeamComponent, RouterOutlet, SiteFooterComponent, SiteHeaderComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

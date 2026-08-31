@@ -1,5 +1,7 @@
 :host {
   display: inline-flex;
+  position: relative;
+  z-index: 4;
 }
 
 .theme-toggle {
@@ -14,9 +16,10 @@
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    transform 120ms ease;
+    border-color var(--motion-duration-standard) ease,
+    background-color var(--motion-duration-standard) ease,
+    box-shadow var(--motion-duration-theme) ease,
+    transform var(--motion-duration-fast) ease;
 }
 
 .theme-toggle:hover {
@@ -36,6 +39,24 @@
   place-items: center;
 }
 
+.theme-toggle__lighthouse::before {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 24px;
+  height: 16px;
+  border-radius: var(--radius-round);
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--color-lighthouse-light) 42%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--motion-duration-theme) ease;
+  content: '';
+}
+
 .theme-toggle__lantern,
 .theme-toggle__tower,
 .theme-toggle__base {
@@ -48,6 +69,10 @@
   border: 1px solid var(--color-text);
   border-radius: 3px 3px 1px 1px;
   background: color-mix(in srgb, var(--color-surface) 70%, var(--color-lighthouse-light));
+  transition:
+    border-color var(--motion-duration-standard) ease,
+    background-color var(--motion-duration-standard) ease,
+    box-shadow var(--motion-duration-theme) ease;
 }
 
 .theme-toggle__tower {
@@ -73,8 +98,21 @@
     0 0 16px color-mix(in srgb, var(--color-lighthouse-light) 58%, transparent);
 }
 
+.theme-toggle[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--color-lighthouse-light) 46%, var(--color-border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-lighthouse-light) 18%, transparent),
+    var(--shadow-sm);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-toggle__lighthouse::before {
+  opacity: 0.72;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .theme-toggle {
+  .theme-toggle,
+  .theme-toggle__lighthouse::before,
+  .theme-toggle__lantern {
     transition: none;
   }
 

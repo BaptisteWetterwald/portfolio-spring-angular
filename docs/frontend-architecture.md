@@ -432,14 +432,17 @@ Frontend requirements:
 - lazy loading for non-critical images;
 - eager loading for critical first-viewport portrait/hero media if used.
 
-## Future Animations
+## Motion Architecture
 
-Prepare animation boundaries without implementing them:
+Milestone 10 adds selected motion without changing the route tree, localized URLs, SSR rendering model, or semantic navigation.
 
-- define reduced-motion behavior globally;
-- isolate motion-heavy visual components behind clear APIs;
-- prefer CSS transitions and SVG animation;
-- reserve GSAP for choreography that CSS/SVG cannot maintain cleanly.
+- Reduced motion is handled globally in `frontend/src/styles.css` and specifically in each animated component stylesheet.
+- `MotionPreferenceService` reads `prefers-reduced-motion` only in the browser and exposes a signal for components that need a DOM state hook.
+- `LighthouseBeamComponent` is a dedicated decorative overlay. It queries the real `data-lighthouse-lantern` element after hydration, derives viewport coordinates with `getBoundingClientRect`, updates CSS custom properties, and observes lantern/header resize, viewport resize, and passive scroll through one requestAnimationFrame-throttled measurement path.
+- The lighthouse beam is fixed, `aria-hidden`, pointer-events-none, opacity/transform animated, hidden in light mode, and static under reduced motion.
+- Sonar/compass navigation remains semantic router links; motion is limited to one hover/focus marker ripple.
+- No ambient wave, parallax, bathymetric drift, path morphing, or replacement background motion is retained for Milestone 10.
+- GSAP remains reserved for future choreography that CSS/SVG cannot maintain cleanly; it is not installed for Milestone 10.
 
 ## Testing Direction
 

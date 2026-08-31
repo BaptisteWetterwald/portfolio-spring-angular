@@ -297,6 +297,15 @@ Validation criteria:
 - animations do not block content;
 - performance remains acceptable on mobile.
 
+Milestone 10 implementation status:
+
+- Reduced-motion handling is centralized through global CSS safeguards plus targeted component rules that stop the lighthouse sweep and sonar ripple while preserving static state.
+- The lighthouse theme control remains an accessible button. Dark mode now lights the lantern, fades in a measured viewport-scale decorative beam, and keeps light mode unlit with no viewport beam.
+- The beam is a CSS gradient wedge rendered by a dedicated Angular component. Browser-only `getBoundingClientRect`, `ResizeObserver`, and resize handling are guarded from SSR and only used to derive CSS custom properties from the actual lantern element.
+- Sonar/compass navigation still uses real localized router links and exact active route state. Hover and keyboard focus add one restrained marker ripple; reduced motion switches this to a static emphasis.
+- No ambient wave, bathymetric drift, parallax, particles, or scroll-linked decorative motion was retained for Milestone 10.
+- GSAP was not added because CSS transforms, opacity, SVG, and native browser observers covered the required motion with lower dependency and maintenance cost.
+
 ## 11. GitHub and Contact Integrations
 
 Objective: add optional dynamic integrations.

@@ -1,0 +1,90 @@
+:host {
+  display: contents;
+}
+
+.lighthouse-beam {
+  position: fixed;
+  top: var(--lighthouse-beam-origin-y);
+  left: var(--lighthouse-beam-origin-x);
+  z-index: 2;
+  width: var(--lighthouse-beam-length);
+  height: var(--lighthouse-beam-width);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%) rotate(var(--lighthouse-beam-start-angle));
+  transform-origin: 0 50%;
+  transition: opacity var(--motion-duration-theme) ease;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.lighthouse-beam::before,
+.lighthouse-beam::after {
+  position: absolute;
+  pointer-events: none;
+  content: '';
+}
+
+.lighthouse-beam::before {
+  inset: 0;
+  clip-path: polygon(0 47%, 100% 6%, 100% 94%, 0 53%);
+  background:
+    radial-gradient(
+      ellipse at 0% 50%,
+      color-mix(in srgb, var(--color-lighthouse-light) 26%, transparent) 0 1.4rem,
+      transparent 5.5rem
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-lighthouse-light) 18%, transparent) 0%,
+      color-mix(in srgb, var(--color-accent-maritime) 10%, transparent) 28%,
+      transparent var(--lighthouse-beam-falloff)
+    );
+}
+
+.lighthouse-beam::after {
+  top: 50%;
+  left: 0;
+  width: clamp(36px, 5vmax, 72px);
+  height: clamp(36px, 5vmax, 72px);
+  border-radius: var(--radius-round);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-lighthouse-light) 34%, transparent),
+    transparent 68%
+  );
+  transform: translate(-42%, -50%);
+}
+
+.lighthouse-beam--ready[data-lighthouse-beam-state='active'][data-lighthouse-beam-motion='standard'] {
+  animation: lighthouse-beam-sweep var(--lighthouse-beam-duration) linear infinite;
+  opacity: var(--lighthouse-beam-opacity);
+}
+
+.lighthouse-beam--ready[data-lighthouse-beam-state='active'][data-lighthouse-beam-motion='reduced'] {
+  opacity: var(--lighthouse-beam-static-opacity);
+  transform: translateY(-50%) rotate(var(--lighthouse-beam-reduced-angle));
+}
+
+@keyframes lighthouse-beam-sweep {
+  from {
+    transform: translateY(-50%) rotate(var(--lighthouse-beam-start-angle));
+  }
+
+  to {
+    transform: translateY(-50%) rotate(calc(var(--lighthouse-beam-start-angle) + 360deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lighthouse-beam {
+    transition: none;
+    will-change: auto;
+  }
+
+  .lighthouse-beam--ready[data-lighthouse-beam-state='active'] {
+    animation: none;
+    opacity: var(--lighthouse-beam-static-opacity);
+    transform: translateY(-50%) rotate(var(--lighthouse-beam-reduced-angle));
+  }
+}

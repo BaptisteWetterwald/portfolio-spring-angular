@@ -1,6 +1,6 @@
 # Motion Guidelines
 
-This document defines future motion principles. It does not implement components or animations.
+This document defines the portfolio motion principles and the current Milestone 10 implementation.
 
 ## Principles
 
@@ -15,12 +15,12 @@ Milestone 9 uses motion only as restrained progressive enhancement. The visual s
 
 ## Motion Scale
 
-| Token | Duration | Use |
-| --- | --- | --- |
-| `motion-fast` | `120ms` | Hover, press, focus reinforcement. |
-| `motion-base` | `180ms` | Menu open/close, theme transition. |
-| `motion-slow` | `320ms` | Page-level transitions and larger reveals. |
-| `motion-ambient` | `6s+` | Optional looping wave/beam movement. |
+| Token            | Duration | Use                                  |
+| ---------------- | -------- | ------------------------------------ |
+| `motion-fast`    | `120ms`  | Hover, press, focus reinforcement.   |
+| `motion-base`    | `180ms`  | Menu open/close, theme transition.   |
+| `motion-slow`    | `240ms`  | Theme glow and beam fade.            |
+| `motion-ambient` | `16s+`   | Optional looping beam or future ambient movement. |
 
 Use easing that feels calm and precise, not elastic or arcade-like.
 
@@ -43,7 +43,9 @@ Guidelines:
 - do not simulate targeting, tracking, fake telemetry, or military systems;
 - reduced motion mode should show a static selected marker.
 
-Milestone 6 implements only the static foundation: SVG/CSS compass rings, waypoint markers, exact active state, and real router links. Its desktop geometry should stay compact and radial, with destinations visually associated with the radar circumference rather than spread across a wide rectangular panel. There is no sweep, ping loop, fake targeting, coordinates, or telemetry. Future animation should build on this component without making navigation motion-dependent.
+Milestone 6 implements the static foundation: SVG/CSS compass rings, waypoint markers, exact active state, and real router links. Its desktop geometry should stay compact and radial, with destinations visually associated with the radar circumference rather than spread across a wide rectangular panel. There is no sweep, ping loop, fake targeting, coordinates, or telemetry.
+
+Milestone 10 adds only interaction feedback: hover and keyboard focus trigger one short marker ripple, while active route state remains a static border, marker, font-weight, and `aria-current` state. Reduced motion disables the ripple animation and shows a static ring emphasis instead.
 
 Future M9/M10 exploration: consider whether the large sonar navigation should have an optional compact or floating state once users scroll into page content. A compact control could reuse the same localized route model and active-state semantics, and could expand on hover, click, or focus to reveal the five destinations. This must be evaluated against the conventional header, the large signature sonar, and footer navigation so the site does not present redundant navigation systems with the same purpose at the same time.
 
@@ -62,7 +64,9 @@ Guidelines:
 - the effect should not flash rapidly;
 - state must be clear without animation.
 
-Milestone 6 implements the lighthouse as a simple accessible button. The dark state illuminates the lantern statically. The M9 owner-review correction keeps this approach and removes the experimental static beam. Moving or realistic lighthouse beams and transition choreography remain deferred.
+Milestone 6 implements the lighthouse as a simple accessible button. The M9 owner-review correction keeps the button and removes the experimental static beam.
+
+Milestone 10 keeps the same button semantics and adds a restrained dark-mode lit state. The lantern fades to the lighthouse-light token, gains a small local glow, and exposes `data-lighthouse-lantern` as the measured origin for the decorative beam. The actual theme change remains immediate.
 
 ## Lighthouse Beam
 
@@ -79,6 +83,15 @@ Guidelines:
 - avoid sweeping beams over long reading text;
 - keep opacity low;
 - disable looping beam in reduced motion.
+
+Milestone 10 implementation:
+
+- A dedicated `app-lighthouse-beam` component renders one fixed, pointer-events-none, `aria-hidden` CSS gradient wedge.
+- The beam is hidden until browser-side measurement finds the actual rendered lantern and stores its viewport coordinates in CSS custom properties.
+- Measurement uses `getBoundingClientRect`, `ResizeObserver`, a passive viewport resize listener, and a passive scroll listener only after hydration; SSR never calls browser layout APIs.
+- Scroll and resize events schedule the same requestAnimationFrame-throttled measurement, so the beam origin follows the non-sticky header while visible and fades out when the lantern leaves the viewport margin.
+- Dark mode uses a 16s linear 360 degree sweep. Light mode keeps the beam inactive. Reduced motion keeps a static low-opacity beam angle.
+- Key tuning parameters live in CSS tokens: `--lighthouse-beam-duration`, `--lighthouse-beam-opacity`, `--lighthouse-beam-static-opacity`, `--lighthouse-beam-start-angle`, `--lighthouse-beam-reduced-angle`, `--lighthouse-beam-length`, `--lighthouse-beam-width`, and `--lighthouse-beam-falloff`.
 
 ## Nautical Timeline
 
@@ -124,6 +137,8 @@ Guidelines:
 - avoid large animated backgrounds behind dense text;
 - pause or simplify on reduced motion.
 
+Milestone 10 does not retain a Home wave treatment. SVG path morphing and transform-based wave drift were evaluated, then removed from the implementation; no wave, parallax, bathymetric drift, or replacement ambient background effect is active in this milestone.
+
 ## Bathymetric / Nautical Chart Graphics
 
 Possible uses:
@@ -164,6 +179,8 @@ GSAP may be justified when:
 - performance and accessibility can be verified.
 
 Do not add GSAP for simple fades, transforms, hover states, or theme transitions.
+
+Milestone 10 does not use GSAP. Native CSS transforms, opacity transitions, and `ResizeObserver` are sufficient for the selected scope.
 
 ## Performance Requirements
 
