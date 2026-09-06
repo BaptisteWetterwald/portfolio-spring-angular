@@ -15,11 +15,11 @@ Milestone 9 uses motion only as restrained progressive enhancement. The visual s
 
 ## Motion Scale
 
-| Token            | Duration | Use                                  |
-| ---------------- | -------- | ------------------------------------ |
-| `motion-fast`    | `120ms`  | Hover, press, focus reinforcement.   |
-| `motion-base`    | `180ms`  | Menu open/close, theme transition.   |
-| `motion-slow`    | `240ms`  | Theme glow and beam fade.            |
+| Token            | Duration | Use                                               |
+| ---------------- | -------- | ------------------------------------------------- |
+| `motion-fast`    | `120ms`  | Hover, press, focus reinforcement.                |
+| `motion-base`    | `180ms`  | Menu open/close, theme transition.                |
+| `motion-slow`    | `240ms`  | Theme glow and beam fade.                         |
 | `motion-ambient` | `16s+`   | Optional looping beam or future ambient movement. |
 
 Use easing that feels calm and precise, not elastic or arcade-like.
@@ -47,9 +47,11 @@ Milestone 6 implements the static foundation: SVG/CSS compass rings, waypoint ma
 
 Milestone 10 adds only interaction feedback: hover and keyboard focus trigger one short marker ripple, while active route state remains a static border, marker, font-weight, and `aria-current` state. Reduced motion disables the ripple animation and shows a static ring emphasis instead.
 
-Future M9/M10 exploration: consider whether the large sonar navigation should have an optional compact or floating state once users scroll into page content. A compact control could reuse the same localized route model and active-state semantics, and could expand on hover, click, or focus to reveal the five destinations. This must be evaluated against the conventional header, the large signature sonar, and footer navigation so the site does not present redundant navigation systems with the same purpose at the same time.
+Future exploration: consider whether the large sonar navigation should have an optional compact or floating state once users scroll into page content. A compact control could reuse the same localized route model and active-state semantics, and could expand on hover, click, or focus to reveal the five destinations. This must be evaluated against the conventional header, the large signature sonar, and footer navigation so the site does not present redundant navigation systems with the same purpose at the same time.
 
 M9 evaluation result: the floating/compact sonar is deferred. Header links, the desktop signature sonar, the mobile menu, and footer links already provide enough route access for the current page lengths.
+
+Post-Milestone-10 experiment: the public shell now has a discrete `top` / `floating` navigation mode. A browser-only `IntersectionObserver` watches a sentinel after the header sonar with separate trigger and restore margins, so the floating state changes without scroll-linked animation or a permanent scroll loop. In floating mode, the sonar component is reused with a compact variant on the left side of the viewport. The compact instrument expands on hover, keyboard focus-within, or click/tap, and the waypoint links deploy from near the sonar center to their final formation with CSS opacity and transform transitions. Reduced motion removes this choreography and keeps the links usable through static state changes.
 
 ## Lighthouse Theme Toggle
 
@@ -87,11 +89,18 @@ Guidelines:
 Milestone 10 implementation:
 
 - A dedicated `app-lighthouse-beam` component renders one fixed, pointer-events-none, `aria-hidden` CSS gradient wedge.
-- The beam is hidden until browser-side measurement finds the actual rendered lantern and stores its viewport coordinates in CSS custom properties.
+- The beam is hidden until browser-side measurement finds the active rendered lantern and stores its viewport coordinates in CSS custom properties.
 - Measurement uses `getBoundingClientRect`, `ResizeObserver`, a passive viewport resize listener, and a passive scroll listener only after hydration; SSR never calls browser layout APIs.
-- Scroll and resize events schedule the same requestAnimationFrame-throttled measurement, so the beam origin follows the non-sticky header while visible and fades out when the lantern leaves the viewport margin.
+- Scroll and resize events schedule the same requestAnimationFrame-throttled measurement, so the beam origin follows the active lighthouse source.
 - Dark mode uses a 16s linear 360 degree sweep. Light mode keeps the beam inactive. Reduced motion keeps a static low-opacity beam angle.
 - Key tuning parameters live in CSS tokens: `--lighthouse-beam-duration`, `--lighthouse-beam-opacity`, `--lighthouse-beam-static-opacity`, `--lighthouse-beam-start-angle`, `--lighthouse-beam-reduced-angle`, `--lighthouse-beam-length`, `--lighthouse-beam-width`, and `--lighthouse-beam-falloff`.
+
+Post-Milestone-10 experiment:
+
+- The active source is state-based: `header` while the shell is in `top` mode, and `floating` while the shell is in `floating` mode.
+- Header and floating lighthouse controls share the same theme service; only their measured lantern source differs.
+- There is still only one viewport beam. The beam reconnects its observer to the active lantern source and remains CSS-rotated.
+- Beam interaction with cards and floating instruments is compositing-only through the same overlay and blend layer. No beam collision detection, per-card illumination state, angle math, or per-frame target queries are implemented.
 
 ## Nautical Timeline
 

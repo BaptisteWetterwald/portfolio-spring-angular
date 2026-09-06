@@ -49,7 +49,9 @@ describe('SonarNavigationComponent integration', () => {
       '/en/contact',
     ]);
     expect(
-      harness.routeNativeElement?.querySelector('nav[data-sonar-nav]')?.getAttribute('aria-label'),
+      harness.routeNativeElement
+        ?.querySelector('nav[data-sonar-nav][data-sonar-nav-variant="primary"]')
+        ?.getAttribute('aria-label'),
     ).toBe('Compass navigation');
   });
 
@@ -73,7 +75,7 @@ describe('SonarNavigationComponent integration', () => {
 
   it('keeps the visual compass static and non-canvas based', async () => {
     const harness = await createHarness('/en/projects');
-    const sonarNav = harness.routeNativeElement?.querySelector('nav[data-sonar-nav]');
+    const sonarNav = primarySonarNav(harness);
 
     expect(sonarNav?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     expect(sonarNav?.querySelector('canvas')).toBeNull();
@@ -97,8 +99,18 @@ async function createHarness(initialUrl: string): Promise<RouterTestingHarness> 
 
 function sonarLinks(harness: RouterTestingHarness): HTMLAnchorElement[] {
   return Array.from(
-    harness.routeNativeElement?.querySelectorAll('nav[data-sonar-nav] a') ?? [],
+    harness.routeNativeElement?.querySelectorAll(
+      'nav[data-sonar-nav][data-sonar-nav-variant="primary"] a',
+    ) ?? [],
   ).filter((link): link is HTMLAnchorElement => link instanceof HTMLAnchorElement);
+}
+
+function primarySonarNav(harness: RouterTestingHarness): HTMLElement | null {
+  return (
+    harness.routeNativeElement?.querySelector(
+      'nav[data-sonar-nav][data-sonar-nav-variant="primary"]',
+    ) ?? null
+  );
 }
 
 function sonarLink(harness: RouterTestingHarness, label: string): HTMLAnchorElement | undefined {

@@ -6,7 +6,7 @@
   position: fixed;
   top: var(--lighthouse-beam-origin-y);
   left: var(--lighthouse-beam-origin-x);
-  z-index: 2;
+  z-index: 41;
   width: var(--lighthouse-beam-length);
   height: var(--lighthouse-beam-width);
   pointer-events: none;

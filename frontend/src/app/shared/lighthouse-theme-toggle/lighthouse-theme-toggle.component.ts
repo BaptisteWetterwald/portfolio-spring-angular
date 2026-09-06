@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { ThemePreferenceService } from '../../core/theme/theme-preference.service';
 import { TranslationService } from '../../core/i18n/translation.service';
+import { LighthouseBeamSource } from '../lighthouse-beam/lighthouse-beam-source';
 
 @Component({
   selector: 'app-lighthouse-theme-toggle',
@@ -10,6 +11,8 @@ import { TranslationService } from '../../core/i18n/translation.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LighthouseThemeToggleComponent {
+  readonly beamSource = input<LighthouseBeamSource>('header');
+
   readonly #themePreference = inject(ThemePreferenceService);
   readonly #translations = inject(TranslationService);
 

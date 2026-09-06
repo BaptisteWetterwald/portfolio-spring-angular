@@ -10,8 +10,10 @@ import {
   PLATFORM_ID,
   QueryList,
   signal,
+  input,
   ViewChild,
   ViewChildren,
+  computed,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -20,6 +22,7 @@ import { filter } from 'rxjs';
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { TranslationService } from '../../core/i18n/translation.service';
 import { localizedPath, StaticPageId, staticPageIds } from '../../core/routing/localized-routes';
+import { MaritimeNavigationMode } from '../maritime-navigation-shell/navigation-mode';
 import { LighthouseThemeToggleComponent } from '../lighthouse-theme-toggle/lighthouse-theme-toggle.component';
 import { LocaleSwitcherComponent } from '../locale-switcher/locale-switcher.component';
 import { SonarNavigationComponent } from '../sonar-navigation/sonar-navigation.component';
@@ -41,10 +44,13 @@ export class SiteHeaderComponent {
   @ViewChild('mobileMenuButton') private mobileMenuButton?: ElementRef<HTMLButtonElement>;
   @ViewChildren('mobileNavLink') private mobileNavLinks?: QueryList<ElementRef<HTMLAnchorElement>>;
 
+  readonly navigationMode = input<MaritimeNavigationMode>('top');
+
   protected readonly navPages = staticPageIds;
   protected readonly exactPageCurrentOptions = { exact: true };
   protected readonly isMobileMenuOpen = signal(false);
   protected readonly mobileMenuId = 'mobile-primary-navigation';
+  protected readonly isFloatingShell = computed(() => this.navigationMode() === 'floating');
   protected readonly locale = inject(LocaleContextService).locale;
 
   readonly #platformId = inject(PLATFORM_ID);

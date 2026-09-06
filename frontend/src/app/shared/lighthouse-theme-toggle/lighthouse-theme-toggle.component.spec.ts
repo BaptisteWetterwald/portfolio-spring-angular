@@ -42,7 +42,7 @@ describe('LighthouseThemeToggleComponent', () => {
     expect(button.getAttribute('aria-label')).toBe('Switch to dark theme');
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(button.textContent).toContain('Light theme is active');
-    expect(button.querySelector('[data-lighthouse-lantern]')).not.toBeNull();
+    expect(button.querySelector('[data-lighthouse-lantern="header"]')).not.toBeNull();
   });
 
   it('toggles theme through the real button control', () => {
