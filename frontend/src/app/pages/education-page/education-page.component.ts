@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { portfolioContentFor } from '../../core/content/portfolio-content';
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
-import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 
 @Component({
   selector: 'app-education-page',
@@ -15,7 +14,6 @@ import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 export class EducationPageComponent {
   readonly #route = inject(ActivatedRoute);
   readonly #localeContext = inject(LocaleContextService);
-  readonly #metadata = inject(PageMetadataService);
 
   protected readonly locale =
     toSupportedLocale(this.#route.parent?.snapshot.data['locale']) ?? defaultLocale;
@@ -23,6 +21,5 @@ export class EducationPageComponent {
 
   constructor() {
     this.#localeContext.setLocale(this.locale);
-    this.#metadata.applyStaticPage('education', this.locale);
   }
 }

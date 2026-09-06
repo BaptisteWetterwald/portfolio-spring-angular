@@ -1,8 +1,7 @@
-<div class="public-shell" [attr.data-maritime-navigation-mode]="navigationMode()">
-  <app-site-header [navigationMode]="navigationMode()" />
-  <span #navigationSentinel class="public-shell__navigation-sentinel" aria-hidden="true"></span>
-  <app-lighthouse-beam [source]="activeBeamSource()" />
-  <app-maritime-floating-controls [navigationMode]="navigationMode()" />
+<div class="public-shell">
+  <app-site-header />
+  <app-lighthouse-beam />
+  <app-maritime-floating-controls />
 
   <main id="main-content" class="public-shell__main" tabindex="-1">
     <router-outlet />

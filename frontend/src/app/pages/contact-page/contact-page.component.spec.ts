@@ -9,7 +9,7 @@ describe('ContactPageComponent', () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
 
-    expect(page.querySelector('h1')?.textContent).toContain('Contact');
+    expect(page.querySelector('h2')?.textContent).toContain('Contact');
     expect(page.textContent).toContain('No public contact method is listed on this site yet.');
     expect(page.querySelector('form')).toBeNull();
     expect(page.querySelector('input')).toBeNull();
@@ -25,12 +25,13 @@ describe('ContactPageComponent', () => {
     expect(page.querySelector('.contact-page__beacon[aria-hidden="true"]')).not.toBeNull();
   });
 
-  it('applies localized contact metadata', async () => {
-    const metadata = { applyStaticPage: vi.fn() };
+  it('exposes the stable contact section anchor and heading relationship', async () => {
+    const fixture = await createFixture('fr');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#contact');
 
-    await createFixture('fr', metadata);
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('contact', 'fr');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('contact-title');
+    expect(section?.querySelector('h2')?.id).toBe('contact-title');
   });
 });
 

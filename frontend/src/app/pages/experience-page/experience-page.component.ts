@@ -5,7 +5,6 @@ import { portfolioContentFor } from '../../core/content/portfolio-content';
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
 import { TranslationService } from '../../core/i18n/translation.service';
-import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 
 @Component({
   selector: 'app-experience-page',
@@ -16,7 +15,6 @@ import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 export class ExperiencePageComponent {
   readonly #route = inject(ActivatedRoute);
   readonly #localeContext = inject(LocaleContextService);
-  readonly #metadata = inject(PageMetadataService);
   readonly #translations = inject(TranslationService);
 
   protected readonly locale =
@@ -25,7 +23,6 @@ export class ExperiencePageComponent {
 
   constructor() {
     this.#localeContext.setLocale(this.locale);
-    this.#metadata.applyStaticPage('experience', this.locale);
   }
 
   protected t(key: string): string {

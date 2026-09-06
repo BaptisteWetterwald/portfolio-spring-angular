@@ -34,6 +34,19 @@ export interface LocalizedRouteMatch {
 
 export const staticPageIds = Object.keys(localizedStaticRouteSegments) as StaticPageId[];
 
+export const portfolioSectionIds = staticPageIds;
+
+export function localizedPortfolioPath(locale: SupportedLocale): string {
+  return `/${locale}`;
+}
+
+export function localizedPortfolioSectionUrl(
+  locale: SupportedLocale,
+  sectionId: StaticPageId,
+): string {
+  return `${localizedPortfolioPath(locale)}#${sectionId}`;
+}
+
 export function localizedPath(locale: SupportedLocale, pageId: StaticPageId): string {
   const segment = localizedSegment(locale, pageId);
 
@@ -74,7 +87,7 @@ export function equivalentLocalizedPath(
 
   if (match.pageId === 'projectDetail') {
     if (projectDetailAvailableLocales && !projectDetailAvailableLocales.includes(targetLocale)) {
-      return localizedPath(targetLocale, 'projects');
+      return localizedPortfolioSectionUrl(targetLocale, 'projects');
     }
 
     return match.slug
@@ -82,7 +95,27 @@ export function equivalentLocalizedPath(
       : localizedPath(targetLocale, 'home');
   }
 
-  return localizedPath(targetLocale, match.pageId);
+  const fragmentSection = portfolioSectionFromUrl(currentUrl);
+
+  if (!fragmentSection && match.pageId === 'home') {
+    return localizedPortfolioPath(targetLocale);
+  }
+
+  return localizedPortfolioSectionUrl(targetLocale, fragmentSection ?? match.pageId);
+}
+
+export function portfolioSectionFromUrl(url: string): StaticPageId | undefined {
+  const fragment = url.split('#')[1]?.split('?')[0];
+
+  if (!fragment) {
+    return undefined;
+  }
+
+  const decodedFragment = decodeSegment(fragment);
+
+  return staticPageIds.includes(decodedFragment as StaticPageId)
+    ? (decodedFragment as StaticPageId)
+    : undefined;
 }
 
 export function matchLocalizedPath(url: string): LocalizedRouteMatch | undefined {

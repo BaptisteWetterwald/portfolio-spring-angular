@@ -14,10 +14,3 @@
 .public-shell__main:focus {
   outline: none;
 }
-
-.public-shell__navigation-sentinel {
-  display: block;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}

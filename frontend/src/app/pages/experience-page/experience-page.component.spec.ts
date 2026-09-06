@@ -90,7 +90,7 @@ describe('ExperiencePageComponent', () => {
     const bureauVeritas = entryArticleById(page, 'bureau-veritas-laboratories');
 
     expect(plansee?.querySelector('.timeline-page__meta')).not.toBeNull();
-    expect(plansee?.querySelector('.timeline-page__identity-panel h2')?.textContent).toContain(
+    expect(plansee?.querySelector('.timeline-page__identity-panel h3')?.textContent).toContain(
       'Plansee Group Functions',
     );
     expect(plansee?.querySelector('.timeline-page__identity-panel .timeline-page__role')).not.toBe(
@@ -256,7 +256,7 @@ describe('ExperiencePageComponent', () => {
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
     expect(links[0].getAttribute('aria-label')).toContain('Official website');
-    expect(links.every((link) => link.closest('h2'))).toBe(true);
+    expect(links.every((link) => link.closest('h3'))).toBe(true);
     expect(links.every((link) => link.querySelector('.timeline-page__logo-frame'))).toBe(false);
     expect(logoLinks.map((link) => link.getAttribute('href'))).toEqual([
       'https://plansee-group.com/en',
@@ -312,12 +312,13 @@ describe('ExperiencePageComponent', () => {
     );
   });
 
-  it('applies localized experience metadata', async () => {
-    const metadata = { applyStaticPage: vi.fn() };
+  it('exposes the stable experience section anchor and heading relationship', async () => {
+    const fixture = await createFixture('fr');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#experience');
 
-    await createFixture('fr', metadata);
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('experience', 'fr');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('experience-title');
+    expect(section?.querySelector('h2')?.id).toBe('experience-title');
   });
 });
 
@@ -367,7 +368,7 @@ function entryIds(page: HTMLElement): string[] {
 }
 
 function entryHeadings(page: HTMLElement): string[] {
-  return Array.from(page.querySelectorAll('article h2')).map(
+  return Array.from(page.querySelectorAll('article .timeline-page__identity-panel h3')).map(
     (element) => element.textContent?.trim() ?? '',
   );
 }

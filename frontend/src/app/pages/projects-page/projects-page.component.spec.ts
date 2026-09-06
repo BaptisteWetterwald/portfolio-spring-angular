@@ -19,7 +19,7 @@ describe('ProjectsPageComponent', () => {
     });
     const page = fixture.nativeElement as HTMLElement;
 
-    expect(page.querySelector('h1')?.textContent).toContain('Projects');
+    expect(page.querySelector('h2')?.textContent).toContain('Projects');
     expect(sectionText(page, 'Featured projects')).toContain('Featured Project');
     expect(sectionText(page, 'Published projects')).toContain('Published Project');
     expect(sectionText(page, 'Archive')).toContain('Archived Project');
@@ -83,21 +83,13 @@ describe('ProjectsPageComponent', () => {
     expect(page.textContent).not.toContain('500');
   });
 
-  it('applies localized static project metadata', async () => {
-    const metadata = {
-      applyStaticPage: vi.fn(),
-    };
+  it('exposes the stable projects section anchor and heading relationship', async () => {
+    const fixture = await createFixture({ kind: 'loaded', projects: [] }, 'fr');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#projects');
 
-    await createFixture(
-      {
-        kind: 'loaded',
-        projects: [],
-      },
-      'fr',
-      metadata,
-    );
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('projects', 'fr');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('projects-title');
+    expect(section?.querySelector('h2')?.id).toBe('projects-title');
   });
 });
 
@@ -141,7 +133,7 @@ async function createFixture(
 }
 
 function sectionText(page: HTMLElement, heading: string): string {
-  const headingElement = Array.from(page.querySelectorAll('h2')).find((element) =>
+  const headingElement = Array.from(page.querySelectorAll('h3')).find((element) =>
     element.textContent?.includes(heading),
   );
 

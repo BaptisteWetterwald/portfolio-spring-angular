@@ -141,7 +141,7 @@ describe('ProjectDetailPageComponent', () => {
     const page = fixture.nativeElement as HTMLElement;
 
     expect(page.textContent).toContain('Project could not be loaded');
-    expect(page.querySelector<HTMLAnchorElement>('a')?.getAttribute('href')).toBe('/en/projects');
+    expect(page.querySelector<HTMLAnchorElement>('a')?.getAttribute('href')).toBe('/en#projects');
   });
 
   it('renders localized not-found UI and sets SSR response status', async () => {

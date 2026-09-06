@@ -1,12 +1,14 @@
 import {
   equivalentLocalizedPath,
   localizedAlternates,
+  localizedPortfolioSectionUrl,
   localizedSegment,
   localizedStaticRouteSegments,
   localizedPath,
   localizedProjectDetailAlternates,
   localizedProjectDetailPath,
   matchLocalizedPath,
+  portfolioSectionFromUrl,
   staticPageIds,
 } from './localized-routes';
 
@@ -44,10 +46,17 @@ describe('localized route model', () => {
     expect(matchLocalizedPath('/es/projects')).toBeUndefined();
   });
 
-  it('maps equivalent static routes between locales', () => {
-    expect(equivalentLocalizedPath('/fr/formation', 'en')).toBe('/en/education');
-    expect(equivalentLocalizedPath('/en/projects', 'fr')).toBe('/fr/projets');
-    expect(equivalentLocalizedPath('/fr/contact', 'en')).toBe('/en/contact');
+  it('maps legacy static routes to equivalent single-page sections', () => {
+    expect(equivalentLocalizedPath('/fr/formation', 'en')).toBe('/en#education');
+    expect(equivalentLocalizedPath('/en/projects', 'fr')).toBe('/fr#projects');
+    expect(equivalentLocalizedPath('/fr/contact', 'en')).toBe('/en#contact');
+  });
+
+  it('preserves stable section fragments across locales', () => {
+    expect(equivalentLocalizedPath('/fr#experience', 'en')).toBe('/en#experience');
+    expect(localizedPortfolioSectionUrl('fr', 'education')).toBe('/fr#education');
+    expect(portfolioSectionFromUrl('/en#projects')).toBe('projects');
+    expect(portfolioSectionFromUrl('/en#unknown')).toBeUndefined();
   });
 
   it('keeps V1 project slugs shared when switching locales', () => {
@@ -63,7 +72,7 @@ describe('localized route model', () => {
   });
 
   it('uses the projects index when project detail translation is known unavailable', () => {
-    expect(equivalentLocalizedPath('/en/projects/english-only', 'fr', ['en'])).toBe('/fr/projets');
+    expect(equivalentLocalizedPath('/en/projects/english-only', 'fr', ['en'])).toBe('/fr#projects');
   });
 
   it('falls back to the selected locale home for unknown routes', () => {

@@ -7,7 +7,7 @@ import {
   RESPONSE_INIT,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
@@ -18,7 +18,8 @@ import {
   projectDetailStateFromRouteData,
   projectDetailStateKey,
 } from '../../core/projects/project-resolvers';
-import { localizedPath } from '../../core/routing/localized-routes';
+import { PortfolioNavigationService } from '../../core/routing/portfolio-navigation.service';
+import { localizedPortfolioSectionUrl } from '../../core/routing/localized-routes';
 import { NotFoundPageComponent } from '../not-found-page/not-found-page.component';
 
 @Component({
@@ -35,7 +36,9 @@ export class ProjectDetailPageComponent {
 
   protected readonly locale =
     toSupportedLocale(this.#route.parent?.snapshot.data['locale']) ?? defaultLocale;
-  protected readonly projectsPath = localizedPath(this.locale, 'projects');
+  protected readonly projectsPath = inject(Router).parseUrl(
+    localizedPortfolioSectionUrl(this.locale, 'projects'),
+  );
   protected readonly state = computed(() =>
     projectDetailStateFromRouteData(this.#routeData()[projectDetailStateKey]),
   );
@@ -50,6 +53,7 @@ export class ProjectDetailPageComponent {
 
   readonly #localeContext = inject(LocaleContextService);
   readonly #metadata = inject(PageMetadataService);
+  readonly #navigation = inject(PortfolioNavigationService);
   readonly #responseInit = inject(RESPONSE_INIT, { optional: true });
 
   constructor() {
@@ -59,17 +63,20 @@ export class ProjectDetailPageComponent {
       const state = this.state();
 
       if (state.kind === 'loaded') {
+        this.#navigation.setActiveSection('projects');
         this.#metadata.applyProjectDetail(this.locale, state.project);
         return;
       }
 
       if (state.kind === 'notFound') {
+        this.#navigation.setActiveSection(null);
         if (this.#responseInit) {
           this.#responseInit.status = 404;
         }
         return;
       }
 
+      this.#navigation.setActiveSection('projects');
       this.#metadata.applyStaticPage('projects', this.locale);
     });
   }

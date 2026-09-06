@@ -8,7 +8,7 @@
   max-width: 680px;
 }
 
-.contact-page__header h1 {
+.contact-page__header h2 {
   margin: 0;
   font-size: 2.25rem;
   line-height: 1.15;
@@ -107,7 +107,7 @@
     width: 68px;
   }
 
-  .contact-page__header h1 {
+  .contact-page__header h2 {
     font-size: 1.9rem;
   }
 }

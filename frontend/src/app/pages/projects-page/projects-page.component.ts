@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
 import { TranslationService } from '../../core/i18n/translation.service';
-import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import {
   projectsPageStateKey,
   projectsStateFromRouteData,
@@ -46,15 +45,9 @@ export class ProjectsPageComponent {
   protected readonly projectCount = computed(() => this.loadedProjects().length);
 
   readonly #localeContext = inject(LocaleContextService);
-  readonly #metadata = inject(PageMetadataService);
 
   constructor() {
     this.#localeContext.setLocale(this.locale);
-
-    effect(() => {
-      this.state();
-      this.#metadata.applyStaticPage('projects', this.locale);
-    });
   }
 
   protected t(key: string): string {

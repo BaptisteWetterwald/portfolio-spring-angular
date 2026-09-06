@@ -1,9 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TransferState } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
+import { ProjectApiService } from '../../core/projects/project-api.service';
 import { themeCookieName, themeStorageKey } from '../../core/theme/theme-preference.service';
 import { siteFooterYearStateKey } from './site-footer.component';
 
@@ -32,16 +35,16 @@ describe('SiteFooterComponent integration', () => {
     }
   });
 
-  it('marks the exact current footer route', async () => {
-    const harness = await createHarness('/fr/contact');
+  it('marks the current footer section location', async () => {
+    const harness = await createHarness('/fr#contact');
 
-    expect(footerLink(harness, 'Contact')?.getAttribute('aria-current')).toBe('page');
+    expect(footerLink(harness, 'Contact')?.getAttribute('aria-current')).toBe('location');
   });
 
   it('does not mark unrelated footer routes current', async () => {
-    const harness = await createHarness('/en/projects');
+    const harness = await createHarness('/en#projects');
 
-    expect(footerLink(harness, 'Projects')?.getAttribute('aria-current')).toBe('page');
+    expect(footerLink(harness, 'Projects')?.getAttribute('aria-current')).toBe('location');
     expect(footerLink(harness, 'Home')?.getAttribute('aria-current')).toBeNull();
     expect(footerLink(harness, 'Contact')?.getAttribute('aria-current')).toBeNull();
   });
@@ -69,7 +72,17 @@ async function createHarness(
 ): Promise<RouterTestingHarness> {
   setSystemTheme(false);
   TestBed.configureTestingModule({
-    providers: [provideRouter(routes)],
+    providers: [
+      provideRouter(routes),
+      {
+        provide: ProjectApiService,
+        useValue: {
+          listProjects: () => of([]),
+          getProject: () =>
+            throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' })),
+        },
+      },
+    ],
   });
   beforeCreate?.();
 

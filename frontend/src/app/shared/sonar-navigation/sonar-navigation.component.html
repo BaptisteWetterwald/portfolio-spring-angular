@@ -43,14 +43,12 @@
         <li [class]="itemClass(pageId)">
           <a
             class="sonar-nav__link"
-            [routerLink]="localizedPath(pageId)"
-            routerLinkActive="sonar-nav__link--active"
-            #activeLink="routerLinkActive"
-            [routerLinkActiveOptions]="exactPageCurrentOptions"
-            [attr.aria-current]="activeLink.isActive ? 'page' : null"
-            [attr.data-active]="activeLink.isActive ? 'true' : null"
+            [class.sonar-nav__link--active]="isSectionActive(pageId)"
+            [attr.href]="sectionHref(pageId)"
+            [attr.aria-current]="isSectionActive(pageId) ? 'location' : null"
+            [attr.data-active]="isSectionActive(pageId) ? 'true' : null"
             [attr.tabindex]="floatingLinksHidden() ? '-1' : null"
-            (click)="closeFloatingNavigation()"
+            (click)="handleSectionNavigation($event, pageId)"
           >
             <span class="sonar-nav__marker" aria-hidden="true"></span>
             <span class="sonar-nav__label">{{ navLabel(pageId) }}</span>

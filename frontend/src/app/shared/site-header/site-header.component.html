@@ -13,11 +13,10 @@
             <li>
               <a
                 class="site-header__nav-link"
-                [routerLink]="localizedPath(pageId)"
-                routerLinkActive="site-header__nav-link--active"
-                #activeLink="routerLinkActive"
-                [routerLinkActiveOptions]="exactPageCurrentOptions"
-                [attr.aria-current]="activeLink.isActive ? 'page' : null"
+                [class.site-header__nav-link--active]="isSectionActive(pageId)"
+                [attr.href]="sectionHref(pageId)"
+                [attr.aria-current]="isSectionActive(pageId) ? 'location' : null"
+                (click)="handleSectionNavigation($event, pageId)"
               >
                 {{ navLabel(pageId) }}
               </a>
@@ -28,7 +27,6 @@
 
       <div class="site-header__actions">
         <app-locale-switcher />
-        <app-lighthouse-theme-toggle beamSource="header" />
         <button
           #mobileMenuButton
           class="btn btn-circle btn-ghost site-header__menu-button"
@@ -59,12 +57,10 @@
               <a
                 #mobileNavLink
                 class="site-header__mobile-link"
-                [routerLink]="localizedPath(pageId)"
-                routerLinkActive="site-header__mobile-link--active"
-                #activeMobileLink="routerLinkActive"
-                [routerLinkActiveOptions]="exactPageCurrentOptions"
-                [attr.aria-current]="activeMobileLink.isActive ? 'page' : null"
-                (click)="closeMobileMenu()"
+                [class.site-header__mobile-link--active]="isSectionActive(pageId)"
+                [attr.href]="sectionHref(pageId)"
+                [attr.aria-current]="isSectionActive(pageId) ? 'location' : null"
+                (click)="handleSectionNavigation($event, pageId, true)"
               >
                 {{ navLabel(pageId) }}
               </a>
@@ -73,13 +69,5 @@
         </ul>
       </nav>
     }
-  </div>
-
-  <div
-    class="site-header__sonar"
-    [attr.aria-hidden]="isFloatingShell() ? 'true' : null"
-    [attr.inert]="isFloatingShell() ? '' : null"
-  >
-    <app-sonar-navigation variant="primary" />
   </div>
 </header>

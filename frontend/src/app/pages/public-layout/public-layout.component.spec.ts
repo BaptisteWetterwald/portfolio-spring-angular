@@ -12,10 +12,8 @@ describe('PublicLayoutComponent integration', () => {
   const originalInnerHeight = globalThis.innerHeight;
   const originalInnerWidth = globalThis.innerWidth;
   const originalMatchMedia = globalThis.matchMedia;
-  let intersectionObservers: MockIntersectionObserver[];
 
   beforeEach(() => {
-    intersectionObservers = installIntersectionObserverMock();
     setSystemTheme(false);
   });
 
@@ -37,62 +35,53 @@ describe('PublicLayoutComponent integration', () => {
     restoreGlobal('matchMedia', originalMatchMedia);
   });
 
-  it('starts in top mode with floating controls inert and the header beam source active', async () => {
+  it('renders only the persistent floating maritime controls from the top of the page', async () => {
     const harness = await createHarness('/en');
 
-    expect(shell(harness).getAttribute('data-maritime-navigation-mode')).toBe('top');
-    expect(floatingControls(harness).getAttribute('aria-hidden')).toBe('true');
-    expect(floatingControls(harness).hasAttribute('inert')).toBe(true);
-    expect(beam(harness).getAttribute('data-lighthouse-beam-source')).toBe('header');
-  });
-
-  it('switches to floating mode after the header navigation sentinel leaves and restores top mode when it returns', async () => {
-    const harness = await createHarness('/en');
-
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
-
-    expect(shell(harness).getAttribute('data-maritime-navigation-mode')).toBe('floating');
+    expect(shell(harness).hasAttribute('data-maritime-navigation-mode')).toBe(false);
     expect(floatingControls(harness).getAttribute('aria-hidden')).toBeNull();
     expect(floatingControls(harness).hasAttribute('inert')).toBe(false);
+    expect(harness.fixture.nativeElement.querySelector('.site-header__sonar')).toBeNull();
+    expect(harness.fixture.nativeElement.querySelector('.site-header .theme-toggle')).toBeNull();
+    expect(
+      harness.fixture.nativeElement.querySelectorAll('app-lighthouse-theme-toggle'),
+    ).toHaveLength(1);
     expect(beam(harness).getAttribute('data-lighthouse-beam-source')).toBe('floating');
-    expect(headerSonar(harness).getAttribute('aria-hidden')).toBe('true');
-    expect(headerSonar(harness).hasAttribute('inert')).toBe(true);
-
-    observerWithRootMargin('-16px 0px 0px 0px').emit(true, 24);
-    await settleHarness(harness);
-
-    expect(shell(harness).getAttribute('data-maritime-navigation-mode')).toBe('top');
-    expect(beam(harness).getAttribute('data-lighthouse-beam-source')).toBe('header');
-    expect(headerSonar(harness).getAttribute('aria-hidden')).toBeNull();
   });
 
-  it('keeps the floating sonar as semantic localized Angular navigation with exact active route state', async () => {
-    const harness = await createHarness('/fr/formation');
+  it('keeps the same lighthouse and beam source while the document scrolls', async () => {
+    const harness = await createHarness('/en');
+    const lighthouse = floatingThemeButton(harness);
+    const beamSource = beam(harness);
 
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
+    globalThis.dispatchEvent(new Event('scroll'));
     await settleHarness(harness);
+
+    expect(floatingThemeButton(harness)).toBe(lighthouse);
+    expect(beam(harness)).toBe(beamSource);
+    expect(beamSource.getAttribute('data-lighthouse-beam-source')).toBe('floating');
+  });
+
+  it('keeps the floating sonar as semantic localized section navigation', async () => {
+    const harness = await createHarness('/fr#education');
 
     const links = floatingSonarLinks(harness);
 
     expect(floatingSonar(harness).getAttribute('aria-label')).toBe('Navigation compas compacte');
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/fr',
-      '/fr/formation',
-      '/fr/experience',
-      '/fr/projets',
-      '/fr/contact',
+      '/fr#home',
+      '/fr#education',
+      '/fr#experience',
+      '/fr#projects',
+      '/fr#contact',
     ]);
     expect(
       links.find((link) => link.textContent?.trim() === 'Formation')?.getAttribute('aria-current'),
-    ).toBe('page');
+    ).toBe('location');
   });
 
   it('expands the floating sonar for keyboard focus without collapsing between internal links', async () => {
     const harness = await createHarness('/en');
-
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
 
     const button = compactSonarButton(harness);
     const firstLink = floatingSonarLinks(harness)[0];
@@ -120,18 +109,15 @@ describe('PublicLayoutComponent integration', () => {
   it('supports click expansion for touch-style interaction and closes after route navigation', async () => {
     const harness = await createHarness('/en');
 
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
-
     compactSonarButton(harness).click();
     await settleHarness(harness);
 
     expect(compactSonarButton(harness).getAttribute('aria-expanded')).toBe('true');
 
-    await harness.navigateByUrl('/en/projects');
+    await harness.navigateByUrl('/en#projects');
     await settleHarness(harness);
 
-    expect(TestBed.inject(Router).url).toBe('/en/projects');
+    expect(TestBed.inject(Router).url).toBe('/en#projects');
     expect(compactSonarButton(harness).getAttribute('aria-expanded')).toBe('false');
   });
 
@@ -139,9 +125,6 @@ describe('PublicLayoutComponent integration', () => {
     setSystemTheme(false, true);
     setViewport(390, 844);
     const harness = await createHarness('/en');
-
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
 
     const button = compactSonarButton(harness);
 
@@ -152,13 +135,10 @@ describe('PublicLayoutComponent integration', () => {
     expect(button.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('snaps a mobile drag without expanding and allows the next tap to expand', async () => {
+  it('snaps a mobile drag and still allows a later waypoint tap to navigate', async () => {
     setSystemTheme(false, true);
     setViewport(390, 844);
     const harness = await createHarness('/en');
-
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
 
     const sonar = floatingSonar(harness);
     const button = compactSonarButton(harness);
@@ -176,20 +156,25 @@ describe('PublicLayoutComponent integration', () => {
     await settleHarness(harness);
 
     expect(button.getAttribute('aria-expanded')).toBe('true');
+
+    floatingSonarLinks(harness)
+      .find((link) => link.textContent?.trim() === 'Projects')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    await settleHarness(harness);
+
+    expect(TestBed.inject(Router).url).toBe('/en#projects');
+    expect(button.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('uses the same theme service for header and floating lighthouse controls', async () => {
+  it('uses the persistent lighthouse to update the shared theme state', async () => {
     const harness = await createHarness('/en');
-
-    observerWithRootMargin('64px 0px 0px 0px').emit(false, -80);
-    await settleHarness(harness);
 
     floatingThemeButton(harness).click();
     await settleHarness(harness);
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(headerThemeButton(harness).getAttribute('aria-pressed')).toBe('true');
     expect(floatingThemeButton(harness).getAttribute('aria-pressed')).toBe('true');
+    expect(harness.fixture.nativeElement.querySelectorAll('.theme-toggle')).toHaveLength(1);
   });
 
   it('does not initialize intersection observers during SSR rendering', () => {
@@ -220,18 +205,11 @@ describe('PublicLayoutComponent integration', () => {
 
     fixture.detectChanges();
 
-    expect(shellFromFixture(fixture).getAttribute('data-maritime-navigation-mode')).toBe('top');
+    expect(shellFromFixture(fixture).hasAttribute('data-maritime-navigation-mode')).toBe(false);
+    expect(fixture.nativeElement.querySelectorAll('app-lighthouse-theme-toggle')).toHaveLength(1);
     expect(intersectionObserver).not.toHaveBeenCalled();
     expect(matchMedia).not.toHaveBeenCalled();
   });
-
-  function observerWithRootMargin(rootMargin: string): MockIntersectionObserver {
-    const observer = intersectionObservers.find((candidate) => candidate.rootMargin === rootMargin);
-
-    expect(observer).toBeDefined();
-
-    return observer as MockIntersectionObserver;
-  }
 });
 
 async function createHarness(initialUrl: string): Promise<RouterTestingHarness> {
@@ -268,10 +246,6 @@ function beam(harness: RouterTestingHarness): HTMLElement {
   return requiredElement(harness.fixture.nativeElement, '.lighthouse-beam');
 }
 
-function headerSonar(harness: RouterTestingHarness): HTMLElement {
-  return requiredElement(harness.fixture.nativeElement, '.site-header__sonar');
-}
-
 function floatingSonar(harness: RouterTestingHarness): HTMLElement {
   return requiredElement(
     harness.fixture.nativeElement,
@@ -291,10 +265,6 @@ function compactSonarButton(harness: RouterTestingHarness): HTMLButtonElement {
   expect(button).toBeInstanceOf(HTMLButtonElement);
 
   return button as HTMLButtonElement;
-}
-
-function headerThemeButton(harness: RouterTestingHarness): HTMLButtonElement {
-  return requiredButton(harness.fixture.nativeElement, '.site-header .theme-toggle');
 }
 
 function floatingThemeButton(harness: RouterTestingHarness): HTMLButtonElement {
@@ -366,51 +336,6 @@ function pointerEvent(type: string, clientX: number, clientY: number): PointerEv
   return event;
 }
 
-function installIntersectionObserverMock(): MockIntersectionObserver[] {
-  const observers: MockIntersectionObserver[] = [];
-
-  class TestIntersectionObserver implements Partial<IntersectionObserver> {
-    readonly root = null;
-    readonly rootMargin: string;
-    readonly scrollMargin = '0px';
-    readonly thresholds = [0];
-    readonly observe = vi.fn();
-    readonly unobserve = vi.fn();
-    readonly disconnect = vi.fn();
-    readonly takeRecords = vi.fn(() => []);
-
-    constructor(
-      readonly callback: IntersectionObserverCallback,
-      options?: IntersectionObserverInit,
-    ) {
-      this.rootMargin = options?.rootMargin ?? '0px';
-      observers.push(this as MockIntersectionObserver);
-    }
-
-    emit(isIntersecting: boolean, top: number): void {
-      this.callback(
-        [
-          {
-            isIntersecting,
-            boundingClientRect: {
-              top,
-            },
-          } as IntersectionObserverEntry,
-        ],
-        this as IntersectionObserver,
-      );
-    }
-  }
-
-  Object.defineProperty(globalThis, 'IntersectionObserver', {
-    configurable: true,
-    writable: true,
-    value: TestIntersectionObserver,
-  });
-
-  return observers;
-}
-
 function restoreGlobal<T>(name: keyof typeof globalThis, value: T): void {
   if (value) {
     Object.defineProperty(globalThis, name, {
@@ -422,10 +347,4 @@ function restoreGlobal<T>(name: keyof typeof globalThis, value: T): void {
   }
 
   Reflect.deleteProperty(globalThis, name);
-}
-
-interface MockIntersectionObserver extends IntersectionObserver {
-  readonly callback: IntersectionObserverCallback;
-
-  emit(isIntersecting: boolean, top: number): void;
 }
