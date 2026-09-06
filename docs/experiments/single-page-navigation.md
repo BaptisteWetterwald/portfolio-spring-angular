@@ -1,6 +1,6 @@
 # Single-Page Navigation Experiment
 
-Status: experimental architecture on `experiment/single-page-navigation`. This note does not replace the approved multi-page information architecture or roadmap.
+Status: experimental architecture, with the desktop handoff refinement evaluated on `experiment/header-sonar-morph`. This note does not replace the approved multi-page information architecture or roadmap.
 
 ## Purpose
 
@@ -19,7 +19,11 @@ This branch compares the approved multi-page portfolio with a single scrolling d
 
 Header, sonar, mobile menu, and footer links are real anchors whose `href` values point to localized root fragments. Explicit activation uses Angular Router navigation, creates one browser-history entry, and then uses native `scrollIntoView`.
 
-The refined experiment keeps the header conventional and removes its embedded sonar and lighthouse. One compact sonar remains fixed on the left and one lighthouse theme control remains fixed on the right from initial render through the footer. Because the floating controls no longer replace top-of-page copies, the public shell has no top/floating mode or source-switching sentinel.
+The refined experiment keeps the header conventional and removes its embedded sonar and lighthouse. One lighthouse theme control remains fixed on the right from initial render through the footer. The lighthouse and beam keep one stable DOM source and do not participate in navigation handoffs.
+
+On viewports at least `900px` wide, `PublicLayoutComponent` observes the stable `app-site-header` host. The header navigation is primary while at least `82%` of the header is visible. The compact left sonar becomes primary after visibility falls to `58%` or less with the header moving above the viewport. Keeping the current state between those thresholds provides hysteresis without a scroll listener. A `420ms` CSS handoff using `cubic-bezier(0.22, 1, 0.36, 1)` coordinates a restrained header fade/scale with the existing sonar container's fade/scale into its approved docked geometry.
+
+Below `900px`, the sonar remains available from initial render; the desktop choreography does not run, and the existing mobile drag, snap, expansion, and lighthouse-safe-zone behavior is unchanged. Reduced motion makes the wide handoff immediate. Hidden navigation is inert and removed from the accessibility tree. If focus is already inside the outgoing header navigation or sonar, that control remains visible and operable until focus leaves, without forced focus movement.
 
 Passive scroll-spy changes update only shared active-section state. They do not change the URL or browser history. Active section links use `aria-current="location"`.
 

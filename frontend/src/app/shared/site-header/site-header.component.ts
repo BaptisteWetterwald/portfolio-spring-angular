@@ -3,10 +3,12 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   HostListener,
   inject,
   Injector,
+  input,
   PLATFORM_ID,
   QueryList,
   signal,
@@ -34,7 +36,13 @@ export class SiteHeaderComponent {
   @ViewChild('mobileMenuButton') private mobileMenuButton?: ElementRef<HTMLButtonElement>;
   @ViewChildren('mobileNavLink') private mobileNavLinks?: QueryList<ElementRef<HTMLAnchorElement>>;
 
+  readonly floatingNavigationActive = input(false);
+
   protected readonly navPages = staticPageIds;
+  protected readonly desktopNavigationFocused = signal(false);
+  protected readonly desktopNavigationUnavailable = computed(
+    () => this.floatingNavigationActive() && !this.desktopNavigationFocused(),
+  );
   protected readonly isMobileMenuOpen = signal(false);
   protected readonly mobileMenuId = 'mobile-primary-navigation';
   protected readonly locale = inject(LocaleContextService).locale;
@@ -69,6 +77,25 @@ export class SiteHeaderComponent {
 
   protected isSectionActive(pageId: StaticPageId): boolean {
     return this.#navigation.isActive(pageId);
+  }
+
+  protected handleDesktopNavigationFocusIn(): void {
+    this.desktopNavigationFocused.set(true);
+  }
+
+  protected handleDesktopNavigationFocusOut(event: FocusEvent): void {
+    const navigation = event.currentTarget;
+    const nextTarget = event.relatedTarget;
+
+    if (
+      navigation instanceof HTMLElement &&
+      nextTarget instanceof Node &&
+      navigation.contains(nextTarget)
+    ) {
+      return;
+    }
+
+    this.desktopNavigationFocused.set(false);
   }
 
   protected handleSectionNavigation(

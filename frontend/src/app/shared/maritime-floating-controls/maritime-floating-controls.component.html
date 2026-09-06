@@ -1,5 +1,12 @@
 <aside class="maritime-floating-controls">
-  <div class="maritime-floating-controls__sonar">
+  <div
+    class="maritime-floating-controls__sonar"
+    [class.maritime-floating-controls__sonar--active]="sonarAvailable()"
+    [attr.aria-hidden]="sonarAvailable() ? null : 'true'"
+    [attr.inert]="sonarAvailable() ? null : ''"
+    (focusin)="handleSonarFocusIn()"
+    (focusout)="handleSonarFocusOut($event)"
+  >
     <app-sonar-navigation variant="floating" />
   </div>
 

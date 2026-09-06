@@ -81,6 +81,10 @@ async function verifyDesktop(client) {
   await setViewport(client, 1440, 900);
   await setReducedMotion(client, false);
   await goto(client, '/en');
+  await waitFor(
+    client,
+    `document.querySelector('.public-shell')?.dataset.navigationHandoffState === 'header'`,
+  );
 
   assert(
     await value(
@@ -88,26 +92,45 @@ async function verifyDesktop(client) {
       `(() => {
         const header = document.querySelector('.site-header');
         const navigation = header?.querySelector('[data-primary-nav]');
+        const shell = document.querySelector('.public-shell');
+        const sonarHost = document.querySelector('.maritime-floating-controls__sonar');
         const sonarButton = document.querySelector('.maritime-floating-controls .sonar-nav__compact-button');
         const lighthouse = document.querySelector('.maritime-floating-controls__lighthouse');
         const heroHeading = document.querySelector('#home h1');
-        if (!header || !navigation || !sonarButton || !lighthouse || !heroHeading) return false;
-        const sonarBounds = sonarButton.getBoundingClientRect();
+        if (!header || !navigation || !shell || !sonarHost || !sonarButton || !lighthouse || !heroHeading) return false;
         const lighthouseBounds = lighthouse.getBoundingClientRect();
+        const sonarStyles = getComputedStyle(sonarHost);
+        const shellStyles = getComputedStyle(shell);
         return getComputedStyle(navigation).display !== 'none' &&
+          shell.dataset.navigationHandoffState === 'header' &&
+          navigation.getAttribute('aria-hidden') === null &&
+          !navigation.hasAttribute('inert') &&
+          sonarHost.getAttribute('aria-hidden') === 'true' &&
+          sonarHost.hasAttribute('inert') &&
+          sonarStyles.visibility === 'hidden' &&
+          Number(sonarStyles.opacity) === 0 &&
+          shellStyles.getPropertyValue('--navigation-handoff-duration').trim() === '.42s' &&
+          shellStyles.getPropertyValue('--navigation-handoff-easing').trim() === 'cubic-bezier(.22, 1, .36, 1)' &&
           !document.querySelector('.site-header__sonar') &&
           !document.querySelector('nav[data-sonar-nav-variant="primary"]') &&
           !document.querySelector('.site-header app-lighthouse-theme-toggle') &&
           document.querySelectorAll('app-lighthouse-theme-toggle').length === 1 &&
-          !document.querySelector('.maritime-floating-controls').hasAttribute('inert') &&
-          Math.abs(sonarBounds.width - 68) < 1 &&
-          Math.abs(sonarBounds.height - 68) < 1 &&
-          sonarBounds.left < innerWidth / 2 &&
           lighthouseBounds.left > innerWidth / 2 &&
           heroHeading.getBoundingClientRect().top < 420;
       })()`,
     ),
-    'desktop top shell did not expose the conventional header and persistent side controls',
+    'desktop top shell did not expose header navigation with a non-interactive hidden sonar',
+  );
+  assert(
+    !(await value(
+      client,
+      `(() => {
+        const button = document.querySelector('.sonar-nav__compact-button');
+        button.focus();
+        return document.activeElement === button;
+      })()`,
+    )),
+    'inert top-state sonar accepted programmatic focus',
   );
 
   if ((await value(client, `document.documentElement.dataset.theme`)) !== 'dark') {
@@ -141,11 +164,133 @@ async function verifyDesktop(client) {
     ),
     'beam did not use the single floating lantern with the tuned duration and width',
   );
-  await captureScreenshot(client, 'desktop-1440x900-home-persistent-controls.png');
+  await captureScreenshot(client, 'desktop-1440x900-header-navigation-state.png');
+
+  await evaluate(
+    client,
+    `(() => {
+      window.__navigationHandoffStates = [document.querySelector('.public-shell').dataset.navigationHandoffState];
+      window.__navigationHandoffObserver = new MutationObserver(() => {
+        window.__navigationHandoffStates.push(document.querySelector('.public-shell').dataset.navigationHandoffState);
+      });
+      window.__navigationHandoffObserver.observe(document.querySelector('.public-shell'), {
+        attributes: true,
+        attributeFilter: ['data-navigation-handoff-state'],
+      });
+    })()`,
+  );
+
+  await setNavigationHandoffState(client, 'sonar', true);
+  await captureScreenshot(client, 'desktop-1440x900-navigation-handoff.png');
+  await delay(470);
+  assert(
+    await value(
+      client,
+      `(() => {
+        const shell = document.querySelector('.public-shell');
+        const navigation = document.querySelector('.site-header__nav');
+        const sonarHost = document.querySelector('.maritime-floating-controls__sonar');
+        const sonarButton = document.querySelector('.sonar-nav__compact-button');
+        const sonarBounds = sonarButton.getBoundingClientRect();
+        const sonarStyles = getComputedStyle(sonarHost);
+        const headerStyles = getComputedStyle(navigation);
+        const activeHeader = navigation.querySelector('[aria-current="location"]');
+        const activeSonar = document.querySelector('nav[data-sonar-nav-variant="floating"] [aria-current="location"]');
+        return shell.dataset.navigationHandoffState === 'sonar' &&
+          sonarHost.getAttribute('aria-hidden') === null &&
+          !sonarHost.hasAttribute('inert') &&
+          sonarStyles.visibility === 'visible' &&
+          Number(sonarStyles.opacity) === 1 &&
+          (sonarStyles.transform === 'none' || sonarStyles.transform === 'matrix(1, 0, 0, 1, 0, 0)') &&
+          navigation.getAttribute('aria-hidden') === 'true' &&
+          navigation.hasAttribute('inert') &&
+          Number(headerStyles.opacity) === 0 &&
+          Math.abs(sonarBounds.width - 68) < 1 &&
+          Math.abs(sonarBounds.height - 68) < 1 &&
+          sonarBounds.left < innerWidth / 2 &&
+          activeHeader?.getAttribute('href') === '/en#home' &&
+          activeSonar?.getAttribute('href') === '/en#home';
+      })()`,
+    ),
+    'desktop header-to-sonar handoff did not finish in the approved compact state',
+  );
+  await captureScreenshot(client, 'desktop-1440x900-floating-sonar-state.png');
+
+  const sonarButtonBounds = await rect(client, '.sonar-nav__compact-button');
+  await moveMouse(client, ...center(sonarButtonBounds));
+  await waitFor(
+    client,
+    `document.querySelector('.sonar-nav__frame').getBoundingClientRect().width > 300`,
+  );
+  await moveMouse(client, 720, 100);
+  await waitFor(
+    client,
+    `document.querySelector('.sonar-nav__frame').getBoundingClientRect().width < 80`,
+  );
+
+  await setNavigationHandoffState(client, 'header', true);
+  await delay(470);
+  assert(
+    await value(
+      client,
+      `document.querySelector('.maritime-floating-controls__sonar').hasAttribute('inert') &&
+        document.querySelector('.site-header__nav').getAttribute('aria-hidden') === null`,
+    ),
+    'reverse handoff did not restore header navigation cleanly',
+  );
+
+  for (let crossing = 0; crossing < 3; crossing += 1) {
+    await setNavigationHandoffState(client, 'sonar');
+    await setNavigationHandoffState(client, 'header');
+  }
+  assert(
+    await value(
+      client,
+      `window.__navigationHandoffStates.join(',') === 'header,sonar,header,sonar,header,sonar,header,sonar,header'`,
+    ),
+    'repeated threshold crossings flickered or produced unstable handoff states',
+  );
+
+  await evaluate(
+    client,
+    `document.querySelector('.site-header__nav [aria-current="location"]').focus()`,
+  );
+  await setNavigationHandoffState(client, 'sonar');
+  const focusedHeaderState = await value(
+    client,
+    `(() => {
+      const navigation = document.querySelector('.site-header__nav');
+      return {
+        containsFocus: navigation.contains(document.activeElement),
+        inert: navigation.hasAttribute('inert'),
+        ariaHidden: navigation.getAttribute('aria-hidden'),
+        opacity: Number(getComputedStyle(navigation).opacity),
+      };
+    })()`,
+  );
+  assert(
+    focusedHeaderState.containsFocus &&
+      !focusedHeaderState.inert &&
+      focusedHeaderState.ariaHidden === null &&
+      focusedHeaderState.opacity > 0.99,
+    `focused header navigation was hidden during passive handoff: ${JSON.stringify(focusedHeaderState)}`,
+  );
+  await evaluate(client, `document.querySelector('app-locale-switcher a').focus()`);
+  await waitFor(client, `document.querySelector('.site-header__nav').hasAttribute('inert')`);
+  await evaluate(client, `document.querySelector('.sonar-nav__compact-button').focus()`);
+  assert(
+    await value(
+      client,
+      `document.activeElement === document.querySelector('.sonar-nav__compact-button')`,
+    ),
+    'active floating sonar was not keyboard focusable after handoff',
+  );
+  await evaluate(client, `document.activeElement.blur()`);
 
   const startingHistoryLength = await value(client, 'history.length');
 
   for (const sectionId of ['home', 'education', 'experience', 'projects', 'contact']) {
+    await ensureFloatingSonarActive(client);
     if (
       (await value(
         client,
@@ -158,6 +303,10 @@ async function verifyDesktop(client) {
         `document.querySelector('.maritime-floating-controls .sonar-nav__compact-button').getAttribute('aria-expanded') === 'true'`,
       );
     }
+    await waitFor(
+      client,
+      `document.querySelector('.sonar-nav__frame').getBoundingClientRect().width > 300`,
+    );
 
     await clickElement(client, `nav[data-sonar-nav-variant="floating"] a[href="/en#${sectionId}"]`);
     await waitFor(
@@ -243,9 +392,17 @@ async function verifyDesktop(client) {
   );
 
   await goto(client, '/fr#experience');
-  await waitFor(client, `document.querySelector('#experience').getBoundingClientRect().top < 80`);
+  await waitFor(
+    client,
+    `document.querySelector('#experience').getBoundingClientRect().top < 80 &&
+      document.querySelector('.public-shell').dataset.navigationHandoffState === 'sonar'`,
+  );
   await clickAnchor(client, 'app-locale-switcher a[lang="en"]');
-  await waitFor(client, `location.pathname === '/en' && location.hash === '#experience'`);
+  await waitFor(
+    client,
+    `location.pathname === '/en' && location.hash === '#experience' &&
+      document.querySelector('.public-shell').dataset.navigationHandoffState === 'sonar'`,
+  );
 
   await goto(client, '/en#contact');
   await waitFor(
@@ -258,6 +415,20 @@ async function verifyDesktop(client) {
 
   await setReducedMotion(client, true);
   await goto(client, '/en');
+  await setNavigationHandoffState(client, 'sonar');
+  const reducedHandoffDurations = await value(
+    client,
+    `[
+      getComputedStyle(document.querySelector('.maritime-floating-controls__sonar')).transitionDuration,
+      getComputedStyle(document.querySelector('.site-header__nav')).transitionDuration,
+    ]`,
+  );
+  assert(
+    reducedHandoffDurations
+      .flatMap((duration) => duration.split(','))
+      .every((duration) => parseFloat(duration) <= 0.001),
+    `reduced motion did not make the header-to-sonar handoff immediate: ${JSON.stringify(reducedHandoffDurations)}`,
+  );
   await evaluate(
     client,
     `(() => {
@@ -297,6 +468,10 @@ async function verifyDesktop(client) {
 
   await setReducedMotion(client, false);
   await goto(client, '/en#projects');
+  await waitFor(
+    client,
+    `document.querySelector('.public-shell').dataset.navigationHandoffState === 'sonar'`,
+  );
   await captureScreenshot(client, 'desktop-1440x900-projects.png');
   assert(
     !(await value(client, 'document.documentElement.scrollWidth > innerWidth')),
@@ -314,9 +489,16 @@ async function verifyMobile(client, width, height, navigateAllSections) {
       client,
       `(() => {
         const lighthouse = document.querySelector('.maritime-floating-controls__lighthouse');
+        const sonar = document.querySelector('.maritime-floating-controls__sonar');
+        const sonarButton = document.querySelector('.sonar-nav__compact-button');
         const bounds = lighthouse?.getBoundingClientRect();
+        const sonarBounds = sonarButton?.getBoundingClientRect();
         return document.querySelectorAll('app-lighthouse-theme-toggle').length === 1 &&
           !document.querySelector('.site-header app-lighthouse-theme-toggle') &&
+          document.querySelector('.public-shell').dataset.navigationHandoffState === 'sonar' &&
+          sonar && !sonar.hasAttribute('inert') && sonar.getAttribute('aria-hidden') === null &&
+          sonarBounds && sonarBounds.width > 56 && sonarBounds.width < 70 &&
+          Math.abs(sonarBounds.width - sonarBounds.height) < 1 &&
           bounds && bounds.left >= 0 && bounds.top >= 0 && bounds.right <= innerWidth && bounds.bottom <= innerHeight;
       })()`,
     ),
@@ -430,6 +612,49 @@ async function setReducedMotion(client, reduce) {
   });
 }
 
+async function ensureFloatingSonarActive(client) {
+  if (
+    (await value(
+      client,
+      `document.querySelector('.public-shell').dataset.navigationHandoffState`,
+    )) === 'header'
+  ) {
+    await setNavigationHandoffState(client, 'sonar');
+  }
+}
+
+async function setNavigationHandoffState(client, targetState, slow = false) {
+  const currentState = await value(
+    client,
+    `document.querySelector('.public-shell').dataset.navigationHandoffState`,
+  );
+
+  if (currentState === targetState) {
+    return;
+  }
+
+  const destination =
+    targetState === 'header'
+      ? 0
+      : await value(
+          client,
+          `Math.ceil(document.querySelector('app-site-header').getBoundingClientRect().height * 0.5)`,
+        );
+  const start = await value(client, 'scrollY');
+  const steps = slow ? 8 : 1;
+
+  for (let step = 1; step <= steps; step += 1) {
+    const next = Math.round(start + ((destination - start) * step) / steps);
+    await evaluate(client, `window.scrollTo({ top: ${next}, behavior: 'instant' })`);
+    await delay(slow ? 55 : 30);
+  }
+
+  await waitFor(
+    client,
+    `document.querySelector('.public-shell').dataset.navigationHandoffState === '${targetState}'`,
+  );
+}
+
 async function clickAnchor(client, selector) {
   await evaluate(
     client,
@@ -460,6 +685,14 @@ async function clickElement(client, selector) {
     clickCount: 1,
   });
   await delay(80);
+}
+
+async function moveMouse(client, x, y) {
+  await client.send('Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    x,
+    y,
+  });
 }
 
 async function drag(client, [startX, startY], [endX, endY]) {
