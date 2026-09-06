@@ -268,6 +268,14 @@ Milestone 6 keyboard behavior:
 - route changes and link activation close the mobile menu;
 - no keyboard trap is introduced.
 
+Post-Milestone-10 persistent controls:
+
+- the floating maritime controls are `aria-hidden` and `inert` while the shell is in `top` mode;
+- when active, the compact floating sonar exposes a real button with `aria-expanded` and `aria-controls`;
+- keyboard focus-within expands the floating sonar and keeps it open while focus moves between its links;
+- click/tap expansion is supported for touch interaction, and route navigation closes the click/tap-expanded state;
+- the floating sonar links remain real localized Angular router links with exact `aria-current="page"` state.
+
 ## Screen Readers
 
 Requirements:
@@ -317,6 +325,8 @@ Milestone 10 reduced-motion behavior:
 - sonar hover/focus feedback changes from a one-shot ripple to a static marker emphasis;
 - no Home wave, parallax, bathymetric drift, or scroll-linked decorative motion is retained;
 - all decorative motion remains `aria-hidden` or pseudo-element based and does not add focusable controls.
+
+Post-Milestone-10 persistent controls keep the same reduced-motion contract. The shell may still switch between `top` and `floating`, but floating-control transitions and sonar waypoint deployment reduce to immediate/static state changes. The lighthouse beam remains a single decorative overlay and stays static when reduced motion is requested.
 
 ## Accessible Fallback Navigation
 

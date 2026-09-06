@@ -402,6 +402,23 @@ Milestone 6 implements conventional navigation in the header and footer, plus a 
 
 The compass navigation is a desktop-oriented enhancement in the header. It uses SVG/CSS rings and real router links with exact `aria-current="page"` state. The desktop frame stays narrower than the main shell width and positions destinations close to the radar circumference so Home, Education, Experience, Projects, and Contact feel connected to one instrument. On narrow screens, the conventional mobile menu remains the primary navigation path.
 
+### Post-Milestone-10 Persistent Maritime Navigation Shell
+
+The public shell now coordinates a discrete navigation mode:
+
+```text
+top -> normal header, full sonar, header lighthouse source
+floating -> left floating sonar, right floating lighthouse source
+```
+
+`PublicLayoutComponent` owns this state and defaults to `top`, which keeps request-time SSR deterministic. Browser-side observation starts only after render. A sentinel placed after the original header sonar is observed with separate floating-trigger and top-restore margins, providing simple hysteresis without a permanent scroll loop or scroll-linked animation.
+
+`MaritimeFloatingControlsComponent` hosts the persistent instruments. It is `aria-hidden` and `inert` while the shell is in `top` mode, then becomes interactive in `floating` mode. This avoids exposing a hidden duplicate floating navigation to assistive technology while preserving the existing SSR header navigation and footer navigation.
+
+`SonarNavigationComponent` remains the source of the five localized Angular router links, exact active route state, and M10 marker ripple. It now supports a `primary` variant for the header presentation and a `floating` variant for the compact persistent instrument. The floating variant adds a compact button with `aria-expanded`; keyboard focus-within and click/tap expand the links, and route navigation closes the click/tap-expanded state. Mobile keeps the existing conventional header menu and uses the compact floating sonar as an additional touch-accessible shortcut after scrolling, not as a replacement route architecture.
+
+`LighthouseThemeToggleComponent` remains a normal button backed by `ThemePreferenceService`. Header and floating presentations share the same theme state and differ only by their `data-lighthouse-lantern` source marker.
+
 ## Loading and Error States
 
 For project pages:
@@ -438,11 +455,19 @@ Milestone 10 adds selected motion without changing the route tree, localized URL
 
 - Reduced motion is handled globally in `frontend/src/styles.css` and specifically in each animated component stylesheet.
 - `MotionPreferenceService` reads `prefers-reduced-motion` only in the browser and exposes a signal for components that need a DOM state hook.
-- `LighthouseBeamComponent` is a dedicated decorative overlay. It queries the real `data-lighthouse-lantern` element after hydration, derives viewport coordinates with `getBoundingClientRect`, updates CSS custom properties, and observes lantern/header resize, viewport resize, and passive scroll through one requestAnimationFrame-throttled measurement path.
+- `LighthouseBeamComponent` is a dedicated decorative overlay. It queries the active `data-lighthouse-lantern` source after hydration, derives viewport coordinates with `getBoundingClientRect`, updates CSS custom properties, and observes the active lantern source, viewport resize, and passive scroll through one requestAnimationFrame-throttled measurement path.
 - The lighthouse beam is fixed, `aria-hidden`, pointer-events-none, opacity/transform animated, hidden in light mode, and static under reduced motion.
 - Sonar/compass navigation remains semantic router links; motion is limited to one hover/focus marker ripple.
 - No ambient wave, parallax, bathymetric drift, path morphing, or replacement background motion is retained for Milestone 10.
 - GSAP remains reserved for future choreography that CSS/SVG cannot maintain cleanly; it is not installed for Milestone 10.
+
+Post-Milestone-10 persistent-control additions:
+
+- the beam source switches from `header` to `floating` from the shell navigation mode;
+- only one viewport beam is rendered;
+- floating sonar waypoint deployment is CSS transform/opacity from the compact core to the expanded waypoint formation;
+- reduced motion disables the floating sonar deployment animation and floating-control transitions;
+- beam surface interaction is compositing-only through the existing fixed overlay and blend mode, with no collision detection or per-surface state.
 
 ## Testing Direction
 

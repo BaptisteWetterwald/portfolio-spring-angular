@@ -28,7 +28,7 @@
 
       <div class="site-header__actions">
         <app-locale-switcher />
-        <app-lighthouse-theme-toggle />
+        <app-lighthouse-theme-toggle beamSource="header" />
         <button
           #mobileMenuButton
           class="btn btn-circle btn-ghost site-header__menu-button"
@@ -75,7 +75,11 @@
     }
   </div>
 
-  <div class="site-header__sonar">
-    <app-sonar-navigation />
+  <div
+    class="site-header__sonar"
+    [attr.aria-hidden]="isFloatingShell() ? 'true' : null"
+    [attr.inert]="isFloatingShell() ? '' : null"
+  >
+    <app-sonar-navigation variant="primary" />
   </div>
 </header>

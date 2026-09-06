@@ -38,14 +38,14 @@ Canonical URL examples should use this domain.
 
 ## Route Hierarchy
 
-| Page           | French URL          | English URL          | Purpose                                                          |
-| -------------- | ------------------- | -------------------- | ---------------------------------------------------------------- |
-| Home           | `/fr`               | `/en`                | Identity, positioning, navigation, featured work, contact entry. |
-| Education      | `/fr/formation`     | `/en/education`      | Education and semester abroad.                                   |
-| Experience     | `/fr/experience`    | `/en/experience`     | Professional timeline and roles.                                 |
-| Projects       | `/fr/projets`       | `/en/projects`       | Published and archived project listing.                          |
+| Page           | French URL          | English URL          | Purpose                                                              |
+| -------------- | ------------------- | -------------------- | -------------------------------------------------------------------- |
+| Home           | `/fr`               | `/en`                | Identity, positioning, navigation, featured work, contact entry.     |
+| Education      | `/fr/formation`     | `/en/education`      | Education and semester abroad.                                       |
+| Experience     | `/fr/experience`    | `/en/experience`     | Professional timeline and roles.                                     |
+| Projects       | `/fr/projets`       | `/en/projects`       | Published and archived project listing.                              |
 | Project detail | `/fr/projets/:slug` | `/en/projects/:slug` | Localized project detail for public projects configured as `DETAIL`. |
-| Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                  |
+| Contact        | `/fr/contact`       | `/en/contact`        | Contact options, social links, downloadable CV.                      |
 
 Milestone 5 implemented the static routes above with placeholder pages for Home, Education, Experience, Projects, and Contact. Milestone 7 replaces the Projects placeholder with an API-backed listing and implements project detail routing, data loading, and metadata for shared V1 slugs. Milestone 8 replaces the Home, Education, and Experience placeholders with bilingual professional content while leaving Contact without a fabricated public contact method.
 
@@ -86,10 +86,10 @@ The Projects list may include public `CARD_ONLY` and `DETAIL` projects. `CARD_ON
 
 Project visual weight should eventually follow content importance:
 
-| Level | Intended use |
-| --- | --- |
-| Featured | Major projects that demonstrate the target backend/full-stack profile. |
-| Standard | Meaningful projects worth presenting normally. |
+| Level           | Intended use                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| Featured        | Major projects that demonstrate the target backend/full-stack profile.                   |
+| Standard        | Meaningful projects worth presenting normally.                                           |
 | Minor / archive | Small academic projects, old experiments, niche demonstrations, or historical exercises. |
 
 The current backend has `status`, `featured`, and `presentation_mode`; that is sufficient for this phase. Presentation mode controls detail-page availability, not visual importance. Do not add a separate persistence field for project importance until real project content shows that `featured` plus `ARCHIVED` is insufficient.
@@ -133,6 +133,8 @@ Future visual milestones may explore a compact or floating sonar state deeper in
 
 Milestone 9 conclusion: do not add a floating or compact sonar control yet. The current IA already has conventional header navigation, the desktop signature sonar/compass, mobile menu navigation, and footer navigation. Adding a floating copy during the visual-system milestone would create redundant navigation before there is evidence that visitors lose orientation in long pages. Revisit only after M9/M10 visual and motion polish can be evaluated on real pages.
 
+Post-Milestone-10 experiment: that revisit introduces a persistent maritime navigation shell without changing the route model. After the header/full sonar area scrolls away, the shell can enter `floating` mode and show a compact sonar on the left plus a floating lighthouse theme control on the right. The sonar still links to the same Home, Education, Experience, Projects, and Contact Angular routes, with localized `/fr/...` and `/en/...` URLs and exact active-route state. It does not add section anchors, scroll-spy state, or single-page navigation.
+
 ## Home Page Structure
 
 The home page should explicitly account for:
@@ -168,14 +170,14 @@ Milestone 9 correction:
 
 ## Page Composition
 
-| Page           | Primary Content Blocks                                                                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home           | Hero, short About, approved portrait/porthole frame, core technologies, skills domains, languages; social/project/contact blocks only when approved content exists. |
-| Education      | Semantic timeline/list with ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand entries. |
-| Experience     | Semantic timeline/list with Plansee current role, Plansee internship, Bureau Veritas Laboratoires apprenticeship, Groupe IES internship, and LIF/UQAC internship. |
-| Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                            |
+| Page           | Primary Content Blocks                                                                                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home           | Hero, short About, approved portrait/porthole frame, core technologies, skills domains, languages; social/project/contact blocks only when approved content exists.                             |
+| Education      | Semantic timeline/list with ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand entries.                                                                               |
+| Experience     | Semantic timeline/list with Plansee current role, Plansee internship, Bureau Veritas Laboratoires apprenticeship, Groupe IES internship, and LIF/UQAC internship.                               |
+| Projects       | Featured published projects, full published list, archived/secondary project area, technology filters if useful.                                                                                |
 | Project detail | For public `DETAIL` projects only: title, short description, ordered localized case-study sections, optional logo/media reference, technologies, GitHub/demo links, related projects if useful. |
-| Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                       |
+| Contact        | Contact method, GitHub/LinkedIn links, downloadable CV, optional future contact form.                                                                                                           |
 
 ## Metadata Requirements
 
@@ -192,15 +194,15 @@ Project detail metadata should be generated from `ProjectTranslation.title` and 
 
 ## Error and Redirect Routes
 
-| Route Type           | Behavior                                                                  |
-| -------------------- | ------------------------------------------------------------------------- |
-| `/`                  | Locale redirect using stored preference, `Accept-Language`, then English. |
-| Unknown locale       | Return 404 unless a clear redirect rule exists.                           |
-| Unknown page         | Localized 404 with semantic navigation.                                   |
-| Unknown project slug | Localized 404 with link back to Projects.                                 |
-| `DRAFT` project slug | 404 for public users.                                                     |
+| Route Type               | Behavior                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `/`                      | Locale redirect using stored preference, `Accept-Language`, then English.     |
+| Unknown locale           | Return 404 unless a clear redirect rule exists.                               |
+| Unknown page             | Localized 404 with semantic navigation.                                       |
+| Unknown project slug     | Localized 404 with link back to Projects.                                     |
+| `DRAFT` project slug     | 404 for public users.                                                         |
 | `CARD_ONLY` project slug | 404 for public detail URLs; the project remains visible on the Projects list. |
-| Old public route     | 301 redirect after a route has existed publicly.                          |
+| Old public route         | 301 redirect after a route has existed publicly.                              |
 
 Milestone 5 root redirect implementation:
 

@@ -226,6 +226,14 @@ Milestone 10 adds the first restrained motion layer:
 - no retained ambient wave, parallax, bathymetric drift, or replacement background animation;
 - a complete reduced-motion baseline for the new looping effects.
 
+Post-Milestone-10 persistent-control experiment:
+
+- after the original header and full sonar scroll away, the shell may show compact floating maritime instruments;
+- the left instrument is the same sonar navigation language in a compact state that expands to reveal the five route waypoints;
+- the right instrument is the same lighthouse theme control, scaled as a floating control and still backed by the theme service;
+- the lighthouse beam follows the active visible lighthouse source and may subtly illuminate page surfaces through compositing;
+- mobile uses smaller side controls and tap expansion, while retaining the conventional mobile menu.
+
 The visual priority remains content first, maritime identity second, and motion third. Light mode keeps the lighthouse inactive and avoids the viewport beam.
 
 ## DaisyUI Direction for Milestone 9+

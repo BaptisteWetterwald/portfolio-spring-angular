@@ -6,9 +6,9 @@
 
 .theme-toggle {
   display: inline-grid;
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: var(--theme-toggle-size, 40px);
+  height: var(--theme-toggle-size, 40px);
+  min-height: var(--theme-toggle-size, 40px);
   place-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-round);
