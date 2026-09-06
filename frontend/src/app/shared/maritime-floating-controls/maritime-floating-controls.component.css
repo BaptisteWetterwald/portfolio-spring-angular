@@ -36,6 +36,29 @@
   pointer-events: none;
 }
 
+@media (min-width: 900px) {
+  .maritime-floating-controls__sonar {
+    visibility: hidden;
+    opacity: 0;
+    filter: blur(1px);
+    transform: translate(30px, -14px) scale(0.78);
+    transform-origin: left center;
+    transition:
+      opacity 295ms var(--navigation-handoff-easing),
+      transform var(--navigation-handoff-duration) var(--navigation-handoff-easing),
+      filter 300ms var(--navigation-handoff-easing),
+      visibility 0s linear var(--navigation-handoff-duration);
+  }
+
+  .maritime-floating-controls__sonar--active {
+    visibility: visible;
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition-delay: 70ms, 70ms, 70ms, 0s;
+  }
+}
+
 .maritime-floating-controls__lighthouse {
   --theme-toggle-size: var(--floating-lighthouse-size);
 
@@ -66,5 +89,12 @@
   .maritime-floating-controls__lighthouse {
     top: auto;
     bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maritime-floating-controls__sonar,
+  .maritime-floating-controls__sonar--active {
+    transition: none;
   }
 }

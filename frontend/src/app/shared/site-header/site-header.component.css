@@ -168,11 +168,36 @@
 @media (min-width: 900px) {
   .site-header__nav {
     display: flex;
+    transform-origin: left center;
+    transition:
+      opacity 270ms var(--navigation-handoff-easing) 70ms,
+      transform var(--navigation-handoff-duration) var(--navigation-handoff-easing) 70ms,
+      filter 300ms var(--navigation-handoff-easing) 70ms;
+  }
+
+  .site-header__nav--handoff {
+    opacity: 0;
+    filter: blur(1px);
+    transform: translate(-24px, 8px) scale(0.94);
+    transition-delay: 0ms;
+  }
+
+  .site-header__nav--handoff:focus-within {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
   }
 
   .site-header__menu-button,
   .site-header__mobile-menu {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header__nav {
+    transition: none;
   }
 }
 

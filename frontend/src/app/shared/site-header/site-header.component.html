@@ -7,7 +7,16 @@
         {{ t('site.name') }}
       </a>
 
-      <nav class="site-header__nav" data-primary-nav [attr.aria-label]="t('nav.primary')">
+      <nav
+        class="site-header__nav"
+        [class.site-header__nav--handoff]="floatingNavigationActive()"
+        data-primary-nav
+        [attr.aria-label]="t('nav.primary')"
+        [attr.aria-hidden]="desktopNavigationUnavailable() ? 'true' : null"
+        [attr.inert]="desktopNavigationUnavailable() ? '' : null"
+        (focusin)="handleDesktopNavigationFocusIn()"
+        (focusout)="handleDesktopNavigationFocusOut($event)"
+      >
         <ul class="menu menu-horizontal site-header__nav-list">
           @for (pageId of navPages; track pageId) {
             <li>
