@@ -85,6 +85,7 @@ async function verifyDesktop(client) {
     client,
     `document.querySelector('.public-shell')?.dataset.navigationHandoffState === 'header'`,
   );
+  await assertMajorSectionPresentation(client, 'en');
 
   assert(
     await value(
@@ -368,6 +369,86 @@ async function verifyDesktop(client) {
     'passive scroll-spy changes polluted browser history or rewrote the fragment',
   );
 
+  const educationPermalink = '#education [data-section-permalink]';
+  const permalinkColor = await value(
+    client,
+    `getComputedStyle(document.querySelector('${educationPermalink}')).color`,
+  );
+  await moveMouse(client, ...center(await rect(client, educationPermalink)));
+  await delay(180);
+  assert(
+    await value(
+      client,
+      `(() => {
+        const link = document.querySelector('${educationPermalink}');
+        return link.matches(':hover') && getComputedStyle(link).color !== ${JSON.stringify(permalinkColor)};
+      })()`,
+    ),
+    'section permalink did not expose its restrained hover accent',
+  );
+  await moveMouse(client, 720, 100);
+
+  await evaluate(
+    client,
+    `(() => {
+      const target = document.querySelector('${educationPermalink}');
+      const focusable = [...document.querySelectorAll('a[href], button:not([disabled])')];
+      const previous = focusable[focusable.indexOf(target) - 1];
+      if (!previous) throw new Error('Missing focusable element before Education permalink');
+      previous.focus();
+    })()`,
+  );
+  await pressTab(client);
+  assert(
+    await value(
+      client,
+      `(() => {
+        const link = document.querySelector('${educationPermalink}');
+        return document.activeElement === link && link.matches(':focus-visible') &&
+          parseFloat(getComputedStyle(link).outlineWidth) >= 2;
+      })()`,
+    ),
+    'section permalink did not expose a visible keyboard focus state',
+  );
+
+  const permalinkHistoryLength = await value(client, 'history.length');
+  await clickAnchor(client, educationPermalink);
+  await waitFor(
+    client,
+    `location.pathname === '/en' && location.hash === '#education' &&
+      document.querySelector('nav[data-sonar-nav-variant="floating"] a[href="/en#education"]').getAttribute('aria-current') === 'location'`,
+  );
+  await waitFor(
+    client,
+    `(() => {
+      const top = document.querySelector('#education').getBoundingClientRect().top;
+      return top >= 0 && top < 60;
+    })()`,
+  );
+  assert(
+    await value(
+      client,
+      `(() => {
+        const sectionBounds = document.querySelector('#education').getBoundingClientRect();
+        const headingBounds = document.querySelector('#education-title').getBoundingClientRect();
+        return sectionBounds.top >= 0 && sectionBounds.top < 60 &&
+          headingBounds.top >= 40 && headingBounds.top < 180;
+      })()`,
+    ),
+    'Education permalink did not land with clear heading breathing room',
+  );
+  assert(
+    (await value(client, 'history.length')) === permalinkHistoryLength + 1,
+    'section permalink did not create exactly one explicit history entry',
+  );
+  await evaluate(client, 'history.back()');
+  await waitFor(client, `location.hash === '#contact'`);
+  await evaluate(client, 'history.forward()');
+  await waitFor(
+    client,
+    `location.hash === '#education' && document.querySelector('#education').getBoundingClientRect().top < 60`,
+  );
+
   await evaluate(
     client,
     `document.querySelector('#projects').scrollIntoView({ behavior: 'instant', block: 'start' })`,
@@ -397,6 +478,8 @@ async function verifyDesktop(client) {
     `document.querySelector('#experience').getBoundingClientRect().top < 80 &&
       document.querySelector('.public-shell').dataset.navigationHandoffState === 'sonar'`,
   );
+  await assertMajorSectionPresentation(client, 'fr');
+  await captureScreenshot(client, 'desktop-1440x900-fr-experience-permalink.png');
   await clickAnchor(client, 'app-locale-switcher a[lang="en"]');
   await waitFor(
     client,
@@ -484,6 +567,7 @@ async function verifyMobile(client, width, height, navigateAllSections) {
   await setViewport(client, width, height);
   await setReducedMotion(client, false);
   await goto(client, '/en');
+  await assertMajorSectionPresentation(client, 'en');
   assert(
     await value(
       client,
@@ -505,6 +589,10 @@ async function verifyMobile(client, width, height, navigateAllSections) {
     `persistent lighthouse was not safely visible at the top at ${width}x${height}`,
   );
   await captureScreenshot(client, `mobile-${width}x${height}-home-persistent-controls.png`);
+  await goto(client, '/fr#experience');
+  await waitFor(client, `document.querySelector('#experience').getBoundingClientRect().top < 80`);
+  await assertMajorSectionPresentation(client, 'fr');
+  await captureScreenshot(client, `mobile-${width}x${height}-fr-experience-permalink.png`);
   await goto(client, '/en#education');
   await waitFor(client, `document.querySelector('.maritime-floating-controls') !== null`);
 
@@ -787,6 +875,19 @@ async function captureBeamAcrossSections(client) {
   await evaluate(
     client,
     `(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      document.activeElement?.blur();
+    })()`,
+  );
+  await moveMouse(client, 720, 100);
+  await waitFor(
+    client,
+    `document.querySelector('.sonar-nav__frame').getBoundingClientRect().width < 80`,
+  );
+
+  await evaluate(
+    client,
+    `(() => {
       const animation = document.querySelector('.lighthouse-beam').getAnimations()[0];
       animation.pause();
       animation.currentTime = Number(animation.effect.getTiming().duration) * 0.55;
@@ -803,6 +904,130 @@ async function captureBeamAcrossSections(client) {
   }
 
   await evaluate(client, `document.querySelector('.lighthouse-beam').getAnimations()[0].play()`);
+}
+
+async function assertMajorSectionPresentation(client, locale) {
+  const labels =
+    locale === 'fr'
+      ? {
+          home: 'Lien vers la section Accueil',
+          education: 'Lien vers la section Formation',
+          experience: 'Lien vers la section Expérience',
+          projects: 'Lien vers la section Projets',
+          contact: 'Lien vers la section Contact',
+        }
+      : {
+          home: 'Link to Home section',
+          education: 'Link to Education section',
+          experience: 'Link to Experience section',
+          projects: 'Link to Projects section',
+          contact: 'Link to Contact section',
+        };
+  const presentation = await value(
+    client,
+    `(() => {
+      const ids = ['home', 'education', 'experience', 'projects', 'contact'];
+      const labels = ${JSON.stringify(labels)};
+      const portfolio = document.querySelector('.portfolio-page');
+      const sections = [...document.querySelectorAll('[data-portfolio-section]')];
+      const links = [...document.querySelectorAll('[data-section-permalink]')];
+      const directDividers = portfolio ? [...portfolio.querySelectorAll(':scope > .divider[data-portfolio-divider]')] : [];
+      const expectedSequence = [
+        'APP-HOME-PAGE', 'DIV', 'APP-EDUCATION-PAGE', 'DIV', 'APP-EXPERIENCE-PAGE',
+        'DIV', 'APP-PROJECTS-PAGE', 'DIV', 'APP-CONTACT-PAGE',
+      ];
+      return {
+        sectionIds: sections.map((section) => section.id),
+        uniqueSectionIds: new Set(sections.map((section) => section.id)).size,
+        linkDetails: links.map((link) => {
+          const id = link.dataset.sectionId;
+          const bounds = link.getBoundingClientRect();
+          const host = link.closest('app-section-permalink');
+          const wrapper = host?.parentElement;
+          const heading = id === 'home'
+            ? document.querySelector('#home-title')
+            : document.querySelector('#' + id + '-title');
+          const headingBounds = heading?.getBoundingClientRect();
+          return {
+            id,
+            href: link.getAttribute('href'),
+            label: link.getAttribute('aria-label'),
+            title: link.getAttribute('title'),
+            svgHidden: link.querySelector('svg')?.getAttribute('aria-hidden'),
+            svgFocusable: link.querySelector('svg')?.getAttribute('focusable'),
+            width: bounds.width,
+            height: bounds.height,
+            isInsideHeading: Boolean(link.closest('h1, h2')),
+            correctPlacement: id === 'home'
+              ? wrapper?.classList.contains('home-page__eyebrow-row') && !link.closest('h1')
+              : wrapper?.querySelector('h2') === heading && host === wrapper?.firstElementChild,
+            overlapsHeading: headingBounds
+              ? !(bounds.right <= headingBounds.left || bounds.left >= headingBounds.right ||
+                  bounds.bottom <= headingBounds.top || bounds.top >= headingBounds.bottom)
+              : true,
+            expectedLabel: labels[id],
+          };
+        }),
+        directDividerCount: directDividers.length,
+        nestedDividerCount: sections.reduce(
+          (count, section) => count + section.querySelectorAll('[data-portfolio-divider]').length,
+          0,
+        ),
+        dividerHeights: directDividers.map((divider) => divider.getBoundingClientRect().height),
+        sequence: portfolio ? [...portfolio.children].map((child) => child.tagName) : [],
+        expectedSequence,
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    })()`,
+  );
+
+  assert(
+    JSON.stringify(presentation.sectionIds) ===
+      JSON.stringify(['home', 'education', 'experience', 'projects', 'contact']) &&
+      presentation.uniqueSectionIds === 5,
+    `${locale} major section IDs were missing, duplicated, or reordered: ${JSON.stringify(presentation.sectionIds)}`,
+  );
+  assert(
+    presentation.linkDetails.length === 5 &&
+      presentation.linkDetails.every(
+        (link) =>
+          link.href === `/${locale}#${link.id}` &&
+          link.label === link.expectedLabel &&
+          link.title === link.expectedLabel &&
+          link.svgHidden === 'true' &&
+          link.svgFocusable === 'false' &&
+          Math.abs(link.width - 40) < 1 &&
+          Math.abs(link.height - 40) < 1 &&
+          !link.isInsideHeading &&
+          link.correctPlacement &&
+          !link.overlapsHeading,
+      ),
+    `${locale} section permalink presentation was invalid: ${JSON.stringify(presentation.linkDetails)}`,
+  );
+  assert(
+    presentation.directDividerCount === 4 &&
+      presentation.nestedDividerCount === 0 &&
+      presentation.dividerHeights.every((height) => height <= 12) &&
+      JSON.stringify(presentation.sequence) === JSON.stringify(presentation.expectedSequence),
+    `${locale} major-section dividers were not restrained or correctly placed: ${JSON.stringify(presentation)}`,
+  );
+  assert(!presentation.horizontalOverflow, `${locale} section headings caused horizontal overflow`);
+}
+
+async function pressTab(client) {
+  await client.send('Input.dispatchKeyEvent', {
+    type: 'rawKeyDown',
+    key: 'Tab',
+    code: 'Tab',
+    windowsVirtualKeyCode: 9,
+  });
+  await client.send('Input.dispatchKeyEvent', {
+    type: 'keyUp',
+    key: 'Tab',
+    code: 'Tab',
+    windowsVirtualKeyCode: 9,
+  });
+  await delay(80);
 }
 
 function center(elementRect) {

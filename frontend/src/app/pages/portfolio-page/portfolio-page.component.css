@@ -4,30 +4,38 @@
   display: block;
 }
 
-.portfolio-page__section {
-  position: relative;
-  border-top: 1px solid color-mix(in srgb, var(--color-accent-maritime) 18%, var(--color-border));
-}
-
-.portfolio-page__section--home {
-  border-top: 0;
-}
-
 .portfolio-page__section--education,
 .portfolio-page__section--projects {
   background: color-mix(in srgb, var(--color-surface-subtle) 28%, transparent);
 }
 
-.portfolio-page__section:not(.portfolio-page__section--home)::before {
-  position: absolute;
+.portfolio-page__divider {
+  position: relative;
   z-index: 1;
-  top: 0;
-  left: 50%;
-  width: 9px;
+  width: min(100%, 1120px);
   height: 9px;
-  transform: translate(-50%, -50%);
-  border: 2px solid var(--color-bg);
+  min-height: 9px;
+  padding-inline: var(--space-5);
+  margin: -4px auto;
+  color: color-mix(in srgb, var(--color-accent-maritime) 28%, var(--color-border));
+}
+
+.portfolio-page__divider::before,
+.portfolio-page__divider::after {
+  height: 1px;
+  opacity: 0.72;
+}
+
+.portfolio-page__divider-waypoint {
+  width: 7px;
+  height: 7px;
   border-radius: var(--radius-round);
   background: var(--color-accent-maritime);
-  content: '';
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-maritime) 10%, transparent);
+}
+
+@media (max-width: 640px) {
+  .portfolio-page__divider {
+    padding-inline: var(--space-4);
+  }
 }

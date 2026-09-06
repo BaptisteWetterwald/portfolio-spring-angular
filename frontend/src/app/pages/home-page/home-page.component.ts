@@ -9,9 +9,11 @@ import {
 } from '../../core/content/portfolio-content.models';
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
+import { SectionPermalinkComponent } from '../../shared/section-permalink/section-permalink.component';
 
 @Component({
   selector: 'app-home-page',
+  imports: [SectionPermalinkComponent],
   templateUrl: './home-page.component.html',
   styleUrls: [
     './home-page.component.css',

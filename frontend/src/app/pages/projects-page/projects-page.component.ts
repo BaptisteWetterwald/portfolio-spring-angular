@@ -10,10 +10,11 @@ import {
   projectsStateFromRouteData,
 } from '../../core/projects/project-resolvers';
 import { ProjectCardComponent } from '../../shared/project-card/project-card.component';
+import { SectionPermalinkComponent } from '../../shared/section-permalink/section-permalink.component';
 
 @Component({
   selector: 'app-projects-page',
-  imports: [ProjectCardComponent],
+  imports: [ProjectCardComponent, SectionPermalinkComponent],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 
 import { portfolioContent } from '../../core/content/portfolio-content';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
@@ -181,10 +181,14 @@ describe('EducationPageComponent', () => {
   it('exposes the stable education section anchor and heading relationship', async () => {
     const fixture = await createFixture('en');
     const section = (fixture.nativeElement as HTMLElement).querySelector('#education');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
     expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
     expect(section?.getAttribute('aria-labelledby')).toBe('education-title');
     expect(section?.querySelector('h2')?.id).toBe('education-title');
+    expect(permalink?.getAttribute('href')).toBe('/en#education');
+    expect(permalink?.getAttribute('aria-label')).toBe('Link to Education section');
+    expect(permalink?.closest('h2')).toBeNull();
   });
 });
 
@@ -196,6 +200,7 @@ async function createFixture(
   await TestBed.configureTestingModule({
     imports: [EducationPageComponent],
     providers: [
+      provideRouter([]),
       {
         provide: ActivatedRoute,
         useValue: {

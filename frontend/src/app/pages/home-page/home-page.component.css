@@ -13,8 +13,15 @@
   padding-block: var(--space-5) var(--space-7);
 }
 
+.home-page__eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
 .home-page__eyebrow {
-  margin: 0 0 var(--space-3);
+  margin: 0;
   color: var(--color-accent-maritime);
   font-size: 0.95rem;
   font-weight: 700;
@@ -172,7 +179,7 @@
     display: contents;
   }
 
-  .home-page__eyebrow {
+  .home-page__eyebrow-row {
     grid-area: eyebrow;
     margin-bottom: 0;
   }

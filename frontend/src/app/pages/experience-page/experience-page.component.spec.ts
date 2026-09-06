@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 
 import { portfolioContent } from '../../core/content/portfolio-content';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
@@ -315,10 +315,14 @@ describe('ExperiencePageComponent', () => {
   it('exposes the stable experience section anchor and heading relationship', async () => {
     const fixture = await createFixture('fr');
     const section = (fixture.nativeElement as HTMLElement).querySelector('#experience');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
     expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
     expect(section?.getAttribute('aria-labelledby')).toBe('experience-title');
     expect(section?.querySelector('h2')?.id).toBe('experience-title');
+    expect(permalink?.getAttribute('href')).toBe('/fr#experience');
+    expect(permalink?.getAttribute('aria-label')).toBe('Lien vers la section Expérience');
+    expect(permalink?.closest('h2')).toBeNull();
   });
 });
 
@@ -330,6 +334,7 @@ async function createFixture(
   await TestBed.configureTestingModule({
     imports: [ExperiencePageComponent],
     providers: [
+      provideRouter([]),
       {
         provide: ActivatedRoute,
         useValue: {

@@ -49,6 +49,65 @@ describe('PortfolioPageComponent integration', () => {
     expect(activeSonarLink(harness)?.getAttribute('href')).toBe('/en#experience');
   });
 
+  it('renders one canonical permalink per unique major section and four inter-section dividers', async () => {
+    const harness = await createHarness('/en');
+    const page = harness.routeNativeElement?.querySelector('.portfolio-page');
+    const sections = Array.from(
+      page?.querySelectorAll<HTMLElement>('[data-portfolio-section]') ?? [],
+    );
+    const sectionIds = sections.map((section) => section.id);
+    const permalinks = Array.from(
+      page?.querySelectorAll<HTMLAnchorElement>('[data-section-permalink]') ?? [],
+    );
+    const children = Array.from(page?.children ?? []);
+
+    expect(sectionIds).toEqual(['home', 'education', 'experience', 'projects', 'contact']);
+    expect(new Set(sectionIds).size).toBe(5);
+    expect(permalinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/en#home',
+      '/en#education',
+      '/en#experience',
+      '/en#projects',
+      '/en#contact',
+    ]);
+    expect(page?.querySelectorAll(':scope > .divider[data-portfolio-divider]')).toHaveLength(4);
+    expect(page?.querySelector('[data-portfolio-section] [data-portfolio-divider]')).toBeNull();
+    expect(
+      children.map((child) =>
+        child.hasAttribute('data-portfolio-divider') ? 'divider' : child.tagName.toLowerCase(),
+      ),
+    ).toEqual([
+      'app-home-page',
+      'divider',
+      'app-education-page',
+      'divider',
+      'app-experience-page',
+      'divider',
+      'app-projects-page',
+      'divider',
+      'app-contact-page',
+    ]);
+  });
+
+  it('uses the existing explicit navigation path for content permalinks', async () => {
+    const harness = await createHarness('/en');
+    const permalink = harness.routeNativeElement?.querySelector<HTMLAnchorElement>(
+      '#experience [data-section-permalink]',
+    );
+
+    expect(permalink).toBeInstanceOf(HTMLAnchorElement);
+
+    permalink?.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, button: 0, cancelable: true, detail: 1 }),
+    );
+    await settleHarness(harness);
+
+    expect(TestBed.inject(Router).url).toBe('/en#experience');
+    expect(activeSonarLink(harness)?.getAttribute('href')).toBe('/en#experience');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
   it('updates the active waypoint from the center-band observer without rewriting the URL', async () => {
     const harness = await createHarness('/en');
     const observer = observers.find(

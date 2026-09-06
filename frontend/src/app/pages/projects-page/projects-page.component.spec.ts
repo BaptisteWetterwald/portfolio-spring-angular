@@ -86,10 +86,14 @@ describe('ProjectsPageComponent', () => {
   it('exposes the stable projects section anchor and heading relationship', async () => {
     const fixture = await createFixture({ kind: 'loaded', projects: [] }, 'fr');
     const section = (fixture.nativeElement as HTMLElement).querySelector('#projects');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
     expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
     expect(section?.getAttribute('aria-labelledby')).toBe('projects-title');
     expect(section?.querySelector('h2')?.id).toBe('projects-title');
+    expect(permalink?.getAttribute('href')).toBe('/fr#projects');
+    expect(permalink?.getAttribute('aria-label')).toBe('Lien vers la section Projets');
+    expect(permalink?.closest('h2')).toBeNull();
   });
 });
 

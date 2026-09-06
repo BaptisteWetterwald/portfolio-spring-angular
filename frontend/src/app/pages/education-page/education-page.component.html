@@ -6,7 +6,10 @@
   tabindex="-1"
 >
   <header class="timeline-page__header">
-    <h2 id="education-title">{{ content.educationPage.heading }}</h2>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <app-section-permalink sectionId="education" />
+      <h2 id="education-title" class="min-w-0 flex-1">{{ content.educationPage.heading }}</h2>
+    </div>
     <p>{{ content.educationPage.introduction }}</p>
   </header>
 

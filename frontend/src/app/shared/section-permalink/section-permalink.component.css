@@ -1,0 +1,33 @@
+:host {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.section-permalink {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: var(--radius-round);
+  color: color-mix(in srgb, var(--color-accent-maritime) 74%, var(--color-text-muted));
+  text-decoration: none;
+  transition:
+    color var(--motion-duration-fast) ease,
+    background-color var(--motion-duration-fast) ease;
+}
+
+.section-permalink:hover,
+.section-permalink:focus-visible {
+  background: color-mix(in srgb, var(--color-accent-signal) 10%, transparent);
+  color: var(--color-accent-signal);
+}
+
+.section-permalink__icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.75;
+}

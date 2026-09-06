@@ -6,7 +6,10 @@
   tabindex="-1"
 >
   <header class="projects-page__header">
-    <h2 id="projects-title">{{ t('pages.projects.heading') }}</h2>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <app-section-permalink sectionId="projects" />
+      <h2 id="projects-title" class="min-w-0 flex-1">{{ t('pages.projects.heading') }}</h2>
+    </div>
     <p>{{ t('pages.projects.introduction') }}</p>
   </header>
 
