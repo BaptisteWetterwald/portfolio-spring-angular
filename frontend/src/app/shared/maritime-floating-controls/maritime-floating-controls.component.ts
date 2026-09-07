@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 
 import { LighthouseThemeToggleComponent } from '../lighthouse-theme-toggle/lighthouse-theme-toggle.component';
-import { MaritimeNavigationMode } from '../maritime-navigation-shell/navigation-mode';
 import { SonarNavigationComponent } from '../sonar-navigation/sonar-navigation.component';
 
 @Component({
@@ -12,7 +11,23 @@ import { SonarNavigationComponent } from '../sonar-navigation/sonar-navigation.c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MaritimeFloatingControlsComponent {
-  readonly navigationMode = input<MaritimeNavigationMode>('top');
+  readonly sonarActive = input(false);
 
-  protected readonly isFloating = computed(() => this.navigationMode() === 'floating');
+  protected readonly sonarFocused = signal(false);
+  protected readonly sonarAvailable = computed(() => this.sonarActive() || this.sonarFocused());
+
+  protected handleSonarFocusIn(): void {
+    this.sonarFocused.set(true);
+  }
+
+  protected handleSonarFocusOut(event: FocusEvent): void {
+    const sonar = event.currentTarget;
+    const nextTarget = event.relatedTarget;
+
+    if (sonar instanceof HTMLElement && nextTarget instanceof Node && sonar.contains(nextTarget)) {
+      return;
+    }
+
+    this.sonarFocused.set(false);
+  }
 }

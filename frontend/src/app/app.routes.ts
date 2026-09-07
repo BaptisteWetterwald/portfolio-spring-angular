@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 
 import { supportedLocales } from './core/i18n/locales';
 import { rootLocaleRedirectGuard } from './core/routing/root-locale-redirect.guard';
@@ -9,14 +10,9 @@ import {
   projectsPageStateKey,
   projectsResolver,
 } from './core/projects/project-resolvers';
-import { ContactPageComponent } from './pages/contact-page/contact-page.component';
-import { EducationPageComponent } from './pages/education-page/education-page.component';
-import { ExperiencePageComponent } from './pages/experience-page/experience-page.component';
-import { HomePageComponent } from './pages/home-page/home-page.component';
-import { LocalizedPageComponent } from './pages/localized-page/localized-page.component';
 import { NotFoundPageComponent } from './pages/not-found-page/not-found-page.component';
+import { PortfolioPageComponent } from './pages/portfolio-page/portfolio-page.component';
 import { ProjectDetailPageComponent } from './pages/project-detail-page/project-detail-page.component';
-import { ProjectsPageComponent } from './pages/projects-page/projects-page.component';
 import { PublicLayoutComponent } from './pages/public-layout/public-layout.component';
 import { RootRedirectPageComponent } from './pages/root-redirect-page/root-redirect-page.component';
 
@@ -34,8 +30,21 @@ export const routes: Routes = [
       locale,
     },
     children: [
-      ...staticPageIds.map((pageId) => localizedStaticPageRoute(locale, pageId)),
+      {
+        path: '',
+        pathMatch: 'full',
+        component: PortfolioPageComponent,
+        resolve: {
+          [projectsPageStateKey]: projectsResolver,
+        },
+        data: {
+          pageId: 'home',
+        },
+      },
       localizedProjectDetailRoute(locale),
+      ...staticPageIds
+        .filter((pageId) => pageId !== 'home')
+        .map((pageId) => localizedSectionCompatibilityRoute(locale, pageId)),
       {
         path: '**',
         component: NotFoundPageComponent,
@@ -48,75 +57,17 @@ export const routes: Routes = [
   },
 ];
 
-function localizedStaticPageRoute(
+function localizedSectionCompatibilityRoute(
   locale: (typeof supportedLocales)[number],
-  pageId: StaticPageId,
+  pageId: Exclude<StaticPageId, 'home'>,
 ): Routes[number] {
-  if (pageId === 'projects') {
-    return {
-      path: localizedSegment(locale, pageId),
-      pathMatch: 'full',
-      component: ProjectsPageComponent,
-      resolve: {
-        [projectsPageStateKey]: projectsResolver,
-      },
-      data: {
-        pageId,
-      },
-    };
-  }
-
-  if (pageId === 'home') {
-    return {
-      path: localizedSegment(locale, pageId),
-      pathMatch: 'full',
-      component: HomePageComponent,
-      data: {
-        pageId,
-      },
-    };
-  }
-
-  if (pageId === 'education') {
-    return {
-      path: localizedSegment(locale, pageId),
-      pathMatch: 'full',
-      component: EducationPageComponent,
-      data: {
-        pageId,
-      },
-    };
-  }
-
-  if (pageId === 'experience') {
-    return {
-      path: localizedSegment(locale, pageId),
-      pathMatch: 'full',
-      component: ExperiencePageComponent,
-      data: {
-        pageId,
-      },
-    };
-  }
-
-  if (pageId === 'contact') {
-    return {
-      path: localizedSegment(locale, pageId),
-      pathMatch: 'full',
-      component: ContactPageComponent,
-      data: {
-        pageId,
-      },
-    };
-  }
-
   return {
     path: localizedSegment(locale, pageId),
     pathMatch: 'full',
-    component: LocalizedPageComponent,
-    data: {
-      pageId,
-    },
+    redirectTo: () =>
+      inject(Router).createUrlTree([`/${locale}`], {
+        fragment: pageId,
+      }),
   };
 }
 

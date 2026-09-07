@@ -30,6 +30,15 @@ describe('SiteHeaderComponent integration', () => {
     }
   });
 
+  it('contains conventional navigation without embedded maritime controls', async () => {
+    const harness = await createHarness('/en');
+    const header = harness.routeNativeElement?.querySelector('.site-header');
+
+    expect(header?.querySelector('[data-primary-nav]')).not.toBeNull();
+    expect(header?.querySelector('app-lighthouse-theme-toggle')).toBeNull();
+    expect(header?.querySelector('app-sonar-navigation')).toBeNull();
+  });
+
   it('opens and closes the mobile navigation from the trigger state', async () => {
     const harness = await createHarness('/en');
     const button = menuButton(harness);
@@ -85,10 +94,10 @@ describe('SiteHeaderComponent integration', () => {
 
     expect(menuButton(harness).getAttribute('aria-expanded')).toBe('true');
 
-    await harness.navigateByUrl('/en/projects');
+    await harness.navigateByUrl('/en#projects');
     await settleHarness(harness);
 
-    expect(TestBed.inject(Router).url).toBe('/en/projects');
+    expect(TestBed.inject(Router).url).toBe('/en#projects');
     expect(menuButton(harness).getAttribute('aria-expanded')).toBe('false');
     expect(mobileMenu(harness)).toBeNull();
   });

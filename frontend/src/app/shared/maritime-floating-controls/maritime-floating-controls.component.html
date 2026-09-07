@@ -1,14 +1,16 @@
-<aside
-  class="maritime-floating-controls"
-  [class.maritime-floating-controls--active]="isFloating()"
-  [attr.aria-hidden]="isFloating() ? null : 'true'"
-  [attr.inert]="isFloating() ? null : ''"
->
-  <div class="maritime-floating-controls__sonar">
+<aside class="maritime-floating-controls">
+  <div
+    class="maritime-floating-controls__sonar"
+    [class.maritime-floating-controls__sonar--active]="sonarAvailable()"
+    [attr.aria-hidden]="sonarAvailable() ? null : 'true'"
+    [attr.inert]="sonarAvailable() ? null : ''"
+    (focusin)="handleSonarFocusIn()"
+    (focusout)="handleSonarFocusOut($event)"
+  >
     <app-sonar-navigation variant="floating" />
   </div>
 
   <div class="maritime-floating-controls__lighthouse">
-    <app-lighthouse-theme-toggle beamSource="floating" />
+    <app-lighthouse-theme-toggle />
   </div>
 </aside>

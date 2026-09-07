@@ -95,13 +95,13 @@
   --motion-duration-fast: 120ms;
   --motion-duration-standard: 180ms;
   --motion-duration-theme: 240ms;
-  --lighthouse-beam-duration: 16s;
+  --lighthouse-beam-duration: 24s;
   --lighthouse-beam-opacity: 0;
   --lighthouse-beam-static-opacity: 0;
   --lighthouse-beam-start-angle: -18deg;
   --lighthouse-beam-reduced-angle: 10deg;
   --lighthouse-beam-length: max(132vmax, 1180px);
-  --lighthouse-beam-width: clamp(180px, 22vmax, 340px);
+  --lighthouse-beam-width: clamp(230px, 29vmax, 440px);
   --lighthouse-beam-falloff: 82%;
   --space-1: 4px;
   --space-2: 8px;
@@ -145,6 +145,10 @@ html {
   min-height: 100%;
   background: var(--color-bg);
   scroll-behavior: smooth;
+}
+
+[data-portfolio-section] {
+  scroll-margin-block-start: var(--space-5);
 }
 
 body {

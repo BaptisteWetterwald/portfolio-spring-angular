@@ -8,23 +8,24 @@ import {
   inject,
   Injector,
   PLATFORM_ID,
+  signal,
   ViewChild,
   computed,
-  signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
-import { SupportedLocale, toSupportedLocale } from '../../core/i18n/locales';
+import { toSupportedLocale } from '../../core/i18n/locales';
 import { LighthouseBeamComponent } from '../../shared/lighthouse-beam/lighthouse-beam.component';
-import { LighthouseBeamSource } from '../../shared/lighthouse-beam/lighthouse-beam-source';
 import { MaritimeFloatingControlsComponent } from '../../shared/maritime-floating-controls/maritime-floating-controls.component';
-import { MaritimeNavigationMode } from '../../shared/maritime-navigation-shell/navigation-mode';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
 
-const floatingTriggerRootMargin = '64px 0px 0px 0px';
-const topRestoreRootMargin = '-16px 0px 0px 0px';
+export const wideHeaderNavigationQuery = '(min-width: 900px)';
+export const headerSonarHandoffRootMargin = '0px';
+export const headerSonarHandoffThresholds = [0.58, 0.82] as const;
+
+type WideNavigationState = 'header' | 'sonar';
 
 @Component({
   selector: 'app-public-layout',
@@ -40,17 +41,21 @@ const topRestoreRootMargin = '-16px 0px 0px 0px';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicLayoutComponent {
-  @ViewChild('navigationSentinel') private navigationSentinel?: ElementRef<HTMLElement>;
-
-  protected readonly locale: () => SupportedLocale;
-  protected readonly navigationMode = signal<MaritimeNavigationMode>('top');
-  protected readonly activeBeamSource = computed<LighthouseBeamSource>(() =>
-    this.navigationMode() === 'floating' ? 'floating' : 'header',
-  );
+  @ViewChild('siteHeader', { read: ElementRef })
+  private siteHeader?: ElementRef<HTMLElement>;
 
   readonly #destroyRef = inject(DestroyRef);
   readonly #injector = inject(Injector);
+  readonly #isWideViewport = signal(true);
   readonly #platformId = inject(PLATFORM_ID);
+  readonly #wideNavigationState = signal<WideNavigationState>('header');
+
+  protected readonly floatingSonarActive = computed(
+    () => !this.#isWideViewport() || this.#wideNavigationState() === 'sonar',
+  );
+  protected readonly navigationHandoffState = computed<WideNavigationState>(() =>
+    this.floatingSonarActive() ? 'sonar' : 'header',
+  );
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -58,53 +63,64 @@ export class PublicLayoutComponent {
     const locale = toSupportedLocale(route.snapshot.data['locale']);
 
     localeContext.setLocale(locale);
-    this.locale = localeContext.locale;
 
-    if (!isPlatformBrowser(this.#platformId)) {
-      return;
+    if (isPlatformBrowser(this.#platformId)) {
+      afterNextRender(() => this.#initializeNavigationHandoff(), { injector: this.#injector });
     }
-
-    afterNextRender(() => this.#initializeShellNavigationObservers(), {
-      injector: this.#injector,
-    });
   }
 
-  #initializeShellNavigationObservers(): void {
-    const sentinel = this.navigationSentinel?.nativeElement;
+  #initializeNavigationHandoff(): void {
+    const header = this.siteHeader?.nativeElement;
 
-    if (!sentinel || typeof globalThis.IntersectionObserver !== 'function') {
+    if (
+      !header ||
+      typeof globalThis.matchMedia !== 'function' ||
+      typeof globalThis.IntersectionObserver !== 'function'
+    ) {
+      this.#isWideViewport.set(false);
       return;
     }
 
-    const floatingObserver = new globalThis.IntersectionObserver(
-      ([entry]) => {
-        if (entry && !entry.isIntersecting && entry.boundingClientRect.top < 0) {
-          this.navigationMode.set('floating');
-        }
-      },
-      {
-        rootMargin: floatingTriggerRootMargin,
-        threshold: 0,
-      },
-    );
-    const topObserver = new globalThis.IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          this.navigationMode.set('top');
-        }
-      },
-      {
-        rootMargin: topRestoreRootMargin,
-        threshold: 0,
-      },
-    );
+    const wideViewport = globalThis.matchMedia(wideHeaderNavigationQuery);
+    let observer: IntersectionObserver | undefined;
+    const configureForViewport = (): void => {
+      observer?.disconnect();
+      observer = undefined;
+      this.#isWideViewport.set(wideViewport.matches);
 
-    floatingObserver.observe(sentinel);
-    topObserver.observe(sentinel);
+      if (!wideViewport.matches) {
+        return;
+      }
 
+      this.#wideNavigationState.set('header');
+      observer = new globalThis.IntersectionObserver(
+        ([entry]) => {
+          if (!entry) {
+            return;
+          }
+
+          if (entry.intersectionRatio >= headerSonarHandoffThresholds[1]) {
+            this.#wideNavigationState.set('header');
+          } else if (
+            entry.intersectionRatio <= headerSonarHandoffThresholds[0] &&
+            entry.boundingClientRect.top < 0
+          ) {
+            this.#wideNavigationState.set('sonar');
+          }
+        },
+        {
+          rootMargin: headerSonarHandoffRootMargin,
+          threshold: [...headerSonarHandoffThresholds],
+        },
+      );
+      observer.observe(header);
+    };
+
+    configureForViewport();
+    wideViewport.addEventListener?.('change', configureForViewport);
     this.#destroyRef.onDestroy(() => {
-      floatingObserver.disconnect();
-      topObserver.disconnect();
+      observer?.disconnect();
+      wideViewport.removeEventListener?.('change', configureForViewport);
     });
   }
 }

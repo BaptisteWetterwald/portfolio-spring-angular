@@ -1,17 +1,24 @@
 # Frontend
 
-Angular SSR frontend for the portfolio.
+Angular 22 request-time SSR frontend for the bilingual portfolio.
 
-Milestone 9 currently implements canonical `/fr` and `/en` route trees, localized static route segments, root locale redirects, lightweight runtime translations, localized metadata, request-time SSR, localized 404 handling, API-backed project pages, frontend-static Home/Education/Experience/Skills/Languages content, and the maritime visual-system baseline.
+## Current Application Shape
 
-The shell uses semantic navigation, responsive mobile navigation, locale switching, light/dark theme preference, a custom lighthouse theme control, and a custom sonar/compass navigation enhancement. DaisyUI is used selectively for reusable primitives such as buttons, badges, cards, menu/navbar/footer structures, timeline structure, and join controls. Custom CSS/SVG remains responsible for the maritime identity.
+- `/fr` and `/en` each render one `PortfolioPageComponent` containing Home, Education, Experience, Projects, and Contact.
+- Stable fragment IDs are `home`, `education`, `experience`, `projects`, and `contact`.
+- Former localized section routes redirect to those fragments.
+- `/fr/projets/:slug` and `/en/projects/:slug` remain dedicated `DETAIL` project pages.
+- Projects are loaded from the Spring Boot API by route resolvers and participate in Angular's SSR transfer cache.
+- Runtime FR/EN translations, localized metadata, canonical/hreflang links, localized 404s, and root locale selection are implemented.
 
-Home intentionally does not render secondary navigation cards. Its right-hand hero area renders the approved portrait in a circular porthole frame, using CSS object cropping from the original portrait asset rather than a manually cropped derivative. Education, Experience, Skills, Languages, and organization/school logo mappings use frontend-owned static facts; Projects remain backend/PostgreSQL-owned. DETAIL project pages render ordered localized sections from the API, while `CARD_ONLY` projects remain complete list-card entries with no detail route affordance. Mockup project showcases, hover-3d surfaces, real contact forms, social links, CV downloads, lighthouse beam work, and advanced motion remain deferred until approved content or later milestones justify them.
+The header is conventional. A compact sonar provides persistent section navigation, including a draggable and edge-snapping mobile presentation. One persistent lighthouse controls the theme, and its dark-mode beam is native CSS. Section anchors, daisyUI dividers, semantic timelines, keyboard states, and reduced-motion fallbacks are implemented.
+
+Static profile, education, experience, skills, languages, and organization metadata live under `src/app/core/content`. Project content remains backend/PostgreSQL-owned.
 
 ## Commands
 
 ```bash
-npm install
+npm ci
 npm start
 npm run format:check
 npm run lint
@@ -19,27 +26,16 @@ npm test
 npm run build
 npm run serve:ssr
 npm run smoke:ssr
+npm run smoke:browser
 ```
 
-Run `npm run serve:ssr` after `npm run build` to start the built SSR server.
+Run `npm run serve:ssr` only after `npm run build`. The smoke scripts expect the built SSR server to be running and default to `http://127.0.0.1:4000`.
 
-The theme preference uses browser `localStorage` key `portfolio.theme` and mirrors explicit choices to a non-sensitive `portfolio_theme` cookie so request-time SSR can render the selected theme when present. Without an explicit choice, the browser uses `prefers-color-scheme`; SSR falls back to light.
+- Override SSR smoke target with `SSR_SMOKE_ORIGIN`.
+- Override browser smoke target with `BROWSER_SMOKE_ORIGIN`.
+- Set `CHROME_PATH` if Chrome/Chromium is not in a recognized location.
+- Set `BROWSER_SMOKE_SCREENSHOT_DIR` to retain browser-smoke screenshots.
 
-`npm run smoke:ssr` expects the built SSR server to already be running. Verified sequence:
+The development server uses `proxy.conf.json` to forward `/api` to `http://localhost:8080`. The built SSR server uses `BACKEND_INTERNAL_ORIGIN` for server-side API requests and browser-facing `/api` proxying.
 
-1. `npm run build`
-2. `npm run serve:ssr`
-3. In another terminal, run `npm run smoke:ssr`
-
-By default the smoke script checks `http://127.0.0.1:4000`. Override the target with `SSR_SMOKE_ORIGIN`, for example:
-
-```powershell
-$env:SSR_SMOKE_ORIGIN = 'http://127.0.0.1:4308'
-npm run smoke:ssr
-```
-
-If an IDE runtime resolves an older Node.js version, use the system Node executable directly:
-
-```powershell
-& 'C:\Program Files\nodejs\node.exe' .\node_modules\@angular\cli\bin\ng.js build
-```
+Theme choices use `localStorage` key `portfolio.theme` and the non-sensitive `portfolio_theme` cookie. Locale choices use `portfolio.locale` and `portfolio_locale`. Cookies allow request-time SSR to honor an explicit preference; without a theme cookie, SSR uses light and the browser may apply its system preference before hydration.

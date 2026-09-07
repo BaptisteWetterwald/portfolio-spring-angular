@@ -13,11 +13,10 @@
       @for (pageId of navPages; track pageId) {
         <a
           class="link link-hover site-footer__link"
-          [routerLink]="localizedPath(pageId)"
-          routerLinkActive="site-footer__link--active"
-          #activeLink="routerLinkActive"
-          [routerLinkActiveOptions]="exactPageCurrentOptions"
-          [attr.aria-current]="activeLink.isActive ? 'page' : null"
+          [class.site-footer__link--active]="isSectionActive(pageId)"
+          [attr.href]="sectionHref(pageId)"
+          [attr.aria-current]="isSectionActive(pageId) ? 'location' : null"
+          (click)="navigateToSection($event, pageId)"
         >
           {{ navLabel(pageId) }}
         </a>

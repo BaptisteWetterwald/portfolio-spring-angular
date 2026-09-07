@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import { ContactPageComponent } from './contact-page.component';
@@ -9,12 +9,13 @@ describe('ContactPageComponent', () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
 
-    expect(page.querySelector('h1')?.textContent).toContain('Contact');
+    expect(page.querySelector('h2')?.textContent).toContain('Contact');
     expect(page.textContent).toContain('No public contact method is listed on this site yet.');
     expect(page.querySelector('form')).toBeNull();
     expect(page.querySelector('input')).toBeNull();
     expect(page.querySelector('textarea')).toBeNull();
-    expect(page.querySelector('a')).toBeNull();
+    expect(page.querySelectorAll('a')).toHaveLength(1);
+    expect(page.querySelector('a')?.hasAttribute('data-section-permalink')).toBe(true);
   });
 
   it('uses a daisyUI card foundation with a custom lighthouse visual', async () => {
@@ -25,12 +26,17 @@ describe('ContactPageComponent', () => {
     expect(page.querySelector('.contact-page__beacon[aria-hidden="true"]')).not.toBeNull();
   });
 
-  it('applies localized contact metadata', async () => {
-    const metadata = { applyStaticPage: vi.fn() };
+  it('exposes the stable contact section anchor and heading relationship', async () => {
+    const fixture = await createFixture('fr');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#contact');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
-    await createFixture('fr', metadata);
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('contact', 'fr');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('contact-title');
+    expect(section?.querySelector('h2')?.id).toBe('contact-title');
+    expect(permalink?.getAttribute('href')).toBe('/fr#contact');
+    expect(permalink?.getAttribute('aria-label')).toBe('Lien vers la section Contact');
+    expect(permalink?.closest('h2')).toBeNull();
   });
 });
 
@@ -41,6 +47,7 @@ async function createFixture(
   await TestBed.configureTestingModule({
     imports: [ContactPageComponent],
     providers: [
+      provideRouter([]),
       {
         provide: ActivatedRoute,
         useValue: {

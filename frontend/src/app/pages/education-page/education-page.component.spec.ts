@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 
 import { portfolioContent } from '../../core/content/portfolio-content';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
@@ -121,7 +121,7 @@ describe('EducationPageComponent', () => {
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
     expect(links[0].getAttribute('aria-label')).toContain('Official website');
-    expect(links.every((link) => link.closest('h2'))).toBe(true);
+    expect(links.every((link) => link.closest('h3'))).toBe(true);
     expect(links.every((link) => link.querySelector('.timeline-page__logo-frame'))).toBe(false);
     expect(logoLinks.map((link) => link.getAttribute('href'))).toEqual([
       'https://www.ensisa.uha.fr/',
@@ -178,12 +178,17 @@ describe('EducationPageComponent', () => {
     );
   });
 
-  it('applies localized education metadata', async () => {
-    const metadata = { applyStaticPage: vi.fn() };
+  it('exposes the stable education section anchor and heading relationship', async () => {
+    const fixture = await createFixture('en');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#education');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
-    await createFixture('en', metadata);
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('education', 'en');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('education-title');
+    expect(section?.querySelector('h2')?.id).toBe('education-title');
+    expect(permalink?.getAttribute('href')).toBe('/en#education');
+    expect(permalink?.getAttribute('aria-label')).toBe('Link to Education section');
+    expect(permalink?.closest('h2')).toBeNull();
   });
 });
 
@@ -195,6 +200,7 @@ async function createFixture(
   await TestBed.configureTestingModule({
     imports: [EducationPageComponent],
     providers: [
+      provideRouter([]),
       {
         provide: ActivatedRoute,
         useValue: {
@@ -235,7 +241,7 @@ function timelineSide(entry: HTMLElement): 'start' | 'end' | 'none' {
 }
 
 function entryHeadings(page: HTMLElement): string[] {
-  return Array.from(page.querySelectorAll('article h2')).map(
+  return Array.from(page.querySelectorAll('article h3')).map(
     (element) => element.textContent?.trim() ?? '',
   );
 }
@@ -246,7 +252,7 @@ function entryText(page: HTMLElement, heading: string): string {
 
 function entryArticle(page: HTMLElement, heading: string): HTMLElement | null {
   return (
-    Array.from(page.querySelectorAll('article h2'))
+    Array.from(page.querySelectorAll('article h3'))
       .find((element) => element.textContent?.trim() === heading)
       ?.closest('article') ?? null
   );

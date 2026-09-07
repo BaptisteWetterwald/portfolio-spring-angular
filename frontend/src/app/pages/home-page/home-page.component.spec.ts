@@ -182,12 +182,18 @@ describe('HomePageComponent', () => {
     expect(text).not.toContain('workflows');
   });
 
-  it('applies localized home metadata', async () => {
-    const metadata = { applyStaticPage: vi.fn() };
+  it('exposes the stable home section anchor around the existing hero', async () => {
+    const fixture = await createFixture('fr');
+    const section = (fixture.nativeElement as HTMLElement).querySelector('#home');
+    const permalink = section?.querySelector<HTMLAnchorElement>('[data-section-permalink]');
 
-    await createFixture('fr', metadata);
-
-    expect(metadata.applyStaticPage).toHaveBeenCalledWith('home', 'fr');
+    expect(section?.hasAttribute('data-portfolio-section')).toBe(true);
+    expect(section?.getAttribute('aria-labelledby')).toBe('home-title');
+    expect(section?.querySelector('.home-page__hero')).toBeInstanceOf(HTMLElement);
+    expect(permalink?.getAttribute('href')).toBe('/fr#home');
+    expect(permalink?.getAttribute('aria-label')).toBe('Lien vers la section Accueil');
+    expect(permalink?.closest('.home-page__eyebrow-row')).not.toBeNull();
+    expect(permalink?.closest('h1')).toBeNull();
   });
 });
 

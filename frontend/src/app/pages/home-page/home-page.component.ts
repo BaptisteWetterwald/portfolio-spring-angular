@@ -9,10 +9,11 @@ import {
 } from '../../core/content/portfolio-content.models';
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { defaultLocale, toSupportedLocale } from '../../core/i18n/locales';
-import { PageMetadataService } from '../../core/metadata/page-metadata.service';
+import { SectionPermalinkComponent } from '../../shared/section-permalink/section-permalink.component';
 
 @Component({
   selector: 'app-home-page',
+  imports: [SectionPermalinkComponent],
   templateUrl: './home-page.component.html',
   styleUrls: [
     './home-page.component.css',
@@ -24,7 +25,6 @@ import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 export class HomePageComponent {
   readonly #route = inject(ActivatedRoute);
   readonly #localeContext = inject(LocaleContextService);
-  readonly #metadata = inject(PageMetadataService);
 
   protected readonly locale =
     toSupportedLocale(this.#route.parent?.snapshot.data['locale']) ?? defaultLocale;
@@ -32,7 +32,6 @@ export class HomePageComponent {
 
   constructor() {
     this.#localeContext.setLocale(this.locale);
-    this.#metadata.applyStaticPage('home', this.locale);
   }
 
   protected skillGroupClass(group: SkillGroup): string {

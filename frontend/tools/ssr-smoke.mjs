@@ -41,9 +41,27 @@ const checks = [
       'https://bwetterwald.fr/fr',
       'href="#main-content"',
       'data-primary-nav',
+      'data-navigation-handoff-state="header"',
       'class="join locale-switcher"',
       'theme-toggle',
       'data-sonar-nav',
+      'href="/fr#education"',
+      'aria-label="Lien vers la section Expérience"',
+      'data-portfolio-divider',
+      'id="home"',
+      'id="education"',
+      'id="experience"',
+      'id="projects"',
+      'id="contact"',
+      'ENSISA',
+      'Plansee Group Functions',
+      'Portfolio Spring Angular',
+      'Blaze4',
+      'Frequensisa',
+      'SummerCamp',
+      'Bot Discord IR',
+      'BeamNG.drive x BeepBeep 3',
+      'href="/fr/projets/blaze4"',
       '<footer',
     ],
   },
@@ -61,16 +79,35 @@ const checks = [
       'https://bwetterwald.fr/en',
       'href="#main-content"',
       'data-primary-nav',
+      'data-navigation-handoff-state="header"',
       'class="join locale-switcher"',
       'theme-toggle',
       'data-sonar-nav',
+      'href="/en#experience"',
+      'aria-label="Link to Experience section"',
+      'data-portfolio-divider',
+      'id="home"',
+      'id="education"',
+      'id="experience"',
+      'id="projects"',
+      'id="contact"',
+      'Engineering Degree',
+      'Software Developer Intern',
+      'Portfolio Spring Angular',
+      'Blaze4',
+      'Frequensisa',
+      'SummerCamp',
+      'Bot Discord IR',
+      'BeamNG.drive x BeepBeep 3',
+      'href="/en/projects/portfolio-spring-angular"',
       '<footer',
     ],
   },
   {
-    name: 'French education metadata',
+    name: 'French education compatibility redirect',
     path: '/fr/formation',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/fr#education',
     expectedBody: [
       '<title>Formation | Baptiste Wetterwald</title>',
       'ENSISA',
@@ -85,9 +122,10 @@ const checks = [
     ],
   },
   {
-    name: 'English education content',
+    name: 'English education compatibility redirect',
     path: '/en/education',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/en#education',
     expectedBody: [
       '<title>Education | Baptiste Wetterwald</title>',
       'Engineering Degree',
@@ -99,9 +137,10 @@ const checks = [
     ],
   },
   {
-    name: 'French experience content',
+    name: 'French experience compatibility redirect',
     path: '/fr/experience',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/fr#experience',
     expectedBody: [
       '<title>Expérience | Baptiste Wetterwald</title>',
       'Plansee Group Functions',
@@ -113,9 +152,10 @@ const checks = [
     ],
   },
   {
-    name: 'English experience content',
+    name: 'English experience compatibility redirect',
     path: '/en/experience',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/en#experience',
     expectedBody: [
       '<title>Experience | Baptiste Wetterwald</title>',
       'Plansee Group Functions',
@@ -126,9 +166,10 @@ const checks = [
     ],
   },
   {
-    name: 'English projects metadata',
+    name: 'English projects compatibility redirect',
     path: '/en/projects',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/en#projects',
     expectedBody: [
       '<title>Projects | Baptiste Wetterwald</title>',
       'A selection of personal and academic projects showcasing the technologies and software architectures I have worked with.',
@@ -171,9 +212,10 @@ const checks = [
     ],
   },
   {
-    name: 'French projects metadata',
+    name: 'French projects compatibility redirect',
     path: '/fr/projets',
-    expectedStatus: 200,
+    expectedStatus: 302,
+    expectedLocation: '/fr#projects',
     expectedBody: [
       '<title>Projets | Baptiste Wetterwald</title>',
       "Une sélection de projets personnels et académiques illustrant les technologies et architectures avec lesquelles j'ai travaillé.",
@@ -212,6 +254,18 @@ const checks = [
       'href="/fr/projets/bot-discord-ir"',
       'href="/fr/projets/beamng-drive-beepbeep-3"',
     ],
+  },
+  {
+    name: 'French contact compatibility redirect',
+    path: '/fr/contact',
+    expectedStatus: 302,
+    expectedLocation: '/fr#contact',
+  },
+  {
+    name: 'English contact compatibility redirect',
+    path: '/en/contact',
+    expectedStatus: 302,
+    expectedLocation: '/en#contact',
   },
   {
     name: 'English Blaze4 detail SSR metadata',
@@ -515,6 +569,11 @@ for (const check of checks) {
         'location',
       )}`,
     );
+  }
+
+  if (response.status >= 300 && response.status < 400) {
+    console.log(`OK ${check.name}`);
+    continue;
   }
 
   for (const fragment of check.expectedBody ?? []) {

@@ -15,12 +15,13 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { TranslationService } from '../../core/i18n/translation.service';
-import { localizedPath, StaticPageId, staticPageIds } from '../../core/routing/localized-routes';
+import { PortfolioNavigationService } from '../../core/routing/portfolio-navigation.service';
+import { StaticPageId, staticPageIds } from '../../core/routing/localized-routes';
 import {
   MobileSonarBounds,
   MobileSonarBubble,
@@ -39,7 +40,6 @@ type SonarNavigationVariant = 'primary' | 'floating';
 
 @Component({
   selector: 'app-sonar-navigation',
-  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sonar-navigation.component.html',
   styleUrls: [
     './sonar-navigation.component.css',
@@ -56,9 +56,9 @@ export class SonarNavigationComponent {
   readonly variant = input<SonarNavigationVariant>('primary');
 
   protected readonly navPages = staticPageIds;
-  protected readonly exactPageCurrentOptions = { exact: true };
   protected readonly locale = inject(LocaleContextService).locale;
 
+  readonly #navigation = inject(PortfolioNavigationService);
   readonly #router = inject(Router);
   readonly #translations = inject(TranslationService);
   readonly #destroyRef = inject(DestroyRef);
@@ -124,8 +124,18 @@ export class SonarNavigationComponent {
     this.closeFloatingNavigation();
   }
 
-  protected localizedPath(pageId: StaticPageId): string {
-    return localizedPath(this.locale(), pageId);
+  protected sectionHref(pageId: StaticPageId): string {
+    return this.#navigation.sectionHref(this.locale(), pageId);
+  }
+
+  protected isSectionActive(pageId: StaticPageId): boolean {
+    return this.#navigation.isActive(pageId);
+  }
+
+  protected handleSectionNavigation(event: MouseEvent, pageId: StaticPageId): void {
+    if (this.#navigation.navigateToSection(event, this.locale(), pageId)) {
+      this.closeFloatingNavigation();
+    }
   }
 
   protected navLabel(pageId: StaticPageId): string {

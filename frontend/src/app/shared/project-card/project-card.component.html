@@ -20,7 +20,7 @@
 
   <div class="card-body project-card__body">
     <div class="project-card__heading-row">
-      <h3 class="card-title project-card__title">{{ project().title }}</h3>
+      <h4 class="card-title project-card__title">{{ project().title }}</h4>
       @if (project().status === 'ARCHIVED') {
         <span class="badge badge-outline project-card__status">
           {{ t('projects.status.' + project().status) }}

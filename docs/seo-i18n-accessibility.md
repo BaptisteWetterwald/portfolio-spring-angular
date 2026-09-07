@@ -1,352 +1,152 @@
 # SEO, I18n, and Accessibility
 
-This document defines requirements and implementation direction for discoverability, localization, and inclusive access.
+This document separates implemented behavior from remaining production hardening.
 
-## Languages
+## Implemented Localization
 
-The site must support:
+The site supports French and English through canonical `/fr` and `/en` documents. Both contain localized Home, Education, Experience, Projects, and Contact sections with stable language-independent fragments.
 
-- French;
-- English.
+Runtime UI dictionaries are frontend-owned. Profile/education/experience/skill/language content is typed and localized in the frontend; project translations are loaded from the backend.
 
-All public canonical pages must have localized route, content, and metadata.
+The root `/` is not canonical content. The built Express SSR server returns HTTP 302 using:
 
-## Domain and Root Redirect
-
-Production domain:
-
-```text
-https://bwetterwald.fr
-```
-
-Root `/` redirects using:
-
-1. stored explicit language preference when available;
+1. explicit `portfolio_locale` cookie;
 2. `Accept-Language`;
 3. English fallback.
 
-The root path is an entry point, not canonical content.
+The Angular root guard provides equivalent client/development-server behavior. Locale choices are stored in `portfolio.locale` and mirrored to the cookie. No geolocation is used.
 
-Milestone 5 implements this as a real HTTP 302 in the built Express SSR server. The redirect priority is:
+## Localized URL Model
 
-1. explicit preference from the `portfolio_locale` cookie;
-2. `Accept-Language`;
-3. English.
-
-The locale switcher persists explicit browser choices in `localStorage` under `portfolio.locale` and mirrors the value to the cookie so future SSR requests can honor it. No geolocation is used.
-
-## Localized Routes
-
-Use locale-prefixed canonical routes:
+Main documents and fragments:
 
 ```text
-/fr/...
-/en/...
+/fr#home
+/fr#education
+/fr#experience
+/fr#projects
+/fr#contact
+/en#home
+/en#education
+/en#experience
+/en#projects
+/en#contact
 ```
 
-French and English use localized section slugs:
+Fragments identify locations inside `/fr` or `/en`; they are not separate canonical documents.
 
-```text
-/fr/formation
-/en/education
-/fr/projets
-/en/projects
-```
+Former localized section paths return redirects to these fragments. Dedicated project details remain `/fr/projets/:slug` and `/en/projects/:slug`, with one shared slug across languages.
 
-Project slugs are shared across locales in V1.
+FR/EN switching preserves a recognized current section. On project details it preserves the slug when the API reports the target locale in `availableLocales`; otherwise it returns to the target locale's Projects section.
 
-Milestone 5 implements the static canonical route set:
+## SSR and Hydration
 
-```text
-/fr
-/fr/formation
-/fr/experience
-/fr/projets
-/fr/contact
-/en
-/en/education
-/en/experience
-/en/projects
-/en/contact
-```
+All public routes use request-time SSR. The localized root resolver loads project summaries before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent.
 
-Unsupported locale prefixes are not normalized to English; they render not-found behavior.
+Angular hydration uses event replay. Browser-only fragment scrolling, scroll-spy, header visibility, lighthouse measurement, media-query handling, animation frames, and mobile drag geometry are platform-guarded and initialized after render.
 
-## Hreflang
+Direct fragment loads are positioned immediately after hydration and checked again after load/browser restoration. Back/forward fragment navigation scrolls without generating another history entry.
 
-Every localized canonical page should output alternate links.
+## Implemented Metadata
 
-Example for a project:
+`PageMetadataService` currently manages:
 
-```html
-<link
-  rel="alternate"
-  hreflang="fr"
-  href="https://bwetterwald.fr/fr/projets/project-slug"
-/>
-<link
-  rel="alternate"
-  hreflang="en"
-  href="https://bwetterwald.fr/en/projects/project-slug"
-/>
-<link rel="alternate" hreflang="x-default" href="https://bwetterwald.fr/" />
-```
+- `<html lang>`;
+- localized `<title>` and description;
+- `robots`;
+- canonical link;
+- `fr`, `en`, and `x-default` alternates;
+- OpenGraph title, description, type, URL, locale, and alternate locale;
+- optional project `og:image` from a validated media reference.
 
-Milestone 5 emits `fr`, `en`, and `x-default` alternates for equivalent static pages. `x-default` points to `https://bwetterwald.fr/`, and each localized page canonicalizes to itself.
+The main composed document canonicalizes to `/fr` or `/en` and uses one localized document metadata set. It does not create separate canonical/alternate entries for fragments.
 
-## Canonical URLs
+Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to API-reported translations. `og:image` is omitted when no media reference exists.
 
-Each localized page should have a canonical URL pointing to itself.
+## Public Project Indexing Rules
 
-Avoid canonicalizing French and English pages to one language; they are separate localized documents.
+- `PUBLISHED` and `ARCHIVED` projects may appear in the SSR-rendered Projects section.
+- `DRAFT` projects are absent from public APIs.
+- Only `DETAIL` projects have crawlable detail pages.
+- Unknown, private, `CARD_ONLY`, and untranslated detail URLs render localized 404 content.
 
-## Localized Metadata
+Structured detail sections are rendered as ordinary localized HTML. The deprecated long-description field is used only when a detail project has no structured sections.
 
-Each route needs:
+## Errors
 
-- localized `<title>`;
-- localized meta description;
-- localized OpenGraph title and description;
-- localized structured data where text appears;
-- locale-specific `og:locale`;
-- alternate locale references where applicable.
+Unknown localized routes and project-detail misses set SSR HTTP 404 where Angular handles the request. Their metadata is localized, uses `noindex,follow`, and removes managed canonical/hreflang links.
 
-Project metadata should come from `ProjectTranslation.title` and `ProjectTranslation.shortDescription`. Structured sections and the deprecated `detailedDescription` fallback are optional and must not be required for metadata.
+Unsupported locale prefixes such as `/de` do not silently render English canonical content. Project-specific misses recover to the localized `#projects` section; generic misses recover to the localized document root.
 
-Milestone 5 metadata is centralized in `PageMetadataService`. Static placeholder pages receive SSR-rendered localized title, description, canonical URL, OpenGraph title/description/url/type/locale, and alternate locale metadata. Structured data is intentionally deferred until approved personal/project content exists.
+## Semantic Structure
 
-Milestone 8 and the Milestone 9 content consolidation update Home, Education, and Experience metadata to describe real content:
+The composed document implements:
 
-- Home identifies Baptiste Wetterwald as a Software Engineer with backend/full-stack positioning and the approved primary technical directions.
-- Education describes ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand content.
-- Experience describes Plansee, Bureau Veritas Laboratoires, Groupe IES, and LIF/UQAC experience without speculative job-search, salary, or unsupported claims.
-- Contact metadata remains conservative because no approved public contact method exists.
+- a skip link and semantic header/navigation/main/footer shell;
+- one Home `h1` and `h2` headings for the other major sections;
+- major sections with stable IDs and programmatic-focus targets;
+- ordered semantic Education/Experience timelines with real `<time>` elements;
+- project cards as articles and actions as real links;
+- detail content as one article with section headings;
+- buttons only for actions and links for navigation.
 
-## SSR and Prerendering
+DaisyUI supplies presentation primitives without replacing semantic elements.
 
-Approved main runtime model: Angular request-time SSR.
+## Keyboard and Focus
 
-SEO-critical routes must return meaningful HTML without relying on client-only rendering.
+Implemented behavior includes:
 
-Requirements:
+- visible global focus styles;
+- keyboard-reachable conventional, locale, sonar, theme, project, and permalink controls;
+- mobile-menu `aria-expanded` and `aria-controls`;
+- Escape close and focus restoration for the mobile menu;
+- Escape close for expanded sonar;
+- keyboard focus retained inside outgoing header/sonar controls during the visibility handoff;
+- keyboard section activation moving focus to the destination section;
+- passive scroll-spy never moving focus.
 
-- SSR for dynamic project detail pages;
-- dynamic project pages must not require a frontend rebuild simply to become crawlable after project data changes;
-- metadata resolved before the HTML response is sent;
-- localized 404 pages rendered server-side;
-- stable routes may be prerendered only if this provides a clear benefit and does not complicate content updates.
+The header-to-sonar handoff does not force focus to a new control. Hidden duplicate navigation is inert and `aria-hidden`; a focused outgoing control remains available until focus leaves.
 
-Milestone 5 keeps request-time SSR as the runtime model with Angular server routes using `RenderMode.Server`. The production build reports `Prerendered 0 static routes`.
+## Sonar Accessibility
 
-## Dynamic Project Pages
+The compact sonar is a semantic `<nav>` with real localized anchors. Its disclosure button exposes `aria-expanded` and `aria-controls`. Collapsed links are hidden from the accessibility tree and removed from tab order. Active links use `aria-current="location"`.
 
-Dynamic project pages require:
+The mobile drag interaction is optional enhancement: tapping and keyboard navigation still operate the control, and no navigation target depends on drag placement.
 
-- stable shared slugs;
-- localized content availability;
-- localized metadata;
-- correct status filtering so `DRAFT` projects are not public;
-- public visibility for `PUBLISHED` and `ARCHIVED` projects;
-- detail-page availability only when presentation mode is `DETAIL`;
-- 404 for unknown, draft, card-only, or untranslated detail slugs;
-- sitemap entries only for public projects with required translations.
+## Section Permalinks
 
-Archived projects may have compact detail pages when no detailed description exists, but only when their presentation mode is `DETAIL`. Public `CARD_ONLY` projects are rendered on the Projects list and return localized not-found behavior for direct detail URLs.
-
-Dynamic project pages were not implemented in Milestone 5 because the public project REST API was a later milestone. At that stage, project-detail-like URLs returned localized not-found content rather than placeholder project data.
-
-Milestone 7 implements dynamic project pages through request-time SSR:
-
-- `/fr/projets/:slug` and `/en/projects/:slug` load project detail data from the backend API before rendering;
-- `PUBLISHED` and `ARCHIVED` projects are crawlable when the requested translation exists;
-- unknown, `DRAFT`, non-public, `CARD_ONLY`, and untranslated project detail requests render localized not-found content and set SSR HTTP 404 where Angular SSR handles the request;
-- project detail metadata comes from the localized project title and short description;
-- project detail `hreflang` alternates are emitted only for locales returned by the API in `availableLocales`;
-- ordered localized structured sections are SSR-rendered on detail pages;
-- `detailedDescription` is optional, deprecated, and used only as a rendering fallback when structured sections are absent.
-
-## Sitemap
-
-Generate `sitemap.xml` with:
-
-- all public localized static routes;
-- all public `DETAIL` project URLs for both locales when required translations exist;
-- `PUBLISHED` and `ARCHIVED` project URLs;
-- last modification timestamps where reliable;
-- alternate language references if the sitemap generation approach supports them.
-
-Sitemap generation can be:
-
-- backend-driven;
-- frontend SSR-driven;
-- deployment-time generated from the API.
-
-The implementation choice should match the final SSR architecture.
-
-## Robots
-
-Provide `robots.txt` with:
-
-- allowed crawling for public content;
-- sitemap location;
-- no accidental disallow of localized routes;
-- no exposure of private/admin paths if future admin routes exist.
-
-## OpenGraph
-
-Each public page should define:
-
-- `og:title`;
-- `og:description`;
-- `og:type`;
-- `og:url`;
-- `og:image` when an approved image exists;
-- `og:locale`;
-- alternate locales.
-
-Project pages should use the optional project logo/media reference when approved and properly sized. Do not use unapproved or fabricated imagery. The Home portrait is approved content and should render from the original portrait asset with localized alt text.
-
-Project detail pages must not emit `og:image` when the project has no valid media reference. A zero-media DETAIL project should still render a complete hero, technical overview, and structured sections.
-
-## Structured Data
-
-Potential schema types:
-
-| Page           | Structured Data                                                                        |
-| -------------- | -------------------------------------------------------------------------------------- |
-| Home           | `Person` or `ProfilePage` for Baptiste Wetterwald, limited to approved public details. |
-| Projects index | `CollectionPage`.                                                                      |
-| Project detail | `CreativeWork` or `SoftwareSourceCode` when appropriate.                               |
-| Breadcrumbs    | `BreadcrumbList`.                                                                      |
-
-Known approved identity details may be used: Baptiste Wetterwald, Software Engineer, graduated Engineer in Computer Science and Networks. Do not publish unapproved location, employer claims beyond the content inventory, social URLs, images, or contact details.
-
-## Semantic HTML
-
-Requirements:
-
-- one logical `h1` per page;
-- semantic `nav`, `main`, `section`, `article`, `footer`;
-- sonar/compass navigation built around real anchors;
-- project cards should use real links when a project has a real detail page or external action;
-- timelines should remain readable as lists or sections;
-- buttons only for actions, links for navigation;
-- form labels explicitly associated with inputs when contact form exists.
-
-Milestone 9 may adopt daisyUI primitives, but the semantic contract remains unchanged. Cards must still be rendered as meaningful articles or sections where appropriate, project titles must remain real links, locale switching remains anchors with language attributes, theme switching remains a real button, and timelines must remain ordered content with visible dates and organization or institution names. DaisyUI timeline geometry is allowed, but it must not reorder the DOM or hide dates behind interactions.
-
-Milestone 6 adds a reusable localized shell with semantic `header`, `nav`, shell-owned `main`, and `footer` landmarks. Page placeholders and localized 404 content render as sections inside the shell main region. The sonar/compass enhancement is built from real Angular router links plus decorative SVG marked `aria-hidden="true"`.
-
-Milestone 8 replaces Home, Education, and Experience placeholders with semantic content:
-
-- Home uses one `h1`, sections for introduction, stack highlights, skill domains, and languages, plus lists for technology groups. The M9 correction removes redundant section-link cards. The approved Home portrait renders in the porthole frame with localized alt text and CSS object cropping from the original asset. Language levels are rendered as text, not progress bars, percentages, gauges, or ratings.
-- Education and Experience use ordered timeline lists with `article` entries so chronology remains understandable without styling.
-- Confirmed dates use `<time>` elements with year or month-level `datetime` values only; exact days are not invented.
-- Optional Education and Experience official-site links are limited to the logo/name identity area, use `target="_blank"` with `rel="noopener noreferrer"`, and expose localized accessible labels. Timeline cards themselves must not become links.
-- No fake social profile link, CV, project card, contact method, or organization logo is rendered.
-- Public copy must not expose milestone/review/TODO language such as "confirmed roles", "approved content", or "awaiting confirmation".
-
-## Keyboard Navigation
-
-Requirements:
-
-- skip link to main content;
-- all interactive elements reachable by keyboard;
-- visible focus state;
-- logical tab order;
-- no keyboard trap in mobile navigation or motion components;
-- escape closes menus/dialogs where applicable;
-- carousel-like behavior should be avoided unless explicitly justified.
-
-Milestone 6 keyboard behavior:
-
-- the skip link targets `#main-content`;
-- all conventional, mobile, locale, theme, and compass links/buttons are keyboard reachable;
-- focus indicators use the semantic focus token in both themes;
-- the mobile menu trigger exposes `aria-expanded` and `aria-controls`;
-- Escape closes the mobile menu and returns focus to the trigger when appropriate;
-- route changes and link activation close the mobile menu;
-- no keyboard trap is introduced.
-
-Post-Milestone-10 persistent controls:
-
-- the floating maritime controls are `aria-hidden` and `inert` while the shell is in `top` mode;
-- when active, the compact floating sonar exposes a real button with `aria-expanded` and `aria-controls`;
-- keyboard focus-within expands the floating sonar and keeps it open while focus moves between its links;
-- click/tap expansion is supported for touch interaction, and route navigation closes the click/tap-expanded state;
-- the floating sonar links remain real localized Angular router links with exact `aria-current="page"` state.
-
-## Screen Readers
-
-Requirements:
-
-- accessible names for icon buttons;
-- `aria-current` for active navigation;
-- clear language attributes on localized pages;
-- decorative graphics hidden from assistive tech;
-- meaningful alt text for content images;
-- polite live regions only for important asynchronous state changes.
-
-Milestone 5 sets `<html lang="">` per localized SSR response through the centralized metadata service. The minimal locale switcher uses visible text labels and accessible names; it does not rely on icons.
-
-Milestone 6 keeps visible language labels in the locale switcher and adds accessible labels/states for the lighthouse theme button. Primary and compass navigation expose `aria-current="page"` only for exact current static routes. Decorative compass SVG and lighthouse visual spans are hidden from assistive technologies.
-
-## Visible Focus
-
-Focus indicators must:
-
-- have sufficient contrast in both themes;
-- not rely on color alone;
-- remain visible on custom maritime controls;
-- work with keyboard and high-contrast user settings where possible.
+Each major section has one anchor-icon permalink with a localized `aria-label` and matching title. The SVG is `aria-hidden` and non-focusable. Home's control is associated with the hero eyebrow rather than the person's name; other controls sit with their section headings.
 
 ## Reduced Motion
 
-Respect `prefers-reduced-motion`.
+Global CSS disables smooth scrolling and compresses long animations/transitions when `prefers-reduced-motion: reduce` is active. Component rules additionally:
 
-Reduced motion mode should:
+- make the header/sonar handoff immediate;
+- make sonar expansion static;
+- replace the waypoint ripple with a static emphasis;
+- stop lighthouse rotation and retain a static low-opacity beam;
+- keep every state and target discoverable without animation.
 
-- disable looping waves, sonar pulses, sweeping beams, and parallax;
-- keep state changes understandable through static visual indicators;
-- preserve all navigation and content access.
+## Media Accessibility
 
-Milestone 6 does not add looping motion. Component CSS includes reduced-motion safeguards, and the compass remains usable as static links.
+The approved portrait has localized meaningful alt text, explicit intrinsic dimensions, and high fetch priority. Timeline logos are decorative within separately labelled links/identity content and use empty alt text. Project media, when present, uses the project title; empty project-media frames are not rendered.
 
-Milestone 9 reduced-motion behavior:
+## Not Yet Implemented
 
-- any hover lift, sonar sweep, future aura, future lighthouse beam, or route-line transition must reduce to a static visual state;
-- active navigation, current locale, current route, project status, and skill importance must be understandable without animation;
-- hover-only effects need equivalent focus-visible treatment where they indicate an interactive state.
+The following remain part of the SEO/accessibility/performance hardening roadmap and must not be claimed as current features:
 
-Milestone 10 reduced-motion behavior:
+- `sitemap.xml`;
+- `robots.txt` file;
+- JSON-LD/Schema.org structured data;
+- approved site-wide OpenGraph image assets;
+- a recorded full screen-reader audit;
+- published Lighthouse/performance/accessibility thresholds;
+- production analytics or monitoring.
 
-- the global baseline disables smooth scrolling and compresses long transitions/animations;
-- the lighthouse beam stops rotating and remains a static, low-opacity dark-mode decoration;
-- sonar hover/focus feedback changes from a one-shot ripple to a static marker emphasis;
-- no Home wave, parallax, bathymetric drift, or scroll-linked decorative motion is retained;
-- all decorative motion remains `aria-hidden` or pseudo-element based and does not add focusable controls.
-
-Post-Milestone-10 persistent controls keep the same reduced-motion contract. The shell may still switch between `top` and `floating`, but floating-control transitions and sonar waypoint deployment reduce to immediate/static state changes. The lighthouse beam remains a single decorative overlay and stays static when reduced motion is requested.
-
-## Accessible Fallback Navigation
-
-The sonar/compass navigation must have a conventional fallback:
-
-- real anchor links in the DOM;
-- no canvas-only navigation;
-- no motion-dependent target discovery;
-- no fake telemetry labels as the only navigation text.
+The absence of a `robots.txt` file does not replace the per-page robots metadata already implemented.
 
 ## Validation Direction
 
-When implementation starts, validate with:
+Current automated coverage includes route/metadata tests, SSR 404 tests, semantic navigation states, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
 
-- automated accessibility checks;
-- keyboard-only walkthrough;
-- screen reader smoke testing;
-- SSR HTML inspection;
-- sitemap and robots inspection;
-- metadata inspection for each locale;
-- Lighthouse or equivalent SEO/performance checks.
-
-Milestone 8 expands the SSR smoke validation to assert real textual content on `/en`, `/fr`, `/en/education`, `/fr/formation`, `/en/experience`, and `/fr/experience`.
+Before production deployment, add the missing crawl artifacts and complete keyboard-only, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits against the deployed origin.

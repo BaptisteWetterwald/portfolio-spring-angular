@@ -1,6 +1,15 @@
-<section class="projects-page" aria-labelledby="page-title">
+<section
+  id="projects"
+  class="projects-page"
+  data-portfolio-section
+  aria-labelledby="projects-title"
+  tabindex="-1"
+>
   <header class="projects-page__header">
-    <h1 id="page-title">{{ t('pages.projects.heading') }}</h1>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <app-section-permalink sectionId="projects" />
+      <h2 id="projects-title" class="min-w-0 flex-1">{{ t('pages.projects.heading') }}</h2>
+    </div>
     <p>{{ t('pages.projects.introduction') }}</p>
   </header>
 
@@ -11,7 +20,7 @@
         aria-labelledby="projects-error-title"
       >
         <div class="card-body">
-          <h2 id="projects-error-title" class="card-title">{{ t('projects.error.heading') }}</h2>
+          <h3 id="projects-error-title" class="card-title">{{ t('projects.error.heading') }}</h3>
           <p>{{ t('projects.error.message') }}</p>
         </div>
       </section>
@@ -23,7 +32,7 @@
           aria-labelledby="projects-empty-title"
         >
           <div class="card-body">
-            <h2 id="projects-empty-title" class="card-title">{{ t('projects.empty.heading') }}</h2>
+            <h3 id="projects-empty-title" class="card-title">{{ t('projects.empty.heading') }}</h3>
             <p>{{ t('projects.empty.message') }}</p>
           </div>
         </section>
@@ -33,7 +42,7 @@
             class="projects-page__group projects-page__group--featured"
             aria-labelledby="featured-projects-title"
           >
-            <h2 id="featured-projects-title">{{ t('projects.section.featured') }}</h2>
+            <h3 id="featured-projects-title">{{ t('projects.section.featured') }}</h3>
             <div class="projects-page__grid projects-page__grid--featured">
               @for (project of featuredProjects(); track project.slug) {
                 <app-project-card [project]="project" [locale]="locale" />
@@ -44,7 +53,7 @@
 
         @if (publishedProjects().length > 0) {
           <section class="projects-page__group" aria-labelledby="published-projects-title">
-            <h2 id="published-projects-title">{{ t('projects.section.published') }}</h2>
+            <h3 id="published-projects-title">{{ t('projects.section.published') }}</h3>
             <div class="projects-page__grid">
               @for (project of publishedProjects(); track project.slug) {
                 <app-project-card [project]="project" [locale]="locale" />
@@ -58,7 +67,7 @@
             class="projects-page__group projects-page__group--archived"
             aria-labelledby="archived-projects-title"
           >
-            <h2 id="archived-projects-title">{{ t('projects.section.archived') }}</h2>
+            <h3 id="archived-projects-title">{{ t('projects.section.archived') }}</h3>
             <div class="projects-page__grid">
               @for (project of archivedProjects(); track project.slug) {
                 <app-project-card [project]="project" [locale]="locale" />

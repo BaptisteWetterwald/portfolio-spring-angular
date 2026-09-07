@@ -4,7 +4,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MotionPreferenceService } from '../../core/motion/motion-preference.service';
 import { ColorTheme, ThemePreferenceService } from '../../core/theme/theme-preference.service';
 import { isLanternBeamVisible, LighthouseBeamComponent } from './lighthouse-beam.component';
-import { lighthouseLanternSelector } from './lighthouse-beam-source';
 
 describe('LighthouseBeamComponent', () => {
   afterEach(() => {
@@ -32,16 +31,10 @@ describe('LighthouseBeamComponent', () => {
     expect(beamElement(fixture).getAttribute('data-lighthouse-beam-motion')).toBe('reduced');
   });
 
-  it('exposes the active lighthouse source for state-based origin switching', () => {
+  it('uses the persistent floating lighthouse as its only source', () => {
     const fixture = createFixture({ platformId: 'server' });
 
-    expect(beamElement(fixture).getAttribute('data-lighthouse-beam-source')).toBe('header');
-
-    fixture.componentRef.setInput('source', 'floating');
-    fixture.detectChanges();
-
     expect(beamElement(fixture).getAttribute('data-lighthouse-beam-source')).toBe('floating');
-    expect(lighthouseLanternSelector('floating')).toBe('[data-lighthouse-lantern="floating"]');
   });
 
   it('does not query browser layout while rendering for SSR', () => {
@@ -51,9 +44,7 @@ describe('LighthouseBeamComponent', () => {
 
     expect(
       querySelector.mock.calls.some(
-        ([selector]) =>
-          selector === '[data-lighthouse-lantern="header"]' ||
-          selector === '[data-lighthouse-lantern="floating"]',
+        ([selector]) => selector === '[data-lighthouse-lantern="floating"]',
       ),
     ).toBe(false);
   });

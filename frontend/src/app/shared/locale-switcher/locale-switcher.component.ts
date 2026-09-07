@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  UrlTree,
+} from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
@@ -34,11 +40,13 @@ export class LocaleSwitcherComponent {
     { requireSync: true },
   );
 
-  protected localePath(locale: SupportedLocale): string {
-    return equivalentLocalizedPath(
-      this.#currentUrl(),
-      locale,
-      projectDetailAvailableLocales(this.#router.routerState.snapshot.root),
+  protected localePath(locale: SupportedLocale): UrlTree {
+    return this.#router.parseUrl(
+      equivalentLocalizedPath(
+        this.#currentUrl(),
+        locale,
+        projectDetailAvailableLocales(this.#router.routerState.snapshot.root),
+      ),
     );
   }
 

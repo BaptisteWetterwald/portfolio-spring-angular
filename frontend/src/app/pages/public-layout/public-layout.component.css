@@ -1,4 +1,7 @@
 .public-shell {
+  --navigation-handoff-duration: 420ms;
+  --navigation-handoff-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
   display: flex;
   min-height: 100vh;
   flex-direction: column;
@@ -13,11 +16,4 @@
 
 .public-shell__main:focus {
   outline: none;
-}
-
-.public-shell__navigation-sentinel {
-  display: block;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
 }

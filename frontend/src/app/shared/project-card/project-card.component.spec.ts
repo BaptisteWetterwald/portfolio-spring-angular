@@ -34,7 +34,7 @@ describe('ProjectCardComponent', () => {
     const card = fixture.nativeElement as HTMLElement;
 
     expect(card.querySelector('article')).not.toBeNull();
-    expect(card.querySelector('h3')?.textContent).toContain('Portfolio API');
+    expect(card.querySelector('h4')?.textContent).toContain('Portfolio API');
     expect(Array.from(card.querySelectorAll('li')).map((item) => item.textContent?.trim())).toEqual(
       ['Angular', 'Spring Boot'],
     );

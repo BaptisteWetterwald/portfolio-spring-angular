@@ -3,39 +3,31 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   HostListener,
   inject,
   Injector,
+  input,
   PLATFORM_ID,
   QueryList,
   signal,
-  input,
   ViewChild,
   ViewChildren,
-  computed,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { TranslationService } from '../../core/i18n/translation.service';
+import { PortfolioNavigationService } from '../../core/routing/portfolio-navigation.service';
 import { localizedPath, StaticPageId, staticPageIds } from '../../core/routing/localized-routes';
-import { MaritimeNavigationMode } from '../maritime-navigation-shell/navigation-mode';
-import { LighthouseThemeToggleComponent } from '../lighthouse-theme-toggle/lighthouse-theme-toggle.component';
 import { LocaleSwitcherComponent } from '../locale-switcher/locale-switcher.component';
-import { SonarNavigationComponent } from '../sonar-navigation/sonar-navigation.component';
 
 @Component({
   selector: 'app-site-header',
-  imports: [
-    LighthouseThemeToggleComponent,
-    LocaleSwitcherComponent,
-    RouterLink,
-    RouterLinkActive,
-    SonarNavigationComponent,
-  ],
+  imports: [LocaleSwitcherComponent, RouterLink],
   templateUrl: './site-header.component.html',
   styleUrl: './site-header.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,17 +36,20 @@ export class SiteHeaderComponent {
   @ViewChild('mobileMenuButton') private mobileMenuButton?: ElementRef<HTMLButtonElement>;
   @ViewChildren('mobileNavLink') private mobileNavLinks?: QueryList<ElementRef<HTMLAnchorElement>>;
 
-  readonly navigationMode = input<MaritimeNavigationMode>('top');
+  readonly floatingNavigationActive = input(false);
 
   protected readonly navPages = staticPageIds;
-  protected readonly exactPageCurrentOptions = { exact: true };
+  protected readonly desktopNavigationFocused = signal(false);
+  protected readonly desktopNavigationUnavailable = computed(
+    () => this.floatingNavigationActive() && !this.desktopNavigationFocused(),
+  );
   protected readonly isMobileMenuOpen = signal(false);
   protected readonly mobileMenuId = 'mobile-primary-navigation';
-  protected readonly isFloatingShell = computed(() => this.navigationMode() === 'floating');
   protected readonly locale = inject(LocaleContextService).locale;
 
   readonly #platformId = inject(PLATFORM_ID);
   readonly #injector = inject(Injector);
+  readonly #navigation = inject(PortfolioNavigationService);
   readonly #router = inject(Router);
   readonly #translations = inject(TranslationService);
 
@@ -74,6 +69,45 @@ export class SiteHeaderComponent {
 
   protected localizedPath(pageId: StaticPageId): string {
     return localizedPath(this.locale(), pageId);
+  }
+
+  protected sectionHref(pageId: StaticPageId): string {
+    return this.#navigation.sectionHref(this.locale(), pageId);
+  }
+
+  protected isSectionActive(pageId: StaticPageId): boolean {
+    return this.#navigation.isActive(pageId);
+  }
+
+  protected handleDesktopNavigationFocusIn(): void {
+    this.desktopNavigationFocused.set(true);
+  }
+
+  protected handleDesktopNavigationFocusOut(event: FocusEvent): void {
+    const navigation = event.currentTarget;
+    const nextTarget = event.relatedTarget;
+
+    if (
+      navigation instanceof HTMLElement &&
+      nextTarget instanceof Node &&
+      navigation.contains(nextTarget)
+    ) {
+      return;
+    }
+
+    this.desktopNavigationFocused.set(false);
+  }
+
+  protected handleSectionNavigation(
+    event: MouseEvent,
+    pageId: StaticPageId,
+    closeMobileMenu = false,
+  ): void {
+    const handled = this.#navigation.navigateToSection(event, this.locale(), pageId);
+
+    if (handled && closeMobileMenu) {
+      this.closeMobileMenu();
+    }
   }
 
   protected navLabel(pageId: StaticPageId): string {

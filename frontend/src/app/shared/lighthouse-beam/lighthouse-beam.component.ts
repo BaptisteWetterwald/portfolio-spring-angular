@@ -6,20 +6,17 @@ import {
   computed,
   DestroyRef,
   DOCUMENT,
-  effect,
   inject,
   Injector,
   PLATFORM_ID,
-  input,
   signal,
 } from '@angular/core';
 
 import { MotionPreferenceService } from '../../core/motion/motion-preference.service';
 import { ThemePreferenceService } from '../../core/theme/theme-preference.service';
-import { LighthouseBeamSource, lighthouseLanternSelector } from './lighthouse-beam-source';
-
 const hiddenOrigin = '-9999px';
 const viewportFadeMarginPx = 12;
+const lighthouseLanternSelector = '[data-lighthouse-lantern="floating"]';
 
 @Component({
   selector: 'app-lighthouse-beam',
@@ -28,8 +25,6 @@ const viewportFadeMarginPx = 12;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LighthouseBeamComponent {
-  readonly source = input<LighthouseBeamSource>('header');
-
   readonly #destroyRef = inject(DestroyRef);
   readonly #document = inject(DOCUMENT);
   readonly #injector = inject(Injector);
@@ -57,44 +52,17 @@ export class LighthouseBeamComponent {
 
   #initializeBrowserMeasurement(): void {
     let frameId: number | undefined;
-    let activeSource: LighthouseBeamSource | undefined;
-    let activeLantern: HTMLElement | undefined;
-    let activeObservedContainer: Element | undefined;
+    const lantern =
+      this.#document.querySelector<HTMLElement>(lighthouseLanternSelector) ?? undefined;
+    const observedContainer = lantern?.closest('app-lighthouse-theme-toggle') ?? undefined;
     const resizeObserver =
       typeof globalThis.ResizeObserver === 'function'
         ? new globalThis.ResizeObserver(() => scheduleMeasure())
         : undefined;
-    const selectActiveLantern = (): HTMLElement | undefined => {
-      const nextSource = this.source();
-
-      if (activeSource === nextSource && activeLantern?.isConnected) {
-        return activeLantern;
-      }
-
-      activeSource = nextSource;
-      activeLantern =
-        this.#document.querySelector<HTMLElement>(lighthouseLanternSelector(nextSource)) ??
-        undefined;
-      activeObservedContainer = activeLantern?.closest('app-lighthouse-theme-toggle') ?? undefined;
-
-      resizeObserver?.disconnect();
-
-      if (activeLantern) {
-        resizeObserver?.observe(activeLantern);
-      }
-
-      if (activeObservedContainer) {
-        resizeObserver?.observe(activeObservedContainer);
-      }
-
-      return activeLantern;
-    };
     const measure = (): void => {
       frameId = undefined;
 
-      const lantern = selectActiveLantern();
-
-      if (!lantern) {
+      if (!lantern?.isConnected) {
         this.originX.set(hiddenOrigin);
         this.originY.set(hiddenOrigin);
         this.isReady.set(false);
@@ -121,20 +89,17 @@ export class LighthouseBeamComponent {
       measure();
     };
 
+    if (lantern) {
+      resizeObserver?.observe(lantern);
+    }
+
+    if (observedContainer) {
+      resizeObserver?.observe(observedContainer);
+    }
+
     measure();
 
     globalThis.addEventListener('resize', scheduleMeasure, { passive: true });
-    globalThis.addEventListener('scroll', scheduleMeasure, { passive: true });
-
-    effect(
-      () => {
-        this.source();
-        activeSource = undefined;
-        this.isReady.set(false);
-        scheduleMeasure();
-      },
-      { injector: this.#injector },
-    );
 
     this.#destroyRef.onDestroy(() => {
       if (frameId !== undefined && typeof globalThis.cancelAnimationFrame === 'function') {
@@ -143,7 +108,6 @@ export class LighthouseBeamComponent {
 
       resizeObserver?.disconnect();
       globalThis.removeEventListener('resize', scheduleMeasure);
-      globalThis.removeEventListener('scroll', scheduleMeasure);
     });
   }
 

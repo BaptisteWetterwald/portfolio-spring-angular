@@ -23,25 +23,25 @@ describe('LocaleSwitcherComponent integration', () => {
   });
 
   it('preserves the equivalent localized route with accessible language labels', async () => {
-    const harness = await createHarness('/fr/formation');
+    const harness = await createHarness('/fr#education');
     const frenchLink = localeLink(harness, 'fr');
     const englishLink = localeLink(harness, 'en');
 
     expect(frenchLink?.getAttribute('aria-current')).toBe('page');
     expect(frenchLink?.getAttribute('aria-label')).toBe('Ouvrir la version française');
-    expect(englishLink?.getAttribute('href')).toBe('/en/education');
+    expect(englishLink?.getAttribute('href')).toBe('/en#education');
     expect(englishLink?.getAttribute('aria-label')).toBe('Ouvrir la version anglaise');
     expect(englishLink?.textContent?.trim()).toBe('English');
   });
 
   it('persists locale choices through the existing preference mechanism', async () => {
-    const harness = await createHarness('/fr/formation');
+    const harness = await createHarness('/fr#education');
     const englishLink = localeLink(harness, 'en');
 
     englishLink?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     await settleHarness(harness);
 
-    expect(TestBed.inject(Router).url).toBe('/en/education');
+    expect(TestBed.inject(Router).url).toBe('/en#education');
     expect(globalThis.localStorage?.getItem(localeStorageKey)).toBe('en');
     expect(document.cookie).toContain('portfolio_locale=en');
   });
@@ -61,7 +61,7 @@ describe('LocaleSwitcherComponent integration', () => {
     });
     const frenchLink = localeLink(harness, 'fr');
 
-    expect(frenchLink?.getAttribute('href')).toBe('/fr/projets');
+    expect(frenchLink?.getAttribute('href')).toBe('/fr#projects');
   });
 
   it('clears project-specific locale behavior after navigating away from detail', async () => {
@@ -69,12 +69,12 @@ describe('LocaleSwitcherComponent integration', () => {
       getProject: () => of(detailProject({ availableLocales: ['en'] })),
     });
 
-    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr/projets');
+    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr#projects');
 
-    await harness.navigateByUrl('/en/education');
+    await harness.navigateByUrl('/en#education');
     await settleHarness(harness);
 
-    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr/formation');
+    expect(localeLink(harness, 'fr')?.getAttribute('href')).toBe('/fr#education');
   });
 });
 

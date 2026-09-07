@@ -20,70 +20,53 @@ describe('localized app routes', () => {
     document.cookie = `${localeCookieName}=; Path=/; Max-Age=0; SameSite=Lax`;
   });
 
-  it('resolves /fr to the French home page content', async () => {
-    const harness = await createHarness('/fr');
+  it.each([
+    ['/fr', 'Ingénieur logiciel'],
+    ['/en', 'Software Engineer'],
+  ] as const)('renders %s as one composed portfolio document', async (url, positioning) => {
+    const harness = await createHarness(url);
+    const root = harness.routeNativeElement;
 
-    expect(harness.routeNativeElement?.querySelector('app-home-page h1')?.textContent).toContain(
-      'Baptiste Wetterwald',
-    );
-    expect(harness.routeNativeElement?.textContent).toContain('Ingénieur logiciel');
+    expect(root?.querySelector('app-home-page h1')?.textContent).toContain('Baptiste Wetterwald');
+    expect(root?.textContent).toContain(positioning);
+    expect(portfolioSectionIds(root)).toEqual([
+      'home',
+      'education',
+      'experience',
+      'projects',
+      'contact',
+    ]);
   });
 
-  it('resolves /en to the English home page content', async () => {
-    const harness = await createHarness('/en');
+  it.each([
+    ['/fr/formation', '/fr#education', 'Formation'],
+    ['/fr/experience', '/fr#experience', 'Expérience professionnelle'],
+    ['/fr/projets', '/fr#projects', 'Projets'],
+    ['/fr/contact', '/fr#contact', 'Contact'],
+    ['/en/education', '/en#education', 'Education'],
+    ['/en/experience', '/en#experience', 'Professional experience'],
+    ['/en/projects', '/en#projects', 'Projects'],
+    ['/en/contact', '/en#contact', 'Contact'],
+  ] as const)('redirects compatibility route %s to %s', async (legacyUrl, expectedUrl, heading) => {
+    const harness = await createHarness(legacyUrl);
 
-    expect(harness.routeNativeElement?.querySelector('app-home-page h1')?.textContent).toContain(
-      'Baptiste Wetterwald',
-    );
-    expect(harness.routeNativeElement?.textContent).toContain('Software Engineer');
+    expect(TestBed.inject(Router).url).toBe(expectedUrl);
+    expect(harness.routeNativeElement?.textContent).toContain(heading);
+    expect(harness.routeNativeElement?.querySelector('app-portfolio-page')).not.toBeNull();
   });
 
-  it('resolves localized education aliases to the education page component', async () => {
-    const harness = await createHarness('/fr/formation');
-
-    expect(
-      harness.routeNativeElement?.querySelector('app-education-page h1')?.textContent,
-    ).toContain('Formation');
-    expect(harness.routeNativeElement?.textContent).toContain('ENSISA');
-
-    await harness.navigateByUrl('/en/education');
-
-    expect(
-      harness.routeNativeElement?.querySelector('app-education-page h1')?.textContent,
-    ).toContain('Education');
-    expect(harness.routeNativeElement?.textContent).toContain('IUT Robert Schuman');
-  });
-
-  it('resolves localized experience routes to the experience page component', async () => {
-    const harness = await createHarness('/en/experience');
-
-    expect(
-      harness.routeNativeElement?.querySelector('app-experience-page h1')?.textContent,
-    ).toContain('Professional experience');
-    expect(harness.routeNativeElement?.textContent).toContain('Plansee Group Functions');
-  });
-
-  it('resolves localized projects routes to the API-backed projects page', async () => {
-    const harness = await createHarness('/en/projects', {
+  it('renders API-backed projects inside the composed document', async () => {
+    const harness = await createHarness('/en#projects', {
       listProjects: () => of([summaryProject()]),
     });
 
-    expect(
-      harness.routeNativeElement?.querySelector('app-projects-page h1')?.textContent,
-    ).toContain('Projects');
+    expect(harness.routeNativeElement?.querySelector('#projects h2')?.textContent).toContain(
+      'Projects',
+    );
     expect(harness.routeNativeElement?.textContent).toContain('Portfolio API');
   });
 
-  it('resolves localized contact routes to the contact page component', async () => {
-    const harness = await createHarness('/fr/contact');
-
-    expect(harness.routeNativeElement?.querySelector('app-contact-page h1')?.textContent).toContain(
-      'Contact',
-    );
-    expect(harness.routeNativeElement?.querySelector('form')).toBeNull();
-  });
-
-  it('resolves localized project detail routes with shared slugs', async () => {
+  it('keeps localized project detail routes with shared slugs', async () => {
     const harness = await createHarness('/fr/projets/portfolio-api', {
       getProject: () => of(detailProject()),
     });
@@ -91,6 +74,7 @@ describe('localized app routes', () => {
     expect(
       harness.routeNativeElement?.querySelector('app-project-detail-page h1')?.textContent,
     ).toContain('Portfolio API');
+    expect(TestBed.inject(Router).url).toBe('/fr/projets/portfolio-api');
   });
 
   it('does not silently render supported content for unsupported locale prefixes', async () => {
@@ -112,7 +96,7 @@ describe('localized app routes', () => {
     );
   });
 
-  it('renders the public shell landmarks around localized pages', async () => {
+  it('renders the public shell landmarks around the portfolio document', async () => {
     const harness = await createHarness('/en');
     const root = harness.routeNativeElement;
 
@@ -125,7 +109,7 @@ describe('localized app routes', () => {
     expect(root?.querySelector('nav[data-primary-nav]')).not.toBeNull();
   });
 
-  it('renders localized primary navigation links from the shared route model', async () => {
+  it('renders localized primary navigation as stable section links', async () => {
     const harness = await createHarness('/fr');
     const links = primaryNavLinks(harness);
 
@@ -137,23 +121,22 @@ describe('localized app routes', () => {
       'Contact',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/fr',
-      '/fr/formation',
-      '/fr/experience',
-      '/fr/projets',
-      '/fr/contact',
+      '/fr#home',
+      '/fr#education',
+      '/fr#experience',
+      '/fr#projects',
+      '/fr#contact',
     ]);
   });
 
-  it('uses exact aria-current page semantics for static navigation links', async () => {
-    const harness = await createHarness('/fr/projets');
+  it('uses aria-current location semantics for the active section', async () => {
+    const harness = await createHarness('/fr#projects');
 
-    await settleHarness(harness);
-    expect(navLink(harness, 'Projets')?.getAttribute('aria-current')).toBe('page');
+    expect(navLink(harness, 'Projets')?.getAttribute('aria-current')).toBe('location');
 
     await harness.navigateByUrl('/fr/projets/inconnu');
-
     await settleHarness(harness);
+
     expect(
       harness.routeNativeElement?.querySelector('app-not-found-page h1')?.textContent,
     ).toContain('Page introuvable');
@@ -161,7 +144,7 @@ describe('localized app routes', () => {
       harness.routeNativeElement
         ?.querySelector<HTMLAnchorElement>('app-not-found-page a')
         ?.getAttribute('href'),
-    ).toBe('/fr/projets');
+    ).toBe('/fr#projects');
     expect(navLink(harness, 'Projets')?.getAttribute('aria-current')).toBeNull();
   });
 });
@@ -180,7 +163,11 @@ async function createHarness(
     ],
   });
 
-  return RouterTestingHarness.create(initialUrl);
+  const harness = await RouterTestingHarness.create(initialUrl);
+
+  await settleHarness(harness);
+
+  return harness;
 }
 
 function projectApiStub(overrides: Partial<ProjectApiService>) {
@@ -204,6 +191,12 @@ function primaryNavLinks(harness: RouterTestingHarness): HTMLAnchorElement[] {
   return Array.from(
     harness.routeNativeElement?.querySelectorAll('nav[data-primary-nav] a') ?? [],
   ).filter((link): link is HTMLAnchorElement => link instanceof HTMLAnchorElement);
+}
+
+function portfolioSectionIds(root: HTMLElement | null | undefined): string[] {
+  return Array.from(root?.querySelectorAll<HTMLElement>('[data-portfolio-section]') ?? []).map(
+    (section) => section.id,
+  );
 }
 
 async function settleHarness(harness: RouterTestingHarness): Promise<void> {

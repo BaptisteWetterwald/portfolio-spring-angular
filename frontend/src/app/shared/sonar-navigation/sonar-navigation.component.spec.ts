@@ -1,8 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
+import { ProjectApiService } from '../../core/projects/project-api.service';
 import { themeCookieName, themeStorageKey } from '../../core/theme/theme-preference.service';
 
 describe('SonarNavigationComponent integration', () => {
@@ -42,25 +45,25 @@ describe('SonarNavigationComponent integration', () => {
       'Contact',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/en',
-      '/en/education',
-      '/en/experience',
-      '/en/projects',
-      '/en/contact',
+      '/en#home',
+      '/en#education',
+      '/en#experience',
+      '/en#projects',
+      '/en#contact',
     ]);
     expect(
       harness.routeNativeElement
-        ?.querySelector('nav[data-sonar-nav][data-sonar-nav-variant="primary"]')
+        ?.querySelector('nav[data-sonar-nav][data-sonar-nav-variant="floating"]')
         ?.getAttribute('aria-label'),
-    ).toBe('Compass navigation');
+    ).toBe('Compact compass navigation');
   });
 
-  it('exposes exact active destination state', async () => {
-    const harness = await createHarness('/fr/formation');
+  it('exposes the active section as the current location', async () => {
+    const harness = await createHarness('/fr#education');
     const formation = sonarLink(harness, 'Formation');
     const accueil = sonarLink(harness, 'Accueil');
 
-    expect(formation?.getAttribute('aria-current')).toBe('page');
+    expect(formation?.getAttribute('aria-current')).toBe('location');
     expect(formation?.getAttribute('data-active')).toBe('true');
     expect(accueil?.getAttribute('aria-current')).toBeNull();
   });
@@ -74,20 +77,48 @@ describe('SonarNavigationComponent integration', () => {
   });
 
   it('keeps the visual compass static and non-canvas based', async () => {
-    const harness = await createHarness('/en/projects');
-    const sonarNav = primarySonarNav(harness);
+    const harness = await createHarness('/en#projects');
+    const sonarNav = floatingSonarNav(harness);
 
     expect(sonarNav?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     expect(sonarNav?.querySelector('canvas')).toBeNull();
     expect(sonarNav?.querySelector('.sonar-nav__bearing')).toBeNull();
     expect(sonarLinks(harness).length).toBe(5);
   });
+
+  it.each([
+    ['Home', 'home'],
+    ['Education', 'education'],
+    ['Experience', 'experience'],
+    ['Projects', 'projects'],
+    ['Contact', 'contact'],
+  ] as const)('navigates the %s waypoint to #%s', async (label, sectionId) => {
+    const harness = await createHarness('/en');
+
+    sonarLink(harness, label)?.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }),
+    );
+    await settleHarness(harness);
+
+    expect(TestBed.inject(Router).url).toBe(`/en#${sectionId}`);
+    expect(sonarLink(harness, label)?.getAttribute('aria-current')).toBe('location');
+  });
 });
 
 async function createHarness(initialUrl: string): Promise<RouterTestingHarness> {
   setSystemTheme(false);
   TestBed.configureTestingModule({
-    providers: [provideRouter(routes)],
+    providers: [
+      provideRouter(routes),
+      {
+        provide: ProjectApiService,
+        useValue: {
+          listProjects: () => of([]),
+          getProject: () =>
+            throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' })),
+        },
+      },
+    ],
   });
 
   const harness = await RouterTestingHarness.create(initialUrl);
@@ -100,15 +131,15 @@ async function createHarness(initialUrl: string): Promise<RouterTestingHarness> 
 function sonarLinks(harness: RouterTestingHarness): HTMLAnchorElement[] {
   return Array.from(
     harness.routeNativeElement?.querySelectorAll(
-      'nav[data-sonar-nav][data-sonar-nav-variant="primary"] a',
+      'nav[data-sonar-nav][data-sonar-nav-variant="floating"] a',
     ) ?? [],
   ).filter((link): link is HTMLAnchorElement => link instanceof HTMLAnchorElement);
 }
 
-function primarySonarNav(harness: RouterTestingHarness): HTMLElement | null {
+function floatingSonarNav(harness: RouterTestingHarness): HTMLElement | null {
   return (
     harness.routeNativeElement?.querySelector(
-      'nav[data-sonar-nav][data-sonar-nav-variant="primary"]',
+      'nav[data-sonar-nav][data-sonar-nav-variant="floating"]',
     ) ?? null
   );
 }

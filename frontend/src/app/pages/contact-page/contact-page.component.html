@@ -1,6 +1,15 @@
-<section class="contact-page" aria-labelledby="contact-title">
+<section
+  id="contact"
+  class="contact-page"
+  data-portfolio-section
+  aria-labelledby="contact-title"
+  tabindex="-1"
+>
   <header class="contact-page__header">
-    <h1 id="contact-title">{{ t('pages.contact.heading') }}</h1>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <app-section-permalink sectionId="contact" />
+      <h2 id="contact-title" class="min-w-0 flex-1">{{ t('pages.contact.heading') }}</h2>
+    </div>
   </header>
 
   <article class="card card-border contact-page__panel">

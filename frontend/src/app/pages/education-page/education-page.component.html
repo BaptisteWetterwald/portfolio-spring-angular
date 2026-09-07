@@ -1,6 +1,15 @@
-<section class="timeline-page" aria-labelledby="education-title">
+<section
+  id="education"
+  class="timeline-page"
+  data-portfolio-section
+  aria-labelledby="education-title"
+  tabindex="-1"
+>
   <header class="timeline-page__header">
-    <h1 id="education-title">{{ content.educationPage.heading }}</h1>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <app-section-permalink sectionId="education" />
+      <h2 id="education-title" class="min-w-0 flex-1">{{ content.educationPage.heading }}</h2>
+    </div>
     <p>{{ content.educationPage.introduction }}</p>
   </header>
 
@@ -98,7 +107,7 @@
           </div>
 
           <div class="timeline-page__body">
-            <h2>
+            <h3>
               @if (entry.officialWebsiteUrl) {
                 <a
                   class="link link-hover timeline-page__identity-link"
@@ -121,7 +130,7 @@
                   <span class="timeline-page__identity-name">{{ entry.institution }}</span>
                 </span>
               }
-            </h2>
+            </h3>
             @if (entry.location) {
               <p class="timeline-page__location">{{ entry.location }}</p>
             }
