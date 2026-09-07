@@ -1,338 +1,174 @@
 # Deployment Architecture
 
-This document proposes production and development deployment architecture for the portfolio.
+This document distinguishes the implemented local/container runtime from the planned production deployment.
 
-Primary sources: `docs/product-vision.md` and `AGENTS.md`.
+## Status Summary
 
-## Production Target
+| Capability                             | Status              |
+| -------------------------------------- | ------------------- |
+| Separate frontend/backend Dockerfiles  | Implemented         |
+| Multi-stage, non-root runtime images   | Implemented         |
+| Local Docker Compose integration       | Implemented         |
+| PostgreSQL named-volume persistence    | Implemented locally |
+| Backend/SSR health checks in Compose   | Implemented         |
+| Host reverse proxy and HTTPS           | Planned             |
+| GHCR image publishing                  | Planned             |
+| GitHub Actions CI/CD                   | Not implemented     |
+| Automated VPS deployment               | Not implemented     |
+| Production backups/rollback/monitoring | Not implemented     |
 
-The production target is `bwetterwald.fr` on a Linux VPS.
+No `.github/workflows` directory exists in the current repository. Nothing in this document should be read as evidence that `bwetterwald.fr` is deployed.
 
-Approved production shape:
+## Implemented Local Runtime
+
+`compose.yaml` runs three services:
+
+```text
+browser
+  |
+  v
+frontend Angular SSR :4000
+  |  /api proxy and SSR data requests
+  v
+backend Spring Boot :8080
+  |
+  v
+PostgreSQL :5432 -> postgres-data volume
+```
+
+| Service    | Image/runtime                                   | Host binding                            | Internal behavior                                                  |
+| ---------- | ----------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| `postgres` | `postgres:18-alpine`                            | `127.0.0.1:${POSTGRES_HOST_PORT:-5432}` | Stores data at `/var/lib/postgresql` in `postgres-data`            |
+| `backend`  | `portfolio-backend:local`, Java 21 JRE Alpine   | `127.0.0.1:${BACKEND_HOST_PORT:-8080}`  | Connects to `postgres:5432`, runs Flyway, validates with Hibernate |
+| `frontend` | `portfolio-frontend:local`, Node 24.19.0 Alpine | `127.0.0.1:${FRONTEND_HOST_PORT:-4000}` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`                 |
+
+All host bindings are loopback-only. They support local browser access, native frontend/backend development, database tools, and health checks; they are not a public exposure design.
+
+The frontend SSR server proxies browser-facing `/api/*` requests to `BACKEND_INTERNAL_ORIGIN`. SSR API requests use the same internal backend origin. This provides a local same-origin browser model without requiring a local Nginx container.
+
+## Container Images
+
+### Frontend
+
+`frontend/Dockerfile`:
+
+- pins Node 24.19.0 Alpine for build and runtime;
+- installs the repository-declared npm 11.6.2 for the build;
+- uses `npm ci` and the lockfile;
+- builds the Angular server output in a separate stage;
+- copies only `dist/frontend` into runtime;
+- runs as non-root user `angular`;
+- listens on configurable `PORT` (default 4000).
+
+### Backend
+
+`backend/Dockerfile`:
+
+- uses Eclipse Temurin Java 21 JDK Alpine to resolve/build through the Maven wrapper;
+- uses a Java 21 JRE Alpine runtime;
+- copies only the packaged jar;
+- runs as non-root user `spring`;
+- listens on `SERVER_PORT` (default 8080).
+
+Both contexts have `.dockerignore` files excluding build outputs, VCS/IDE data, local environment files, and private keys. No production credentials are embedded.
+
+## Local Configuration
+
+`.env.example` documents safe development defaults:
+
+| Variable             | Default                    |
+| -------------------- | -------------------------- |
+| `POSTGRES_DB`        | `portfolio`                |
+| `POSTGRES_USER`      | `portfolio`                |
+| `POSTGRES_PASSWORD`  | `portfolio-local-password` |
+| `POSTGRES_HOST_PORT` | `5432`                     |
+| `BACKEND_HOST_PORT`  | `8080`                     |
+| `FRONTEND_HOST_PORT` | `4000`                     |
+
+Compose sets `SPRING_DATASOURCE_*`, enables Flyway, and sets the frontend `BACKEND_INTERNAL_ORIGIN`. The checked-in password is intentionally a local default and must not be reused for production.
+
+## Local Operation
+
+Full stack:
+
+```bash
+docker compose build backend frontend
+docker compose up -d --wait
+curl http://127.0.0.1:8080/api/health
+curl http://127.0.0.1:4000/en
+curl http://127.0.0.1:4000/api/health
+docker compose down
+```
+
+`docker compose down` does not remove the named volume. Removing the volume would delete local database data and is not part of the normal documented workflow.
+
+Native development can run Angular and Spring Boot separately while using only the Compose PostgreSQL service. Angular's development proxy sends `/api` to `http://localhost:8080`.
+
+## Health and Startup Order
+
+- PostgreSQL health uses `pg_isready`.
+- Backend waits for healthy PostgreSQL and exposes Actuator `/api/health`.
+- Frontend waits for healthy backend and checks its own root response.
+- Flyway migrations run during backend startup, followed by Hibernate schema validation.
+
+This gives the local stack controlled startup and useful failure signals. It is not a complete production rollout/rollback mechanism.
+
+## Planned Production Target
+
+The intended target remains one Linux VPS and one public origin:
 
 ```text
 Internet
   |
   v
-Nginx on VPS host / HTTPS
-  |
-  +-- /       -> frontend Docker container
-  |
-  +-- /api/*  -> backend Docker container
-                  |
-                  v
-               PostgreSQL Docker container
+host Nginx / HTTPS
+  +-- /      -> frontend SSR container
+  +-- /api/* -> backend container -> PostgreSQL container/volume
 ```
 
-Use one public origin for the website and API:
+Host Nginx is the current preferred direction because it is proportionate to a single server and can preserve host/scheme forwarding for canonical metadata. Exact configuration, certificate automation, security headers, and upstream exposure have not been implemented.
 
-```text
-https://bwetterwald.fr
-```
+Do not add Kubernetes, multi-server orchestration, or another proxy without a concrete requirement.
 
-## Runtime Services
+## Planned CI/CD
 
-Docker Compose manages:
+GitHub Actions should eventually:
 
-- frontend;
-- backend;
-- PostgreSQL.
+1. install frontend dependencies from the lockfile;
+2. run formatting, linting, tests, and production build;
+3. run backend tests, compilation, and packaging;
+4. build images only after validation succeeds;
+5. publish immutable Git-SHA-tagged images to GHCR;
+6. authenticate the VPS for image pulls;
+7. update selected image versions through Compose;
+8. let the backend apply compatible startup migrations;
+9. verify public frontend/API health;
+10. retain traceability and a reasonable application rollback path.
 
-Nginx runs on the VPS host as the reverse proxy and HTTPS layer unless a concrete blocker is discovered during implementation.
+No workflow, registry namespace, deployment script, or VPS configuration currently implements this plan.
 
-PostgreSQL uses persistent storage.
+## Production Security and Operations Requirements
 
-## Container Strategy
+Future production work must provide:
 
-The frontend and backend must have separate production images.
+- non-default PostgreSQL credentials outside Git;
+- server-side-only application/API/email secrets;
+- least-privilege deployment and GHCR credentials;
+- HTTPS and verified host keys;
+- PostgreSQL inaccessible from the public internet;
+- explicit backup schedule and tested restore procedure;
+- deployment records with Git SHA and image tags;
+- compatible migration and application rollback strategy;
+- logging, health monitoring, and failed-rollout handling.
 
-| Image | Responsibility |
-| --- | --- |
-| Frontend | Run Angular request-time SSR server and serve frontend assets. |
-| Backend | Run Spring Boot API and Flyway startup migrations. |
-| PostgreSQL | Use official PostgreSQL image with persistent volume. |
-
-Production images should:
-
-- be built in CI;
-- be tagged immutably, preferably with the Git commit SHA;
-- avoid embedded secrets;
-- use runtime environment variables for configuration;
-- run as non-root where practical;
-- contain only production runtime dependencies.
-
-## Reverse Proxy Decision
-
-Approved default: Nginx on the VPS host.
-
-Rationale:
-
-- common and well understood on Linux VPS deployments;
-- straightforward path routing for `/` and `/api/*`;
-- keeps Docker Compose focused on application services and PostgreSQL;
-- works with Certbot or another ACME automation path for HTTPS.
-
-Potential blockers to revisit:
-
-- existing VPS image or hosting provider strongly favors another proxy;
-- certificate automation becomes simpler and safer with another approved tool;
-- operational requirements change beyond a single VPS.
-
-Do not introduce Traefik, Caddy, Kubernetes, or multi-server infrastructure without a concrete new requirement.
-
-## Nginx Routing
-
-Conceptual routing:
-
-```text
-location / {
-  proxy_pass frontend_container;
-}
-
-location /api/ {
-  proxy_pass backend_container;
-}
-```
-
-Implementation must preserve:
-
-- original host and scheme headers for correct canonical URLs;
-- WebSocket or streaming support only if a later feature needs it;
-- request size limits appropriate for future contact forms;
-- HTTPS redirects;
-- security headers where appropriate.
-
-## Docker Compose
-
-Expected production services:
-
-- `frontend`;
-- `backend`;
-- `postgres`.
-
-Expected persistent volumes:
-
-- PostgreSQL data volume.
-
-Expected networking:
-
-- frontend reachable by host Nginx;
-- backend reachable by host Nginx and frontend SSR runtime;
-- PostgreSQL reachable only by backend over the Docker network;
-- PostgreSQL port not exposed publicly.
-
-## Milestone 3 Local Compose Implementation
-
-The local integration environment is implemented in `compose.yaml` with exactly these services:
-
-- `postgres`;
-- `backend`;
-- `frontend`.
-
-No local Nginx, Caddy, Traefik, Kubernetes, or production proxy container is used for this milestone.
-
-Local service behavior:
-
-| Service | Local image/runtime | Host binding | Internal connectivity |
-| --- | --- | --- | --- |
-| `postgres` | `postgres:18-alpine` | `127.0.0.1:${POSTGRES_HOST_PORT:-5432}` | Backend uses `postgres:5432`. |
-| `backend` | `portfolio-backend:local`, Java 21 JRE | `127.0.0.1:${BACKEND_HOST_PORT:-8080}` | Frontend and host health checks use port `8080`. |
-| `frontend` | `portfolio-frontend:local`, Node.js 24.19.0 | `127.0.0.1:${FRONTEND_HOST_PORT:-4000}` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080`. |
-
-PostgreSQL data persists in the `postgres-data` named volume mounted at `/var/lib/postgresql`, which matches the PostgreSQL 18 image layout. The local PostgreSQL host binding is loopback-only so native Spring Boot runs and local database tools can use the same non-production database without exposing it to the LAN.
-
-Dockerized browser `/api/*` requests are handled by the frontend SSR server and proxied to `BACKEND_INTERNAL_ORIGIN`. This validates the future same-origin browser model locally without adding a production Nginx configuration ahead of its milestone.
-
-## Configuration
-
-Use environment variables and safe example files.
-
-Potential variables:
-
-| Service | Variable Type |
-| --- | --- |
-| Frontend | public site URL `https://bwetterwald.fr`, backend internal URL for SSR, default locale `en`. |
-| Backend | JDBC URL, database user/password, active profile, allowed origins for development, future GitHub/email tokens. |
-| PostgreSQL | database name, user, password. |
-| Nginx/host | domain name, upstream ports, certificate path/automation settings. |
-
-No production secrets may be committed.
-
-Milestone 3 local variables:
-
-| Variable | Used by | Local default |
-| --- | --- | --- |
-| `POSTGRES_DB` | Compose PostgreSQL and backend JDBC URL | `portfolio` |
-| `POSTGRES_USER` | Compose PostgreSQL and backend datasource username | `portfolio` |
-| `POSTGRES_PASSWORD` | Compose PostgreSQL and backend datasource password | `portfolio-local-password` |
-| `POSTGRES_HOST_PORT` | Local PostgreSQL loopback binding | `5432` |
-| `BACKEND_HOST_PORT` | Local backend loopback binding | `8080` |
-| `FRONTEND_HOST_PORT` | Local frontend loopback binding | `4000` |
-| `BACKEND_INTERNAL_ORIGIN` | Frontend SSR runtime and local SSR `/api` proxy | `http://backend:8080` in Compose |
-
-Milestone 4 update: the backend Compose service now enables Flyway by default with `SPRING_FLYWAY_ENABLED=true`. On startup, the backend applies versioned migrations to PostgreSQL and then Hibernate validates the schema.
-
-## Database Migrations
-
-Use Flyway migrations committed with backend source.
-
-Approved V1 production strategy:
-
-- allow Spring Boot startup migrations;
-- require version-controlled migrations;
-- keep production Hibernate schema generation disabled;
-- prefer backward-compatible migrations.
-
-A dedicated migration deployment step can be introduced later if complexity justifies it.
-
-Milestone 4 created the first production migration:
-
-```text
-V1__create_project_domain.sql
-```
-
-The backend runs this migration at startup in the current local Compose stack. Docker Compose smoke validation confirmed the backend reaches healthy status with the migration applied and Hibernate schema validation enabled.
-
-Prefer backward-compatible migrations:
-
-- add nullable columns before requiring data;
-- deploy code that can tolerate both old and new fields where practical;
-- avoid destructive schema changes without backup and explicit rollback plan.
-
-## CI/CD Strategy
-
-GitHub Actions is the intended CI/CD platform.
-
-A push or merge to `main` should eventually:
-
-1. validate frontend;
-2. validate backend;
-3. run tests;
-4. build production artifacts;
-5. build Docker images;
-6. publish immutable/versioned images to GHCR;
-7. deploy selected image versions to the VPS;
-8. allow Spring Boot/Flyway to apply startup migrations;
-9. verify application health.
-
-Do not write the workflow until the projects exist.
-
-## Container Registry
-
-GitHub Container Registry is the approved default registry.
-
-Use tags such as:
-
-```text
-ghcr.io/<owner>/<repo>-frontend:<git-sha>
-ghcr.io/<owner>/<repo>-backend:<git-sha>
-```
-
-Mutable convenience tags such as `main` may exist, but deployment should record and use immutable tags.
-
-## VPS Deployment Approach
-
-Recommended V1 automation:
-
-- GitHub Actions connects to the VPS over SSH;
-- deployment updates selected frontend/backend image tags;
-- VPS authenticates to GHCR and pulls images;
-- Docker Compose recreates changed services;
-- backend startup runs Flyway migrations;
-- health checks verify frontend, backend, and database readiness.
-
-Manual deployment scripts may exist as a fallback, but the intended production path is automated deployment from `main`.
-
-## Deployment Security
-
-Handle secrets as follows:
-
-| Secret | Storage |
-| --- | --- |
-| GitHub Actions deploy SSH key | GitHub Actions secret. |
-| VPS known host / host key | GitHub Actions secret or pinned repository variable if non-secret. |
-| GHCR token for VPS pulls | VPS environment/credential store or GitHub Actions provisioned secret. |
-| PostgreSQL password | VPS environment file or secret store, not Git. |
-| Backend application secrets | VPS environment file or secret store, not Git. |
-| External API tokens | Server-side only, injected into backend. |
-| Future email credentials | Server-side only, injected into backend. |
-| HTTPS certificates | Managed on VPS host, not Git. |
-
-Security requirements:
-
-- no secrets in workflow files;
-- no secrets in Angular build artifacts;
-- least-privilege deploy user on VPS;
-- SSH key restricted to deployment where practical;
-- PostgreSQL not exposed to the internet;
-- HTTPS enforced at Nginx.
-
-## Health Verification
-
-Deployment should verify:
-
-- Nginx responds on HTTPS;
-- frontend returns a successful localized response through `/` redirect and `/en`;
-- backend health endpoint is healthy through `/api/*` or internal route;
-- backend can reach PostgreSQL;
-- expected image tags are running.
-
-Failed health verification should stop the deployment and report clearly.
-
-## Rollback
-
-Application rollback:
-
-- keep previous frontend/backend image tags;
-- keep the previous Compose environment file or deployment record;
-- redeploy the previous known-good image versions;
-- verify health after rollback.
-
-Database rollback:
-
-- do not assume image rollback reverses migrations;
-- prefer backward-compatible migrations;
-- take database backups before risky migrations;
-- use explicit corrective migrations rather than automatic down migrations in production unless a tested policy exists.
-
-For a single VPS, a practical rollback record can be a small deployment manifest listing image tags, migration version, timestamp, and Git commit SHA.
-
-## Local Development
-
-Support two workflows.
-
-### Native Development
-
-Use native Angular and Spring development servers when rapid feedback matters:
-
-- Angular dev server with hot reload;
-- Spring Boot dev run with local profile;
-- local PostgreSQL through Docker Compose or installed PostgreSQL;
-- frontend proxies `/api` to backend during development.
-
-Milestone 2 implements the native development proxy in `frontend/proxy.conf.json`: `/api` is forwarded to `http://localhost:8080`. Browser-side production requests remain same-origin under `/api`; request-time SSR can use `BACKEND_INTERNAL_ORIGIN` when an internal backend origin is available.
-
-Milestone 3 keeps that native proxy unchanged. The backend now expects PostgreSQL by default at `jdbc:postgresql://localhost:5432/portfolio`, so native backend runs need either an installed PostgreSQL instance or the Compose `postgres` service exposed on loopback.
-
-Milestone 4 enables Flyway and Hibernate validation by default. For native backend runs, the local PostgreSQL database must be reachable before Spring Boot starts so migrations can apply and schema validation can complete.
-
-Do not require Docker for every UI or backend edit if it slows normal development.
-
-### Docker Compose Integration
-
-Use Docker Compose for full-stack integration:
-
-- frontend container;
-- backend container;
-- PostgreSQL container;
-- frontend SSR server proxying local browser `/api/*` requests to the backend.
-
-This should validate service wiring without replacing hot-reload workflows.
+Database rollback must not assume that reverting an image reverses Flyway migrations. Prefer backward-compatible migrations and corrective forward migrations.
 
 ## Remaining Decisions
 
-- Exact GHCR namespace and image names.
-- VPS deployment user and directory layout.
-- HTTPS certificate automation details for host Nginx.
-- Backup schedule and retention.
-- Whether a dedicated migration deployment step becomes necessary after V1.
+- GHCR namespace and image names;
+- VPS user, directory layout, and Compose/environment-file ownership;
+- exact Nginx and certificate automation;
+- production secret provisioning;
+- backup schedule, retention, and restore testing;
+- deployment/health rollback mechanics;
+- whether migration complexity eventually warrants a dedicated migration job.

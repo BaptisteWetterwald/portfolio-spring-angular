@@ -1,16 +1,16 @@
 # Data Model
 
-This document defines the first-pass PostgreSQL model for portfolio projects and technologies.
+This document defines the current PostgreSQL model for portfolio projects and technologies.
 
 ## Principles
 
 - Model structured project content, not a generic CMS.
 - Keep locale-neutral project data separate from translated text.
-- Keep project slugs stable and shareable across locales in V1.
+- Keep project slugs stable and shareable across locales.
 - Use explicit constraints and indexes for data integrity.
-- Keep media modelling minimal for V1.
+- Keep media modelling minimal until real multi-item requirements exist.
 - Keep public visibility independent from whether a project has a detail page.
-- Allow richer case studies later without forcing V1 into a page-builder architecture.
+- Represent rich case studies with generic ordered localized sections rather than a page-builder schema.
 
 ## Out Of Scope
 
@@ -20,13 +20,19 @@ Do not add Education, Experience, Skill, Language, biography, or generic CMS tab
 
 ## Implementation Status
 
-Milestone 4 implements this V1 model through Flyway migration:
+The current model starts with this Flyway migration:
 
 ```text
 backend/src/main/resources/db/migration/V1__create_project_domain.sql
 ```
 
-The V1 migration is structural only. The first real production project record is seeded later by:
+The V1 migration is structural only. Media-reference constraints are added by:
+
+```text
+backend/src/main/resources/db/migration/V2__constrain_project_media_refs.sql
+```
+
+The first real public project record is seeded later by:
 
 ```text
 backend/src/main/resources/db/migration/V3__seed_real_portfolio_projects.sql
@@ -38,7 +44,7 @@ Project detail-page availability is added by:
 backend/src/main/resources/db/migration/V4__add_project_presentation_mode.sql
 ```
 
-The second real production project record is seeded by:
+The second real public project record is seeded by:
 
 ```text
 backend/src/main/resources/db/migration/V5__seed_blaze4_project.sql
@@ -56,6 +62,12 @@ The current portfolio project record is seeded by:
 backend/src/main/resources/db/migration/V7__seed_portfolio_project.sql
 ```
 
+The final current seed set and display order are completed by:
+
+```text
+backend/src/main/resources/db/migration/V8__seed_card_only_projects_and_reorder.sql
+```
+
 Test fixtures remain fictional and limited to repository tests.
 
 ## Entity Overview
@@ -71,11 +83,11 @@ Project n..m Technology
 
 Project status answers whether a project is publicly visible and what lifecycle state it is in. It does not decide whether a project has a dedicated detail page.
 
-| Status | Public? | Featured? | Meaning |
-| --- | --- | --- | --- |
-| `DRAFT` | no | no | Private work in progress. |
-| `PUBLISHED` | yes | yes | Public project, eligible for featured areas. |
-| `ARCHIVED` | yes | no by default | Older or secondary project archive. |
+| Status      | Public? | Featured? | Meaning                                      |
+| ----------- | ------- | --------- | -------------------------------------------- |
+| `DRAFT`     | no      | no        | Private work in progress.                    |
+| `PUBLISHED` | yes     | yes       | Public project, eligible for featured areas. |
+| `ARCHIVED`  | yes     | no        | Older or secondary project archive.          |
 
 Public APIs must exclude `DRAFT` projects.
 
@@ -83,33 +95,33 @@ Public APIs must exclude `DRAFT` projects.
 
 Project presentation mode answers whether a public project has a dedicated detail page. It is explicit persisted editorial data and must not be inferred from status, detailed description, media, links, technologies, or featured state.
 
-| Presentation mode | Detail page? | Meaning |
-| --- | --- | --- |
-| `CARD_ONLY` | no | Complete public project represented by its Projects list card only. |
-| `DETAIL` | yes | Public project with a dedicated localized detail page. |
+| Presentation mode | Detail page? | Meaning                                                             |
+| ----------------- | ------------ | ------------------------------------------------------------------- |
+| `CARD_ONLY`       | no           | Complete public project represented by its Projects list card only. |
+| `DETAIL`          | yes          | Public project with a dedicated localized detail page.              |
 
 Status and presentation mode are independent. Examples such as `PUBLISHED` + `CARD_ONLY`, `PUBLISHED` + `DETAIL`, `ARCHIVED` + `CARD_ONLY`, and `ARCHIVED` + `DETAIL` are valid when the editorial content supports them.
 
-Project status and the `featured` flag are not a complete long-term project-importance model. The portfolio may later distinguish featured, standard, and minor/archive projects once real project inventory exists. Do not add a new persistence field for that hierarchy until approved project content shows that `featured` plus `ARCHIVED` cannot express the needed visual prominence.
+The current project inventory is adequately represented by publication status, `featured`, presentation mode, and display order. Do not add another project-importance field unless approved future content demonstrates a concrete distinction that these fields cannot express.
 
 ## Tables
 
 ### `projects`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `id` | `bigserial` | yes | Primary key. |
-| `slug` | `varchar(120)` | yes | Stable public slug, unique. |
-| `logo_media_ref` | `varchar(500)` | no | Minimal V1 logo/media reference: root-relative `/...` path or absolute `https://...` URL. |
-| `github_url` | `varchar(500)` | no | Public repository URL. |
-| `demo_url` | `varchar(500)` | no | Public demo URL. |
-| `featured` | `boolean` | yes | Defaults to `false`; meaningful for `PUBLISHED` projects. |
-| `status` | `varchar(32)` | yes | `DRAFT`, `PUBLISHED`, or `ARCHIVED`. |
-| `presentation_mode` | `varchar(32)` | yes | `CARD_ONLY` or `DETAIL`; controls public detail-page availability. |
-| `display_order` | `integer` | yes | Defaults to `0`; lower values sort first. |
-| `created_at` | `timestamptz` | yes | Creation timestamp. |
-| `updated_at` | `timestamptz` | yes | Last update timestamp. |
-| `published_at` | `timestamptz` | no | Optional public publication timestamp. |
+| Column              | Type           | Required | Notes                                                                                         |
+| ------------------- | -------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `id`                | `bigserial`    | yes      | Primary key.                                                                                  |
+| `slug`              | `varchar(120)` | yes      | Stable public slug, unique.                                                                   |
+| `logo_media_ref`    | `varchar(500)` | no       | Current single logo/media reference: root-relative `/...` path or absolute `https://...` URL. |
+| `github_url`        | `varchar(500)` | no       | Public repository URL.                                                                        |
+| `demo_url`          | `varchar(500)` | no       | Public demo URL.                                                                              |
+| `featured`          | `boolean`      | yes      | Defaults to `false`; meaningful for `PUBLISHED` projects.                                     |
+| `status`            | `varchar(32)`  | yes      | `DRAFT`, `PUBLISHED`, or `ARCHIVED`.                                                          |
+| `presentation_mode` | `varchar(32)`  | yes      | `CARD_ONLY` or `DETAIL`; controls public detail-page availability.                            |
+| `display_order`     | `integer`      | yes      | Defaults to `0`; lower values sort first.                                                     |
+| `created_at`        | `timestamptz`  | yes      | Creation timestamp.                                                                           |
+| `updated_at`        | `timestamptz`  | yes      | Last update timestamp.                                                                        |
+| `published_at`      | `timestamptz`  | no       | Optional public publication timestamp.                                                        |
 
 Constraints:
 
@@ -123,16 +135,16 @@ Constraints:
 
 ### `project_translations`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `id` | `bigserial` | yes | Primary key. |
-| `project_id` | `bigint` | yes | Foreign key to `projects.id`. |
-| `locale` | `varchar(8)` | yes | `fr` or `en` for V1. |
-| `title` | `varchar(180)` | yes | Localized project title. |
-| `short_description` | `varchar(320)` | yes | Card/list summary and metadata source. |
-| `detailed_description` | `text` | no | Deprecated compatibility/fallback body. Structured DETAIL projects should use `project_sections` instead. |
-| `created_at` | `timestamptz` | yes | Creation timestamp. |
-| `updated_at` | `timestamptz` | yes | Last update timestamp. |
+| Column                 | Type           | Required | Notes                                                                                                     |
+| ---------------------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `id`                   | `bigserial`    | yes      | Primary key.                                                                                              |
+| `project_id`           | `bigint`       | yes      | Foreign key to `projects.id`.                                                                             |
+| `locale`               | `varchar(8)`   | yes      | Current supported values are `fr` and `en`.                                                               |
+| `title`                | `varchar(180)` | yes      | Localized project title.                                                                                  |
+| `short_description`    | `varchar(320)` | yes      | Card/list summary and metadata source.                                                                    |
+| `detailed_description` | `text`         | no       | Deprecated compatibility/fallback body. Structured DETAIL projects should use `project_sections` instead. |
+| `created_at`           | `timestamptz`  | yes      | Creation timestamp.                                                                                       |
+| `updated_at`           | `timestamptz`  | yes      | Last update timestamp.                                                                                    |
 
 Constraints:
 
@@ -142,13 +154,13 @@ Constraints:
 
 ### `project_sections`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `id` | `bigserial` | yes | Primary key. |
-| `project_id` | `bigint` | yes | Foreign key to `projects.id`. |
-| `display_order` | `integer` | yes | Defaults to `0`; lower values render first. |
-| `created_at` | `timestamptz` | yes | Creation timestamp. |
-| `updated_at` | `timestamptz` | yes | Last update timestamp. |
+| Column          | Type          | Required | Notes                                       |
+| --------------- | ------------- | -------- | ------------------------------------------- |
+| `id`            | `bigserial`   | yes      | Primary key.                                |
+| `project_id`    | `bigint`      | yes      | Foreign key to `projects.id`.               |
+| `display_order` | `integer`     | yes      | Defaults to `0`; lower values render first. |
+| `created_at`    | `timestamptz` | yes      | Creation timestamp.                         |
+| `updated_at`    | `timestamptz` | yes      | Last update timestamp.                      |
 
 Constraints:
 
@@ -157,15 +169,15 @@ Constraints:
 
 ### `project_section_translations`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `id` | `bigserial` | yes | Primary key. |
-| `section_id` | `bigint` | yes | Foreign key to `project_sections.id`. |
-| `locale` | `varchar(8)` | yes | `fr` or `en` for V1. |
-| `title` | `varchar(180)` | yes | Localized section heading. |
-| `content` | `text` | yes | Localized section body text. |
-| `created_at` | `timestamptz` | yes | Creation timestamp. |
-| `updated_at` | `timestamptz` | yes | Last update timestamp. |
+| Column       | Type           | Required | Notes                                       |
+| ------------ | -------------- | -------- | ------------------------------------------- |
+| `id`         | `bigserial`    | yes      | Primary key.                                |
+| `section_id` | `bigint`       | yes      | Foreign key to `project_sections.id`.       |
+| `locale`     | `varchar(8)`   | yes      | Current supported values are `fr` and `en`. |
+| `title`      | `varchar(180)` | yes      | Localized section heading.                  |
+| `content`    | `text`         | yes      | Localized section body text.                |
+| `created_at` | `timestamptz`  | yes      | Creation timestamp.                         |
+| `updated_at` | `timestamptz`  | yes      | Last update timestamp.                      |
 
 Constraints:
 
@@ -176,15 +188,15 @@ Constraints:
 
 ### `technologies`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `id` | `bigserial` | yes | Primary key. |
-| `name` | `varchar(120)` | yes | Display name, usually shared across locales. |
-| `slug` | `varchar(120)` | yes | Stable technology slug, unique. |
-| `icon_ref` | `varchar(500)` | no | Icon path, key, or icon identifier. |
-| `category` | `varchar(80)` | no | Example: language, framework, database, tooling, platform. |
-| `created_at` | `timestamptz` | yes | Creation timestamp. |
-| `updated_at` | `timestamptz` | yes | Last update timestamp. |
+| Column       | Type           | Required | Notes                                                      |
+| ------------ | -------------- | -------- | ---------------------------------------------------------- |
+| `id`         | `bigserial`    | yes      | Primary key.                                               |
+| `name`       | `varchar(120)` | yes      | Display name, usually shared across locales.               |
+| `slug`       | `varchar(120)` | yes      | Stable technology slug, unique.                            |
+| `icon_ref`   | `varchar(500)` | no       | Icon path, key, or icon identifier.                        |
+| `category`   | `varchar(80)`  | no       | Example: language, framework, database, tooling, platform. |
+| `created_at` | `timestamptz`  | yes      | Creation timestamp.                                        |
+| `updated_at` | `timestamptz`  | yes      | Last update timestamp.                                     |
 
 Constraints:
 
@@ -193,11 +205,11 @@ Constraints:
 
 ### `project_technologies`
 
-| Column | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `project_id` | `bigint` | yes | Foreign key to `projects.id`. |
-| `technology_id` | `bigint` | yes | Foreign key to `technologies.id`. |
-| `display_order` | `integer` | yes | Defaults to `0`. |
+| Column          | Type      | Required | Notes                             |
+| --------------- | --------- | -------- | --------------------------------- |
+| `project_id`    | `bigint`  | yes      | Foreign key to `projects.id`.     |
+| `technology_id` | `bigint`  | yes      | Foreign key to `technologies.id`. |
+| `display_order` | `integer` | yes      | Defaults to `0`.                  |
 
 Constraints:
 
@@ -206,7 +218,7 @@ Constraints:
 
 ## SQL Shape
 
-This summarizes the current project-domain shape after the V1 through V7 migrations.
+This summarizes the current project-domain shape after the V1 through V8 migrations.
 
 ```sql
 create table projects (
@@ -224,7 +236,17 @@ create table projects (
   published_at timestamptz,
   constraint projects_status_check check (status in ('DRAFT', 'PUBLISHED', 'ARCHIVED')),
   constraint projects_presentation_mode_check check (presentation_mode in ('CARD_ONLY', 'DETAIL')),
-  constraint projects_slug_check check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
+  constraint projects_slug_check check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  constraint projects_logo_media_ref_check check (
+    logo_media_ref is null
+    or (
+      logo_media_ref = btrim(logo_media_ref)
+      and (
+        logo_media_ref ~ '^/[^/[:space:]][^[:space:]]*$'
+        or logo_media_ref ~ '^https://[^[:space:]]+$'
+      )
+    )
+  )
 );
 
 create table project_translations (
@@ -285,16 +307,16 @@ create table project_technologies (
 );
 ```
 
-## Indexes
+## Implemented Indexes
 
-Recommended indexes:
+The migrations create these indexes:
 
 - `projects(status, featured, display_order)`;
 - `projects(status, display_order)`;
 - `project_translations(locale)`;
 - `project_sections(project_id, display_order, id)` for ordered section retrieval per project;
 - `project_section_translations(locale)`;
-- `project_technologies(technology_id)`.
+- `project_technologies(technology_id)`;
 - `project_technologies(project_id, display_order)` for ordered technology retrieval per project.
 
 ## Query Patterns
@@ -325,7 +347,7 @@ Find project by slug where status in (PUBLISHED, ARCHIVED) and presentation_mode
 
 Missing translation policy must be explicit. For SEO, returning a localized 404 is cleaner than silently showing the wrong language unless a fallback is approved.
 
-Milestone 7 policy:
+Current locale and visibility policy:
 
 - localized list endpoints join the requested translation and omit public projects that do not have that translation;
 - localized detail endpoints return 404 for missing requested translations;
@@ -333,7 +355,7 @@ Milestone 7 policy:
 - no API or frontend fallback renders another language silently;
 - detail responses include `availableLocales` so the frontend can publish `hreflang` alternates only for detail pages with existing translations.
 
-Milestone 7 fetch strategy:
+Current fetch strategy:
 
 - project list/detail APIs query through `ProjectTranslationEntity` for the requested locale;
 - list/detail translation queries `join fetch` the owning `ProjectEntity`;
@@ -344,13 +366,13 @@ Milestone 7 fetch strategy:
 - structured detail sections are fetched only for detail responses and ordered by `project_sections.display_order`, then section ID;
 - list APIs batch-load technologies for all returned project IDs instead of issuing one technology query per project.
 
-Current production seed data uses `projects.display_order` values `10`, `20`, `30`, `40`, `50`, and `60` for Portfolio Spring Angular, Blaze4, Frequensisa, SummerCamp, Bot Discord IR, and BeamNG.drive x BeepBeep 3 respectively.
+Current Flyway seed data uses `projects.display_order` values `10`, `20`, `30`, `40`, `50`, and `60` for Portfolio Spring Angular, Blaze4, Frequensisa, SummerCamp, Bot Discord IR, and BeamNG.drive x BeepBeep 3 respectively.
 
-Milestone 7 frontend grouping:
+Current frontend grouping:
 
 - Angular receives the deterministically ordered public project list and groups it for presentation into featured published, non-featured published, and archived sections;
 - featured published projects are not rendered a second time in the non-featured published section;
-- this grouping is a Projects page presentation concern, not a separate backend ordering contract.
+- this grouping is a Projects-section presentation concern, not a separate backend ordering contract.
 
 ## Richer Case Studies
 
@@ -366,4 +388,4 @@ Future evolution options:
 - add `project_metrics` if real measurable outcomes exist;
 - add a full `project_media` domain for screenshots, videos, captions, and alt text if the content strategy requires it later.
 
-Do not introduce a generic page-builder or CMS schema in V1. It would add complexity before the content model proves it needs that flexibility.
+Do not introduce a generic page-builder or CMS schema without a demonstrated content requirement. It would add complexity that the current model does not need.

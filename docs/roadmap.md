@@ -1,468 +1,264 @@
 # Roadmap
 
-This roadmap turns the specification into milestone-based implementation work. It intentionally stops before bootstrapping code in the current phase.
+This roadmap records what the repository currently implements and what remains. It preserves the original milestone numbering for traceability.
 
-## 1. Project and Tooling Bootstrap
+## Current Status
 
-Objective: establish the repository structure and baseline tooling.
+| Milestone                                   | Status                             | Current evidence                                                                                                             |
+| ------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| M1 Bootstrap                                | Complete                           | Angular/Spring projects, wrappers, formatting/linting configuration, repository layout                                       |
+| M2 Health/connectivity                      | Complete                           | Actuator `/api/health`, Angular API URL service, native development proxy                                                    |
+| M3 Docker Compose                           | Complete                           | Frontend, backend, PostgreSQL, local networking, health checks, named volume                                                 |
+| M4 Persistence/Flyway                       | Complete                           | JPA domain, PostgreSQL repositories, Flyway V1-V8, schema/query tests                                                        |
+| M5 FR/EN SSR/SEO foundation                 | Complete                           | Request-time SSR, `/fr` and `/en`, root redirect, runtime i18n, metadata, localized 404s                                     |
+| M6 Shell/theme/navigation                   | Complete                           | Semantic shell, locale/theme preferences, accessible header/mobile/footer navigation                                         |
+| M7 Projects API/pages                       | Complete                           | Public API, API-backed listing, dedicated `DETAIL` pages, resolver/SSR states                                                |
+| M8 Real portfolio content                   | Complete for supplied content      | Profile, skills, languages, education, experience, six seeded projects; unprovided contact/CV/social content remains omitted |
+| M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
+| M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
+| M11 GitHub/contact integrations             | Not started                        | No global GitHub feed/client, contact backend, email, spam, or rate-limit implementation                                     |
+| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, 404s, keyboard/reduced-motion coverage exist; sitemap, robots file, structured data, formal audits remain     |
+| M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
+| M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
+| M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
+| M16 Production hardening                    | Not started                        | No deployed backup/restore, rollback automation, monitoring, or production security verification                             |
 
-Dependencies: approved technical specification.
+The single-page work after M10 is implemented on `experiment/single-page-navigation` as the candidate branch state. It should be described as current on this branch, but not as deployed or already accepted on `main`.
 
-Deliverables:
+## Post-M10 Candidate Work
 
-- Angular project scaffold;
-- Spring Boot project scaffold;
-- shared repository conventions;
-- editor/formatting baseline;
-- safe example environment files if needed.
+Implemented in the current branch:
 
-Non-goals:
+- persistent compact maritime navigation;
+- mobile draggable sonar with edge snapping and viewport-safe inward expansion;
+- `/fr` and `/en` single-page portfolio composition;
+- stable `#home`, `#education`, `#experience`, `#projects`, and `#contact` links;
+- compatibility redirects from former localized section routes;
+- explicit fragment/history/focus behavior and passive scroll-spy;
+- one persistent lighthouse independent of navigation handoff;
+- wide-viewport conventional-header-to-sonar handoff with hysteresis and focus retention;
+- anchor-icon permalinks for all major sections;
+- restrained daisyUI dividers between major sections;
+- expanded unit, SSR smoke, and headless-browser smoke coverage.
 
-- production deployment;
-- final visual design;
-- database domain implementation.
+The former large header sonar, header lighthouse, dual lighthouse source switching, and Home SVG wave experiment are not part of the candidate architecture.
 
-Validation criteria:
+## M1 — Project and Tooling Bootstrap
 
-- clean repository structure;
-- generated apps build with default checks;
-- README documents only real commands after they exist.
+Status: complete.
 
-## 2. Angular and Spring Foundations
+Implemented:
 
-Objective: create minimal working frontend and backend applications.
+- Angular 22 standalone SSR application;
+- Spring Boot Maven project using Java 21;
+- Angular ESLint, Prettier, strict TypeScript, and unit-test setup;
+- repository/frontend/backend documentation and safe example environment file.
 
-Dependencies: milestone 1.
+## M2 — Angular and Spring Foundations
 
-Deliverables:
+Status: complete.
 
-- Angular app shell placeholder;
-- Spring Boot health endpoint;
-- local frontend/backend communication;
-- environment-based configuration.
+Implemented:
 
-Non-goals:
+- Spring Boot Actuator health at `/api/health`;
+- typed Angular health/API URL services;
+- same-origin browser `/api` convention;
+- native Angular proxy to `http://localhost:8080`;
+- SSR internal-origin support through `BACKEND_INTERNAL_ORIGIN`.
 
-- final UI;
-- project database model;
-- authentication.
+## M3 — Docker and Local Integration
 
-Validation criteria:
+Status: complete.
 
-- frontend runs locally;
-- backend runs locally;
-- frontend can reach backend health endpoint in development.
+Implemented:
 
-## 3. Docker and Local Integration
+- `postgres`, `backend`, and `frontend` Compose services;
+- loopback-only host bindings;
+- persistent `postgres-data` volume;
+- dependency-aware health checks;
+- frontend SSR `/api` proxy to the backend Compose service.
 
-Objective: create reproducible local full-stack integration.
+This is a local integration environment, not a VPS deployment.
 
-Dependencies: milestone 2.
+## M4 — PostgreSQL, Flyway, and Project Domain
 
-Deliverables:
+Status: complete.
 
-- local Docker Compose file;
-- PostgreSQL service with local persistent volume;
-- backend database configuration;
-- frontend/backend wiring for integration mode;
-- optional local Nginx configuration only if proxy behavior needs testing.
+Implemented:
 
-Non-goals:
+- projects, translations, technologies, ordered associations, and structured detail sections;
+- `DRAFT`, `PUBLISHED`, and `ARCHIVED` statuses;
+- independent `CARD_ONLY` and `DETAIL` presentation modes;
+- Flyway V1-V8 including constraints and real content seeds;
+- Hibernate `ddl-auto=validate`;
+- isolated PostgreSQL migration/repository tests.
 
-- production Docker hardening;
-- CI publishing;
-- VPS deployment.
+## M5 — Routing, I18n, and Request-Time SSR
 
-Validation criteria:
+Status: complete, with the route architecture subsequently consolidated by the single-page branch.
 
-- full stack starts locally through Compose;
-- backend reaches PostgreSQL;
-- `/api` routing works in integration mode.
+Implemented now:
 
-## 4. PostgreSQL, Flyway, and Project Domain
+- canonical `/fr` and `/en` request-time SSR documents;
+- root HTTP redirect using cookie, `Accept-Language`, then English;
+- runtime frontend translations and localized backend project content;
+- localized document and project metadata;
+- localized 404 responses with SSR status;
+- compatibility redirects from the former section routes.
 
-Objective: implement the structured project and technology domain.
+## M6 — Application Shell and Navigation
 
-Dependencies: milestone 3.
+Status: complete and evolved after M10.
 
-Deliverables:
+Implemented now:
 
-- Flyway migrations for project tables;
-- JPA entities and repositories;
-- `DRAFT`, `PUBLISHED`, `ARCHIVED` status handling;
-- optional `detailedDescription` compatibility field;
-- seed or fixture strategy for development data;
-- validation constraints.
+- reusable localized shell, skip link, header, main, and footer;
+- conventional header and mobile-menu section links;
+- locale preference switching;
+- one persistent lighthouse theme control;
+- compact floating sonar with shared semantic fragment links;
+- accessible current-location and disclosure states.
 
-Non-goals:
+## M7 — Project API and Project Pages
 
-- generic CMS;
-- full project media domain;
-- admin editing UI;
-- GitHub integration.
+Status: complete.
 
-Validation criteria:
+Implemented:
 
-- migrations apply from an empty database;
-- schema validates on backend startup;
-- public queries exclude `DRAFT`;
-- `PUBLISHED` and `ARCHIVED` project queries work;
-- repository tests cover core queries.
+- localized public list, status-filtered list, featured, and detail endpoints;
+- exclusion of drafts and rejection of card-only detail requests;
+- route resolvers and SSR transfer-cache-compatible data loading;
+- featured/published/archived list presentation inside the main document;
+- dedicated detail pages with optional media, ordered technologies, localized generic sections, and deprecated body fallback;
+- empty, API error, and localized detail-not-found states.
 
-## 5. Routing, I18n, and Request-Time SSR
+## M8 — Education, Experience, and Content
 
-Objective: establish localized route handling and SEO-capable rendering.
+Status: complete for content currently supplied and published.
 
-Dependencies: milestones 2 and 4.
+Implemented:
 
-Deliverables:
+- bilingual identity, biography, backend/full-stack positioning, and porthole portrait;
+- skills with importance hierarchy and languages with text-based levels;
+- five Education and five Professional Experience entries;
+- approved local organization/school logo assets and scoped official links;
+- six real project records, including two `DETAIL` and four `CARD_ONLY` entries.
 
-- `/fr` and `/en` route trees;
-- localized static route segments;
-- root redirect using stored preference, `Accept-Language`, then English;
-- runtime UI translations;
-- metadata service;
-- request-time SSR baseline;
-- localized 404 handling.
+Global social links, downloadable CV, and public contact method remain absent because approved values/files have not been supplied. Their absence does not make the implemented content milestone incomplete.
 
-Non-goals:
+## M9 — Maritime Visual System
 
-- polished page designs;
-- advanced animations.
+Status: complete.
 
-Validation criteria:
+Implemented:
 
-- each public route renders server-side HTML;
-- dynamic project detail pages render without frontend rebuild after backend data changes;
-- locale switching preserves equivalent route where possible;
-- localized metadata is visible in rendered HTML.
+- navy/off-white/cyan/signal-red token system and related light/dark themes;
+- selective daisyUI primitives plus custom maritime CSS/SVG;
+- porthole portrait;
+- route/waypoint Education and Experience timelines;
+- project/skill/contact surface hierarchy;
+- responsive layouts and visible focus treatment.
 
-## 6. Application Shell and Navigation
+Mockup, Aura, and Hover 3D treatments were considered but are not implemented because current content/media does not justify them.
 
-Objective: build the accessible portfolio shell and primary navigation concept.
+## M10 — Motion
 
-Dependencies: milestone 5.
+Status: complete.
 
-Deliverables:
+Implemented:
 
-- header, footer, skip link;
-- semantic navigation links;
-- sonar/compass/rose des vents visual navigation enhancement;
-- locale switcher;
-- lighthouse light/dark theme control;
-- responsive mobile navigation.
+- one dark-mode rotating lighthouse beam using CSS;
+- one-shot sonar marker feedback;
+- compact-sonar expansion and header handoff transitions;
+- global and component-specific reduced-motion behavior;
+- browser-guarded measurement/observer logic.
 
-Non-goals:
+GSAP was not added. Decorative Home waves, bathymetric drift, parallax, and particles were not retained.
 
-- complex motion choreography;
-- final maritime visual polish.
+## M11 — GitHub and Contact Integrations
 
-Validation criteria:
+Status: not started.
 
-- keyboard navigation works;
-- active route state is exposed;
-- sonar/compass navigation enhances real links;
-- theme preference persists without layout shift.
+Potential scope, only after content/product approval:
 
-## 7. Project API and Project Pages
+- server-side GitHub activity or repository enrichment with caching;
+- real contact endpoint, validation, spam/rate limiting, privacy handling, and email delivery;
+- graceful external-service failure behavior.
 
-Objective: expose project data and render project listing/detail pages.
+Project-specific GitHub links stored in seeded data are static content and do not constitute a GitHub API integration.
 
-Dependencies: milestones 4, 5, and 6.
+## M12 — SEO, Accessibility, and Performance Hardening
 
-Deliverables:
+Status: in progress.
 
-- public project list API;
-- published project filter;
-- archived project filter;
-- featured published projects API;
-- project detail API;
-- Angular project index;
-- Angular project detail page;
-- loading, empty, error, and 404 states.
+Already implemented:
 
-Non-goals:
+- request-time localized SSR;
+- localized metadata, canonical and `hreflang` links, OpenGraph metadata;
+- localized SSR 404/noindex behavior;
+- semantic navigation/content, keyboard states, focus handling, and reduced motion;
+- unit, SSR smoke, and responsive headless-browser checks.
 
-- generic CMS or page-builder;
-- authenticated editing;
-- full media gallery;
-- live GitHub metadata.
+Remaining:
 
-Validation criteria:
+- `sitemap.xml`;
+- `robots.txt` file;
+- approved JSON-LD structured data;
+- approved site-wide OpenGraph imagery;
+- formal keyboard, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits;
+- agreed performance/accessibility thresholds and remediation.
 
-- `DRAFT` projects are not public;
-- `PUBLISHED` projects render in both locales when translations exist;
-- `ARCHIVED` projects render as public archive content;
-- project detail pages work with ordered localized sections and optional deprecated detailed-description fallback;
-- project detail pages have localized metadata and canonical URLs.
+## M13 — Production Docker Images
 
-## 8. Education, Experience, and Content
+Status: complete as an image baseline; production publication/operation remains later work.
 
-Objective: add approved owner content for non-project sections.
+Implemented:
 
-Dependencies: milestone 6 and supplied content.
+- separate multi-stage frontend SSR and backend Dockerfiles;
+- versioned Node 24.19.0 and Java 21 runtime bases;
+- lockfile/wrapper-driven builds;
+- minimal runtime contents;
+- non-root runtime users;
+- runtime environment configuration;
+- `.dockerignore` coverage;
+- Compose health checks.
 
-Deliverables:
+Remaining outside M13: immutable registry publishing, production deployment configuration, and deployed verification.
 
-- Baptiste Wetterwald identity content;
-- Backend / Full-stack positioning;
-- ENSISA, UQAC semester, IUT Robert Schuman, INSA Lyon, and Lycée Louis Armand education content;
-- confirmed experience entries;
-- language facts when owner-supplied;
-- primary and enterprise skill groups;
-- skill importance model for primary, professional/complementary, secondary, and exploratory/historical knowledge;
-- conservative AI-assisted software engineering content;
-- content strategy documentation for future skill/project enrichment;
-- GitHub/LinkedIn links when actual URLs are approved;
-- downloadable CV link when approved files exist;
-- content inventory updated from TODO to confirmed where source is supplied.
+## M14 — CI
 
-Non-goals:
+Status: not started.
 
-- fabricated placeholder personal details;
-- invented responsibilities, metrics, or outcomes;
-- contact form backend.
+Required:
 
-Validation criteria:
+- GitHub Actions frontend install/format/lint/test/build validation;
+- backend test/compile/package validation with PostgreSQL;
+- image builds and GHCR publishing only after validation;
+- immutable Git-SHA tags and secure credentials.
 
-- all public personal content is owner-approved;
-- French and English variants are complete;
-- Plansee internship is not described as ABAP work;
-- PostgreSQL is not described as previous professional experience;
-- no TODO copy appears on production pages.
+## M15 — Automated VPS Deployment
 
-## 9. Maritime Visual System
+Status: not started.
 
-Objective: apply the design foundations and restrained maritime language.
+Required:
 
-Dependencies: milestones 6 through 8.
+- host Nginx and HTTPS for `bwetterwald.fr`;
+- production Compose/environment configuration;
+- authenticated GHCR pulls;
+- controlled frontend/backend update;
+- startup migration coordination;
+- public health verification and deployment traceability;
+- rollback to prior compatible image versions.
 
-Deliverables:
+## M16 — Production Verification and Hardening
 
-- CSS design tokens;
-- related but non-inverted light/dark themes;
-- typography and spacing system;
-- navy/off-white/blue/cyan/signal-red palette;
-- DaisyUI-based reusable UI primitive refinement where it fits the portfolio design system;
-- porthole portrait treatment;
-- nautical route/waypoint timeline styling;
-- bathymetric or nautical chart accents where useful.
+Status: not started.
 
-Non-goals:
+Required:
 
-- complex animation timelines;
-- brass/gold primary brand system;
-- cyberpunk/HUD/submarine styling.
-
-Validation criteria:
-
-- design matches the documented 70/20/10 balance;
-- colors meet contrast requirements;
-- components remain readable on mobile and desktop;
-- maritime visuals support content rather than overpowering it.
-
-Milestone 9 implementation status:
-
-- DaisyUI custom light/dark theme variables now align with the portfolio navy/off-white/red/cyan tokens.
-- Header, footer, locale switcher, project cards, project detail actions, skills, Contact, and timelines use daisyUI primitives where appropriate.
-- Sonar/compass navigation and lighthouse visuals remain custom identity components backed by semantic links/buttons. Sonar geometry uses consistent concentric rings and symmetrical axes; the M9 lighthouse beam experiment is removed.
-- Home no longer renders redundant route-card navigation. The hero renders the approved portrait in the porthole frame using the original asset and CSS object cropping.
-- Education and Experience use daisyUI timeline geometry with a central route, waypoints on the route, desktop start/end alternation, compact mobile behavior, and custom maritime route styling.
-- Contact has a designed non-functional visual foundation without publishing fake contact methods or forms.
-- Mockups, hover-3d, floating sonar, lighthouse beam work, and advanced motion remain deferred.
-
-## 10. Motion
-
-Objective: add selected signature motion without harming accessibility.
-
-Dependencies: milestone 9.
-
-Deliverables:
-
-- reduced-motion baseline;
-- optional lighthouse theme transition;
-- restrained sonar ping interaction feedback;
-- optional wave or bathymetric motion where appropriate;
-- optional dark-mode lighthouse beam.
-
-Non-goals:
-
-- motion-dependent navigation;
-- fake telemetry;
-- GSAP unless justified by implementation complexity.
-
-Validation criteria:
-
-- reduced-motion mode is calm and complete;
-- animations do not block content;
-- performance remains acceptable on mobile.
-
-Milestone 10 implementation status:
-
-- Reduced-motion handling is centralized through global CSS safeguards plus targeted component rules that stop the lighthouse sweep and sonar ripple while preserving static state.
-- The lighthouse theme control remains an accessible button. Dark mode now lights the lantern, fades in a measured viewport-scale decorative beam, and keeps light mode unlit with no viewport beam.
-- The beam is a CSS gradient wedge rendered by a dedicated Angular component. Browser-only `getBoundingClientRect`, `ResizeObserver`, and resize handling are guarded from SSR and only used to derive CSS custom properties from the actual lantern element.
-- Sonar/compass navigation still uses real localized router links and exact active route state. Hover and keyboard focus add one restrained marker ripple; reduced motion switches this to a static emphasis.
-- No ambient wave, bathymetric drift, parallax, particles, or scroll-linked decorative motion was retained for Milestone 10.
-- GSAP was not added because CSS transforms, opacity, SVG, and native browser observers covered the required motion with lower dependency and maintenance cost.
-
-## 11. GitHub and Contact Integrations
-
-Objective: add optional dynamic integrations.
-
-Dependencies: milestones 7 and 8.
-
-Deliverables:
-
-- server-side GitHub integration if approved;
-- optional GitHub activity on Home if approved;
-- caching for external API responses;
-- contact form backend if approved;
-- spam/rate-limit strategy;
-- email delivery configuration if approved.
-
-Non-goals:
-
-- exposing external API tokens to frontend;
-- user accounts;
-- admin dashboard.
-
-Validation criteria:
-
-- secrets remain server-side;
-- external API failures degrade gracefully;
-- contact validation and error handling work.
-
-## 12. SEO, Accessibility, and Performance Hardening
-
-Objective: verify production-quality public behavior.
-
-Dependencies: milestones 5 through 11.
-
-Deliverables:
-
-- sitemap.xml;
-- robots.txt;
-- OpenGraph images;
-- structured data with approved personal details only;
-- accessibility fixes;
-- performance optimization pass.
-
-Non-goals:
-
-- new major features.
-
-Validation criteria:
-
-- localized `hreflang` and canonicals are correct for `bwetterwald.fr`;
-- SSR HTML contains meaningful content;
-- public sitemap excludes `DRAFT` projects and includes eligible `PUBLISHED`/`ARCHIVED` projects;
-- keyboard and screen reader smoke tests pass;
-- Lighthouse or equivalent checks meet agreed thresholds.
-
-## 13. Production Docker Images
-
-Objective: create hardened production images.
-
-Dependencies: milestones 7 and 12.
-
-Deliverables:
-
-- frontend production Dockerfile for Angular SSR runtime;
-- backend production Dockerfile for Spring Boot;
-- `.dockerignore` files;
-- runtime configuration documentation;
-- image health behavior.
-
-Non-goals:
-
-- automated deployment;
-- Kubernetes.
-
-Validation criteria:
-
-- images build reproducibly;
-- runtime images exclude development dependencies;
-- services run as non-root where practical;
-- secrets are not embedded.
-
-## 14. CI
-
-Objective: validate and build the application in GitHub Actions.
-
-Dependencies: milestone 13.
-
-Deliverables:
-
-- frontend validation job;
-- backend validation job;
-- test jobs;
-- production build jobs;
-- Docker image build and publish jobs;
-- immutable GHCR image tagging strategy.
-
-Non-goals:
-
-- production workflow before runnable projects exist.
-
-Validation criteria:
-
-- failed checks block image publishing;
-- image tags trace to Git commits;
-- secrets are managed through GitHub Actions secrets.
-
-## 15. Automated VPS Deployment
-
-Objective: deploy approved image versions to the VPS automatically.
-
-Dependencies: milestone 14 and VPS readiness.
-
-Deliverables:
-
-- host Nginx routing/HTTPS configuration for `bwetterwald.fr`;
-- deployment script or Compose update strategy;
-- SSH-based GitHub Actions deployment;
-- GHCR authentication on VPS;
-- Spring Boot startup migration coordination;
-- health verification.
-
-Non-goals:
-
-- multi-server orchestration;
-- Kubernetes;
-- blue/green infrastructure unless justified.
-
-Validation criteria:
-
-- push/merge to `main` deploys selected image tags;
-- Nginx routes `/` to frontend and `/api/*` to backend;
-- failed health checks stop or roll back deployment;
-- deployment record identifies image tags and commit SHA.
-
-## 16. Production Verification and Hardening
-
-Objective: prove the production system is maintainable and recoverable.
-
-Dependencies: milestone 15.
-
-Deliverables:
-
-- HTTPS verification;
-- backup plan;
-- rollback procedure;
-- logging review;
-- basic monitoring/health checks;
-- security review of secrets and exposed ports.
-
-Non-goals:
-
-- enterprise observability stack;
-- Kubernetes;
-- complex release train process.
-
-Validation criteria:
-
-- previous image versions can be redeployed;
-- database backup and restore procedure is documented/tested;
-- only intended ports are public;
-- production health can be checked after deployment.
+- HTTPS/security-header and exposed-port review;
+- PostgreSQL backup schedule and tested restore;
+- tested application rollback with migration compatibility;
+- logging and basic monitoring;
+- secrets/permissions review;
+- documented operational recovery procedure.

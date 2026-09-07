@@ -17,7 +17,7 @@ The first-glance hierarchy should read:
 Software Engineer -> Java/Spring + C#/.NET + TypeScript/Node.js -> backend/full-stack -> real industrial/professional experience -> Angular as the main frontend/full-stack framework.
 ```
 
-Deeper pages and lower-importance skill groups may show SAP, API/integration work, OAuth 2.0, Power Platform, databases, AI-assisted engineering, international experience, and older academic or exploratory technologies.
+Deeper sections and project-detail pages may show SAP, API/integration work, OAuth 2.0, Power Platform, databases, AI-assisted engineering, international experience, and older academic or exploratory technologies.
 
 Old, niche, academic, or self-taught technologies can remain discoverable, but they must not visually compete with the current backend/full-stack direction.
 
@@ -43,7 +43,9 @@ Backend/PostgreSQL-owned:
 - project translations;
 - project technologies;
 - project publication/archive/featured state;
-- project-owned media/data.
+- project presentation mode;
+- project-owned media/links;
+- ordered localized detail sections.
 
 Do not migrate CV/profile content into PostgreSQL or introduce Education, Experience, Skill, Language, biography, or generic CMS tables unless future requirements materially change. Valid triggers would include runtime editing/admin, many dynamic clients, substantially more locales, or an external content-management workflow.
 
@@ -53,12 +55,12 @@ Shared locale-neutral frontend facts should include IDs, dates, ordering, organi
 
 Skills use importance levels, not percentages, star ratings, fake proficiency scores, gauges, or vague expert/intermediate/beginner labels.
 
-| Level | Meaning | Current examples |
-| --- | --- | --- |
-| Primary | Central to the current professional positioning and strongest visual emphasis. | Java, Spring, Spring Boot, C#, .NET, TypeScript, Node.js, Express, Angular, REST, HTTP, OAuth 2.0, Sockets. |
-| Professional / complementary | Real professional or enterprise context, but subordinate to the main positioning. | SQL, PostgreSQL as portfolio experience, MySQL, SQLite, Oracle, PL/SQL, SAP S/4HANA, ABAP, Power Apps, Power Automate, Dataverse, Microsoft Power Platform, ASP.NET Blazor, VB.NET. |
-| Secondary | Useful supporting or broader software experience that should remain visible but quieter. | C, C++, Python, Django, PHP, Laravel, Android / Java, Kotlin, JavaFX, Swing, Unreal Engine, Blueprint, MATLAB, Git, Docker. |
-| Exploratory / historical | Older, niche, academic, self-taught, or lightly explored knowledge. | Arduino, LabVIEW, Flowcode, LaTeX, UML, SolidWorks, Solid Edge, Perforce, Apache Subversion, Windows, Linux. |
+| Level                        | Meaning                                                                                  | Current examples                                                                                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary                      | Central to the current professional positioning and strongest visual emphasis.           | Java, Spring, Spring Boot, C#, .NET, TypeScript, Node.js, Express, Angular, REST, HTTP, OAuth 2.0, Sockets.                                                                         |
+| Professional / complementary | Real professional or enterprise context, but subordinate to the main positioning.        | SQL, PostgreSQL as portfolio experience, MySQL, SQLite, Oracle, PL/SQL, SAP S/4HANA, ABAP, Power Apps, Power Automate, Dataverse, Microsoft Power Platform, ASP.NET Blazor, VB.NET. |
+| Secondary                    | Useful supporting or broader software experience that should remain visible but quieter. | C, C++, Python, Django, PHP, Laravel, Android / Java, Kotlin, JavaFX, Swing, Unreal Engine, Blueprint, MATLAB.                                                                      |
+| Exploratory / historical     | Older, niche, academic, self-taught, or lightly explored knowledge.                      | Arduino, LabVIEW, Flowcode, LaTeX, UML, SolidWorks, Solid Edge, Git, Perforce, Apache Subversion, Docker, Windows, Linux.                                                           |
 
 PostgreSQL should be framed as portfolio/personal project experience unless professional usage is later supplied. Microsoft Office and the old PIX score/code are intentionally not part of the public skill positioning.
 
@@ -97,17 +99,17 @@ Project publication status and presentation mode are separate editorial decision
 
 `DETAIL` projects use ordered localized content sections as the canonical case-study model. Section headings and body copy are project content, not backend enums, so each project can use the narrative structure that fits its real evidence. The legacy `detailedDescription` field is kept only as a staged fallback for older records and should not be authored for new rich detail pages.
 
-Future project presentation should support at least three prominence levels:
+Current project presentation supports three prominence levels from existing fields:
 
-| Level | Intended use |
-| --- | --- |
-| Featured / flagship | Large, polished, current projects aligned with the target backend/full-stack profile. |
-| Significant | Meaningful technical projects worth explaining normally. |
+| Level                | Intended use                                                                              |
+| -------------------- | ----------------------------------------------------------------------------------------- |
+| Featured / flagship  | Large, polished, current projects aligned with the target backend/full-stack profile.     |
+| Significant          | Meaningful technical projects worth explaining normally.                                  |
 | Archive / historical | Small academic projects, old experiments, niche demonstrations, and historical exercises. |
 
 The existing backend `featured` flag, `PUBLISHED` / `ARCHIVED` statuses, and `CARD_ONLY` / `DETAIL` presentation modes are sufficient for now. Do not add a separate project-importance persistence field until real project content proves that this model is insufficient.
 
-Candidate future inventory:
+Current inventory and future candidates:
 
 - Featured / flagship: WakomMUTE when implementation facts are ready.
 - Seeded published projects in public display order: Portfolio Spring Angular (`DETAIL`, display order `10`); Blaze4 (`DETAIL`, `20`); Frequensisa (`CARD_ONLY`, `30`); SummerCamp (`CARD_ONLY`, `40`); Bot Discord IR (`CARD_ONLY`, `50`); BeamNG.drive x BeepBeep 3 (`CARD_ONLY`, `60`).

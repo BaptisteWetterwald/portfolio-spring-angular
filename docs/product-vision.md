@@ -1,25 +1,10 @@
 # Product Vision
 
-This document is the primary product source of truth for the portfolio.
+This document defines the durable product direction and distinguishes it from deployment work that is not yet complete.
 
-## Product
+## Product and Positioning
 
 The product is a bilingual personal portfolio for Baptiste Wetterwald, a graduated Engineer in Computer Science and Networks.
-
-The portfolio should present Baptiste as:
-
-- Software Engineer;
-- Backend / Full-stack oriented;
-- comfortable with professional backend, enterprise, and web application work.
-
-The portfolio must not primarily position Baptiste as:
-
-- frontend-only;
-- UI/UX;
-- SAP/ABAP specialist;
-- low-code-only developer.
-
-## Professional Positioning
 
 Primary positioning:
 
@@ -27,176 +12,107 @@ Primary positioning:
 Software Engineer - Backend / Full-stack
 ```
 
-Primary technologies to emphasize:
+Technologies emphasized in the current content are Java/Spring, C#/.NET, TypeScript/Node.js, and Angular. Microsoft Power Platform, SAP/ABAP, database, integration, industrial, AI-assisted, and broader academic experience remain supporting evidence rather than the primary role identity.
 
-- Java / Spring;
-- C# / .NET;
-- TypeScript / Node.js;
-- Angular.
+The portfolio must not imply unsupported frontend-only, UI/UX, SAP-specialist, low-code-specialist, AI/ML, or LLM-specialist positioning. PostgreSQL is part of this portfolio implementation and is not presented as prior professional PostgreSQL experience.
 
-Complementary Microsoft and enterprise application experience is relevant:
+## Audience and Experience Goal
 
-- Microsoft Power Platform;
-- Power Apps;
-- Power Automate;
-- Dataverse;
-- Microsoft 365;
-- Custom Connectors where genuinely used;
-- PCF where genuinely used;
-- .NET integrations.
+The portfolio serves recruiters, hiring managers, technical leads, and professional contacts who need a concise, technically credible view of experience, skills, and projects.
 
-PostgreSQL is part of this portfolio project architecture. It must not be described as previous professional PostgreSQL experience unless such experience is later confirmed.
+The intended first impression is modern, precise, personal, and professional. The maritime identity should aid recognition and orientation without turning the interface into a simulated control system.
 
-## Audience
+## Current Product Shape
 
-The portfolio should serve:
+The current candidate architecture on `experiment/single-page-navigation` uses two main localized documents:
 
-- recruiters and hiring managers evaluating software engineering fit;
-- technical leads looking for backend/full-stack evidence;
-- professional contacts who need a concise view of experience, skills, and projects.
+- `/fr` for French;
+- `/en` for English.
 
-The first impression should be competent, modern, precise, and personal without becoming theatrical.
+Each document composes Home, Education, Experience, Projects, and Contact in that order. Stable fragments make every major section directly linkable. Project case studies remain separate localized pages when a project is configured as `DETAIL`.
+
+This branch state is implemented and validated locally but is not yet the architecture deployed from `main`.
+
+## Current Content
+
+The main document contains:
+
+- an identity/positioning hero and porthole portrait;
+- introduction and primary technology directions;
+- skills grouped by importance;
+- languages;
+- education;
+- professional experience;
+- API-backed projects;
+- a conservative Contact section that explicitly does not invent a contact method.
+
+Real GitHub URLs exist on seeded project records where supported by source material. A global GitHub profile link, LinkedIn link, downloadable CV, public contact method, contact form, and GitHub activity feed are not implemented.
 
 ## Visual Identity
 
-The visual identity is:
+The implemented visual direction is a restrained modern software-engineering portfolio with French Navy/maritime cues:
 
-```text
-modern software engineering portfolio x French naval / maritime inspiration
-```
+- deep navy and off-white themes;
+- cyan technical/navigation accent and restrained signal red;
+- a porthole portrait;
+- route/waypoint Education and Experience timelines;
+- compact sonar navigation;
+- one persistent lighthouse theme control and dark-mode beam;
+- subtle sonar interaction feedback;
+- anchor icons for section permalinks;
+- restrained daisyUI dividers between major sections.
 
-Approximate balance:
+The lighthouse beam, navigation handoff, and sonar expansion use native browser APIs and CSS. Reduced motion is supported. Decorative Home SVG waves were evaluated and removed; they are not part of the current design.
 
-- 70% clean modern interface;
-- 20% maritime visual language;
-- 10% signature effects.
+Avoid cyberpunk, videogame HUD, fake telemetry, submarine-control styling, military roleplay, excessive neon, or motion that competes with content.
 
-Important maritime concepts:
+## Content Ownership
 
-- sonar / compass / rose des vents as the primary visual navigation concept;
-- nautical route / waypoints for Education and Experience timelines;
-- porthole for portrait treatment;
-- lighthouse for light/dark theme toggle;
-- lighthouse beam as an optional dark-mode ambient effect;
-- bathymetric / nautical chart graphics as subtle backgrounds;
-- waves as possible transitions;
-- sonar ping as restrained interaction feedback.
+The product deliberately uses a hybrid content model.
 
-The maritime concept should support orientation and identity. It must not become a fake control system.
+Frontend-static and version-controlled:
 
-Avoid:
+- identity and biography;
+- Home copy;
+- Education and Professional Experience;
+- Skills and Languages;
+- portrait, organization/school logos, and official organization/school links.
 
-- submarine operating system styling;
-- cyberpunk;
-- videogame HUD;
-- fake telemetry;
-- fake military roleplay;
-- excessive neon.
+Backend/PostgreSQL-owned:
 
-## Home Page Product Requirements
+- Projects and translations;
+- publication and presentation state;
+- ordered technologies;
+- optional project media references and external project links;
+- ordered localized detail sections.
 
-The home page must explicitly account for:
-
-- hero with identity and professional positioning;
-- portrait with future porthole treatment;
-- GitHub and LinkedIn links when URLs are approved;
-- sonar/compass primary visual navigation enhancing real semantic links;
-- short About content;
-- core technologies;
-- featured projects;
-- optional GitHub activity;
-- contact call to action.
-
-The sonar/compass navigation is a major product concept, not only a later animation. It must enhance accessible navigation links rather than replace them.
-
-## Primary Sections
-
-The portfolio must include:
-
-- Home;
-- Education;
-- Experience;
-- Projects;
-- Project details;
-- Contact.
-
-French and English must be supported from the beginning with localized routes, content, and metadata.
-
-## Content Principles
-
-- Use confirmed personal information only.
-- Do not invent responsibilities, metrics, project outcomes, links, or media.
-- English is the primary authoring language for future portfolio source copy.
-- French content should be written as a natural localized adaptation, not a literal sentence-by-sentence translation.
-- Distinguish primary software engineering skills from complementary enterprise/Microsoft experience.
-- Treat SAP-related experience accurately: the Plansee internship occurred inside an SAP-related team but did not involve ABAP development.
+Do not add a generic CMS or move profile/CV content into PostgreSQL without a concrete editing or multi-client requirement.
 
 ## Project Domain
 
-Projects are backend-managed Spring Boot / PostgreSQL entities.
+Publication status and presentation mode are independent:
 
-Project statuses:
+| Concept            | Values                           | Public behavior                                                                             |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------------------------------- |
+| Publication status | `DRAFT`, `PUBLISHED`, `ARCHIVED` | Drafts are private; published and archived projects may appear publicly.                    |
+| Presentation mode  | `CARD_ONLY`, `DETAIL`            | Card-only projects stop at the list card; detail projects have localized case-study routes. |
 
-| Status | Meaning |
-| --- | --- |
-| `DRAFT` | Private, not publicly visible. |
-| `PUBLISHED` | Publicly visible and eligible to be featured. |
-| `ARCHIVED` | Publicly visible but belongs to an older or secondary archive. |
+Rich `DETAIL` content uses generic ordered localized sections rather than a hard-coded case-study schema. The deprecated long-description field remains a compatibility fallback.
 
-Project presentation modes:
+## Technical Requirements
 
-| Mode | Meaning |
-| --- | --- |
-| `CARD_ONLY` | Public project represented completely by its Projects card, with no dedicated detail page. |
-| `DETAIL` | Public project with a dedicated localized detail page. |
+The implemented application consists of:
 
-Publication status and presentation mode are independent. Featured or significant projects may have richer detail pages when their mode is `DETAIL`; smaller public projects may remain useful as `CARD_ONLY` entries with only a title, short description, technologies, and optional external links.
+- an Angular request-time SSR frontend with runtime FR/EN localization;
+- a Spring Boot public project API;
+- PostgreSQL persistence managed through Flyway;
+- separate frontend/backend container images;
+- a local Docker Compose stack.
 
-Rich `DETAIL` pages should use ordered localized case-study sections. Section titles and copy belong to project content rather than hard-coded backend categories, so each project can present the narrative supported by its real implementation evidence.
+Browser API calls remain same-origin under `/api`. SSR can use `BACKEND_INTERNAL_ORIGIN` to reach the backend over an internal container network. Dynamic project pages become crawlable without rebuilding the frontend.
 
-Do not introduce a generic CMS for V1.
+## Production Direction
 
-## Technical Product Requirements
+The intended production origin is `https://bwetterwald.fr`, with `/` served by the frontend and `/api/*` by the backend through a reverse proxy.
 
-The intended application consists of:
-
-- Angular frontend;
-- Spring Boot backend;
-- PostgreSQL database.
-
-Approved frontend direction:
-
-- canonical `/fr/...` and `/en/...` routes;
-- localized static route segments;
-- shared project slugs across locales in V1;
-- runtime UI translations in Angular;
-- localized project content from the backend;
-- Angular request-time SSR as the main runtime model.
-
-Dynamic project pages must not require a frontend rebuild simply to become crawlable after project data changes.
-
-## Deployment Product Requirements
-
-The production domain is assumed to be:
-
-```text
-bwetterwald.fr
-```
-
-Use one public origin:
-
-```text
-/      -> Angular frontend
-/api/* -> Spring Boot backend
-```
-
-Production deployment target:
-
-- Linux VPS;
-- Nginx on the VPS host as reverse proxy / HTTPS layer unless a concrete blocker appears;
-- Docker Compose managing frontend, backend, and PostgreSQL;
-- separate production images for frontend and backend;
-- persistent PostgreSQL storage;
-- GitHub Actions eventually validating, testing, building, publishing immutable GHCR images, deploying on `main`, and verifying health.
-
-Do not design Kubernetes, microservices, or multi-server infrastructure without a new explicit requirement.
+The planned target is a single Linux VPS with host Nginx/HTTPS, Docker Compose, persistent PostgreSQL storage, immutable GHCR images, GitHub Actions validation/deployment, health verification, backups, and rollback. Those production capabilities are not currently implemented; only the application images and local Compose integration exist.
