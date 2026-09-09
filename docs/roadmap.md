@@ -16,14 +16,14 @@ This roadmap records what the repository currently implements and what remains. 
 | M8 Real portfolio content                   | Complete for supplied content      | Profile, skills, languages, education, experience, six seeded projects; unprovided contact/CV/social content remains omitted |
 | M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
 | M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
-| M11 GitHub/contact integrations             | Not started                        | No global GitHub feed/client, contact backend, email, spam, or rate-limit implementation                                     |
+| M11 GitHub/contact integrations             | In progress                        | Approved GitHub REST activity and token-gated GraphQL calendar exist; Contact remains blocked on approved values             |
 | M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, 404s, keyboard/reduced-motion coverage exist; sitemap, robots file, structured data, formal audits remain     |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
 | M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
 | M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
 | M16 Production hardening                    | Not started                        | No deployed backup/restore, rollback automation, monitoring, or production security verification                             |
 
-The single-page work after M10 is implemented on `experiment/single-page-navigation` as the candidate branch state. It should be described as current on this branch, but not as deployed or already accepted on `main`.
+The single-page architecture is the approved `main` baseline. It is implemented and validated locally, but it must not be described as production-deployed.
 
 ## Post-M10 Candidate Work
 
@@ -177,15 +177,27 @@ GSAP was not added. Decorative Home waves, bathymetric drift, parallax, and part
 
 ## M11 — GitHub and Contact Integrations
 
-Status: not started.
+Status: in progress.
 
-Potential scope, only after content/product approval:
+Implemented:
 
-- server-side GitHub activity or repository enrichment with caching;
-- real contact endpoint, validation, spam/rate limiting, privacy handling, and email delivery;
-- graceful external-service failure behavior.
+- fixed-target server-side GitHub REST client for the configured portfolio identity;
+- approved `BaptisteWetterwald` global identity enabled by default;
+- optional backend-only bearer token, anonymous public-repository operation, and authenticated official GraphQL contribution-calendar query;
+- portfolio-owned `GET /api/v1/github/activity` response contract;
+- three-item mapping of recently pushed, owner-visible public repositories while excluding forks, archived repositories, disabled repositories, and malformed items;
+- compact contribution contract containing total contributions and date/count values for approximately one year;
+- thread-safe fixed-cardinality 30-minute in-process component caches, two-minute error retry backoff, partial stale-on-refresh-error fallback, and controlled unavailable state;
+- request-time Angular resolver with HTTP transfer caching and a compact localized block after Skills/Languages inside Home;
+- native SSR-safe Angular contribution grid with maritime cyan intensity levels, month/weekday context, accessible date/count labels, and calendar-only horizontal scrolling;
+- quiet component-level omission when REST or GraphQL data is unavailable, with no page-level failure and no new primary section or navigation waypoint.
 
-Project-specific GitHub links stored in seeded data are static content and do not constitute a GitHub API integration.
+Not yet implemented:
+
+- production provisioning of the optional backend-only token needed to populate the GraphQL contribution calendar; repositories work anonymously without it;
+- Contact form/API, validation, spam/rate limiting, privacy copy, or delivery, because no recipient/sender identity, delivery mechanism, public contact policy, or provider configuration has been approved.
+
+Project-specific GitHub links stored in seeded data remain static content and are separate from this API integration.
 
 ## M12 — SEO, Accessibility, and Performance Hardening
 

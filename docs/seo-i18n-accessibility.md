@@ -41,7 +41,7 @@ FR/EN switching preserves a recognized current section. On project details it pr
 
 ## SSR and Hydration
 
-All public routes use request-time SSR. The localized root resolver loads project summaries before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent.
+All public routes use request-time SSR. The localized root resolvers load project summaries and controlled GitHub activity before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent. Angular HTTP transfer caching prevents an immediate duplicate GitHub request after hydration.
 
 Angular hydration uses event replay. Browser-only fragment scrolling, scroll-spy, header visibility, lighthouse measurement, media-query handling, animation frames, and mobile drag geometry are platform-guarded and initialized after render.
 
@@ -87,6 +87,7 @@ The composed document implements:
 - major sections with stable IDs and programmatic-focus targets;
 - ordered semantic Education/Experience timelines with real `<time>` elements;
 - project cards as articles and actions as real links;
+- the GitHub evidence block as an internal Home subsection with a localized date/count contribution grid, repository articles, and safe external-link semantics;
 - detail content as one article with section headings;
 - buttons only for actions and links for navigation.
 
@@ -104,6 +105,7 @@ Implemented behavior includes:
 - keyboard focus retained inside outgoing header/sonar controls during the visibility handoff;
 - keyboard section activation moving focus to the destination section;
 - passive scroll-spy never moving focus.
+- one focusable horizontal contribution-calendar region with non-focusable, individually labelled date/count cells instead of hundreds of tab stops.
 
 The header-to-sonar handoff does not force focus to a new control. Hidden duplicate navigation is inert and `aria-hidden`; a focused outgoing control remains available until focus leaves.
 

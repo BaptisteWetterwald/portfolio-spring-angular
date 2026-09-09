@@ -6,6 +6,7 @@ The current single-page candidate architecture is:
 
 - `/fr` and `/en` are the localized portfolio documents.
 - Home, Education, Experience, Projects, and Contact are sections with stable IDs `home`, `education`, `experience`, `projects`, and `contact`.
+- The GitHub activity block is supporting content inside Home, after the existing skills/languages content. Its optional contribution calendar precedes the repository cards. It is not a sixth section or navigation target.
 - Former localized section paths redirect to the corresponding fragment.
 - Project `DETAIL` routes remain `/fr/projets/:slug` and `/en/projects/:slug`.
 - `CARD_ONLY` projects never receive a public detail affordance or route response.
@@ -16,7 +17,7 @@ Do not recreate the former five-primary-page route architecture.
 
 Frontend-static, typed, version-controlled content under `frontend/src/app/core/content` owns identity, biography, Education, Experience, Skills, Languages, profile/portrait metadata, and organization/school references.
 
-The Spring Boot/PostgreSQL project domain owns projects, translations, publication status, presentation mode, technologies, media references, and ordered localized detail sections.
+The Spring Boot/PostgreSQL project domain owns projects, translations, publication status, presentation mode, technologies, media references, and ordered localized detail sections. The server-configured GitHub integration owns the approved `BaptisteWetterwald` username, optional token, upstream mapping, and bounded runtime cache; the username must not be inferred from project repository URLs.
 
 Do not invent content, hardcode project records in Angular, or introduce a generic CMS/admin model without a new requirement.
 
@@ -42,7 +43,9 @@ Main-document metadata canonicalizes to `/fr` or `/en`. Project detail metadata 
 
 # Backend and persistence
 
-The backend is one feature-oriented modular monolith. Public project APIs live under `/api/v1/projects`; Actuator health is `/api/health`.
+The backend is one feature-oriented modular monolith. Public project APIs live under `/api/v1/projects`; the controlled GitHub activity API is `/api/v1/github/activity`; Actuator health is `/api/health`.
+
+GitHub activity uses the official public-repository REST endpoint plus authenticated GraphQL `contributionsCollection` through a backend-only client, single-identity in-process caches, and partial stale-on-error fallback. The approved username is the default; a blank `PORTFOLIO_GITHUB_USERNAME` disables the feature. `PORTFOLIO_GITHUB_TOKEN` is backend-only and optional: without it, repository activity remains available and the contribution calendar is omitted. Contact remains a conservative non-form state until real delivery and contact-policy values are supplied.
 
 `DRAFT` is private. `PUBLISHED` and `ARCHIVED` are public. `DETAIL` controls detail eligibility independently from publication status; `CARD_ONLY` remains list-only. Structured `project_sections` are the canonical rich-detail model; `detailed_description` is a deprecated fallback.
 

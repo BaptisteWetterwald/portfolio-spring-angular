@@ -1,0 +1,176 @@
+:host {
+  display: block;
+}
+
+.github-contribution-calendar {
+  --github-calendar-cell-size: 0.7rem;
+  --github-calendar-gap: 3px;
+  --github-calendar-weekday-width: 2.75rem;
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 32%, var(--color-border));
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-subtle));
+  box-shadow: var(--shadow-sm);
+}
+
+.github-contribution-calendar__body {
+  gap: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.github-contribution-calendar__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.github-contribution-calendar__total,
+.github-contribution-calendar__range,
+.github-contribution-calendar__scroll-hint {
+  margin: 0;
+}
+
+.github-contribution-calendar__total {
+  color: var(--color-text);
+  font-weight: 750;
+}
+
+.github-contribution-calendar__range,
+.github-contribution-calendar__scroll-hint {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.github-contribution-calendar__scroll-hint {
+  display: none;
+  margin-top: var(--space-2);
+}
+
+.github-contribution-calendar__scroll {
+  max-width: 100%;
+  margin-top: var(--space-3);
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: var(--radius-sm);
+  scrollbar-color: color-mix(in srgb, var(--color-accent-maritime) 46%, var(--color-border))
+    transparent;
+  scrollbar-width: thin;
+}
+
+.github-contribution-calendar__scroll:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.github-contribution-calendar__canvas {
+  width: max-content;
+  min-width: 100%;
+  padding-inline: var(--space-1);
+}
+
+.github-contribution-calendar__months {
+  display: grid;
+  gap: var(--github-calendar-gap);
+  min-width: max-content;
+  margin-left: calc(var(--github-calendar-weekday-width) + var(--space-2));
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.github-contribution-calendar__months span {
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.github-contribution-calendar__plot {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin-top: var(--space-1);
+}
+
+.github-contribution-calendar__weekdays {
+  display: grid;
+  flex: 0 0 var(--github-calendar-weekday-width);
+  grid-template-rows: repeat(7, var(--github-calendar-cell-size));
+  gap: var(--github-calendar-gap);
+  padding: 0;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  line-height: var(--github-calendar-cell-size);
+  list-style: none;
+}
+
+.github-contribution-calendar__weekdays li {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.github-contribution-calendar__weeks {
+  display: flex;
+  gap: var(--github-calendar-gap);
+}
+
+.github-contribution-calendar__week {
+  display: grid;
+  grid-template-rows: repeat(7, var(--github-calendar-cell-size));
+  gap: var(--github-calendar-gap);
+}
+
+.github-contribution-calendar__day,
+.github-contribution-calendar__day-placeholder {
+  display: block;
+  width: var(--github-calendar-cell-size);
+  height: var(--github-calendar-cell-size);
+  border-radius: 2px;
+}
+
+.github-contribution-calendar__day {
+  border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+}
+
+.github-contribution-calendar__day--level-0 {
+  background: color-mix(in srgb, var(--color-surface-subtle) 78%, var(--color-border));
+}
+
+.github-contribution-calendar__day--level-1 {
+  background: color-mix(in srgb, var(--color-accent-maritime) 24%, var(--color-surface));
+}
+
+.github-contribution-calendar__day--level-2 {
+  background: color-mix(in srgb, var(--color-accent-maritime) 46%, var(--color-surface));
+}
+
+.github-contribution-calendar__day--level-3 {
+  background: color-mix(in srgb, var(--color-accent-maritime) 72%, var(--color-surface));
+}
+
+.github-contribution-calendar__day--level-4 {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 80%, var(--color-border));
+  background: var(--color-accent-maritime);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent-maritime) 18%, transparent);
+}
+
+.github-contribution-calendar__legend {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 640px) {
+  .github-contribution-calendar__body {
+    padding: var(--space-3);
+  }
+
+  .github-contribution-calendar__scroll-hint {
+    display: block;
+  }
+}

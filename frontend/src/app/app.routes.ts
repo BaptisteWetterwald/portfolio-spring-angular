@@ -1,6 +1,10 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
 
+import {
+  githubActivityResolver,
+  githubActivityStateKey,
+} from './core/github/github-activity.resolver';
 import { supportedLocales } from './core/i18n/locales';
 import { rootLocaleRedirectGuard } from './core/routing/root-locale-redirect.guard';
 import { localizedSegment, StaticPageId, staticPageIds } from './core/routing/localized-routes';
@@ -35,6 +39,7 @@ export const routes: Routes = [
         pathMatch: 'full',
         component: PortfolioPageComponent,
         resolve: {
+          [githubActivityStateKey]: githubActivityResolver,
           [projectsPageStateKey]: projectsResolver,
         },
         data: {

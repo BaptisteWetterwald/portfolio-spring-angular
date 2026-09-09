@@ -19,6 +19,8 @@ Software Engineer -> Java/Spring + C#/.NET + TypeScript/Node.js -> backend/full-
 
 Deeper sections and project-detail pages may show SAP, API/integration work, OAuth 2.0, Power Platform, databases, AI-assisted engineering, international experience, and older academic or exploratory technologies.
 
+Home includes a compact evidence block for the approved `BaptisteWetterwald` GitHub identity after Skills/Languages and before Education. An approximately one-year public contribution calendar provides the primary visual evidence, followed by a few recently pushed public repositories. It remains supporting evidence rather than a primary section, project substitute, or vanity-stat dashboard.
+
 Old, niche, academic, or self-taught technologies can remain discoverable, but they must not visually compete with the current backend/full-stack direction.
 
 ## Content Ownership
@@ -117,6 +119,8 @@ Current inventory and future candidates:
 - Archive / historical: educational 2D game; Puissance 4 JavaFX; Fourmilière; Kingdomino; EnsiBlog; Cloner Kebab; folder synchronization tool; holiday expense-management Windows Forms app; ant-colony simulation; other Discord bots; Minecraft server administration/community project. These may later need a compact "Autres projets" / "Archives" presentation, but no separate presentation mode or archive UI exists yet.
 
 DaisyUI mockups, Aura, and Hover 3D treatments should only be used for future project content when real media, project type, and importance justify them. Do not fabricate screenshots, media, URLs, metrics, or repository/demo links.
+
+The GitHub integration must use only the explicitly approved `BaptisteWetterwald` username. Static owners visible in project repository URLs do not establish identity. The contribution calendar uses official GraphQL data and a native portfolio-styled Angular grid; follower totals, trophies, streak widgets, third-party GitHub-stat images, scraping, and browser-to-GitHub requests remain outside the compact evidence direction.
 
 ## Supporting Materials
 

@@ -2,7 +2,7 @@
 
 Bilingual portfolio for Baptiste Wetterwald, positioned as a Software Engineer focused on backend and full-stack work.
 
-The current `experiment/single-page-navigation` branch is the candidate single-page architecture that will be reconciled before merge into `main`. The branch is implemented and tested locally; production deployment is not yet implemented.
+The approved baseline uses the single-page architecture described below. The application and local container stack are implemented and tested locally; production deployment is not yet implemented.
 
 ## Current Architecture
 
@@ -19,6 +19,7 @@ docs/      Product, architecture, content, and operations documentation
 - Public `CARD_ONLY` projects appear in the Projects section but have no public detail route.
 - Profile, skills, languages, education, and experience are typed, version-controlled frontend content. Projects are Spring Boot/PostgreSQL-owned content seeded through Flyway migrations.
 - Angular renders all public routes at request time. Project resolvers load API data before SSR completes.
+- Home renders a compact server-enriched GitHub activity block after Skills/Languages. Anonymous REST data supplies recent repositories; an optional backend token enables the contribution calendar. It is not a primary section or navigation target.
 
 ## Navigation and Visual Identity
 
@@ -129,7 +130,11 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/portfolio
 SPRING_DATASOURCE_USERNAME=portfolio
 SPRING_DATASOURCE_PASSWORD=portfolio-local-password
 SPRING_FLYWAY_ENABLED=true
+PORTFOLIO_GITHUB_USERNAME=BaptisteWetterwald
+PORTFOLIO_GITHUB_TOKEN=
 ```
+
+`BaptisteWetterwald` is the approved global GitHub identity and the backend default. `PORTFOLIO_GITHUB_USERNAME` can override it or be set to a blank value to disable the enhancement. `PORTFOLIO_GITHUB_TOKEN` is optional and stays backend-only: anonymous operation still loads recent public repositories, while a token enables GitHub GraphQL contribution-calendar data and raises REST rate limits. Use a fine-grained personal access token targeted to `BaptisteWetterwald`; GitHub's automatic read access to public repositories is sufficient for the public-only query, and no write permission is required. Do not put the token in frontend configuration or Git.
 
 Flyway is the schema source of truth. Hibernate runs with `spring.jpa.hibernate.ddl-auto=validate`. Tests create and remove isolated PostgreSQL schemas.
 
@@ -142,9 +147,12 @@ GET /api/v1/projects?locale=en&status=PUBLISHED
 GET /api/v1/projects?locale=en&status=ARCHIVED
 GET /api/v1/projects/featured?locale=en
 GET /api/v1/projects/{slug}?locale=en
+GET /api/v1/github/activity
 ```
 
 There is no standalone public technologies endpoint in the current implementation.
+
+The GitHub endpoint exposes only a portfolio-owned activity contract: availability, profile URL, up to three recently pushed non-fork/non-archived public repositories, an optional contribution calendar containing total/date/count values, refresh time, and stale status. It uses fixed-cardinality, single-identity in-process caches with a 30-minute TTL, briefly backs off after errors, and preserves successful REST or GraphQL data independently when the other source fails.
 
 ## Docker Compose
 

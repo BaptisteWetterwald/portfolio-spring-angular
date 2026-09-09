@@ -38,16 +38,17 @@ Signal red must remain sparse. Cyan should not turn the entire site neon. Brass/
 
 ## Implemented Maritime Language
 
-| Element              | Current treatment                                                     |
-| -------------------- | --------------------------------------------------------------------- |
-| Portrait             | Approved portrait cropped with CSS inside a circular porthole frame   |
-| Education/Experience | Semantic daisyUI timelines styled as one plotted route with waypoints |
-| Navigation           | Conventional header/footer plus compact sonar waypoint navigation     |
-| Theme                | One persistent floating lighthouse button                             |
-| Dark-mode ambience   | One low-opacity rotating lighthouse beam                              |
-| Interaction feedback | A short sonar waypoint ripple on hover/focus                          |
-| Section links        | Small anchor-icon permalinks for all five canonical fragments         |
-| Section rhythm       | Four restrained daisyUI dividers with centered route waypoints        |
+| Element              | Current treatment                                                      |
+| -------------------- | ---------------------------------------------------------------------- |
+| Portrait             | Approved portrait cropped with CSS inside a circular porthole frame    |
+| Education/Experience | Semantic daisyUI timelines styled as one plotted route with waypoints  |
+| Navigation           | Conventional header/footer plus compact sonar waypoint navigation      |
+| Theme                | One persistent floating lighthouse button                              |
+| Dark-mode ambience   | One low-opacity rotating lighthouse beam                               |
+| Interaction feedback | A short sonar waypoint ripple on hover/focus                           |
+| Section links        | Small anchor-icon permalinks for all five canonical fragments          |
+| Section rhythm       | Four restrained daisyUI dividers with centered route waypoints         |
+| GitHub evidence      | Cyan contribution calendar plus compact Home-internal repository cards |
 
 The Home permalink belongs to the hero eyebrow row. It must not be placed beside the person's name. Standard section permalinks sit with the Education, Experience, Projects, and Contact headings. Their SVG is decorative; the link itself has a localized accessible name.
 
@@ -83,6 +84,8 @@ Custom CSS  maritime identity, bespoke responsive geometry, and motion
 
 Current daisyUI use includes buttons, badges, cards, navbar/menu/footer/join structures, timeline geometry, and major-section dividers. Sonar geometry, the lighthouse drawing/beam, porthole styling, route details, and mobile drag behavior remain custom.
 
+The GitHub block uses a bordered calendar card, small repository cards, restrained language/star badges, real external links, and the existing spacing/color tokens. Its five contribution levels run from a muted neutral/navy surface through restrained cyan intensities; GitHub's green palette is not copied and signal red remains reserved. The calendar is the primary visual within the block, with repositories secondary. It remains subordinate to Projects, adds no GitHub-branded dashboard styling, and creates no fifth divider or sixth primary section.
+
 Do not force identity components into a generic library primitive. Conversely, do not recreate buttons, cards, badges, menus, or timelines from scratch when the existing daisyUI structure is already suitable.
 
 Mockup, Aura, Hover 3D, and contact-form primitives are not part of the current public implementation. Project media remains too generic to infer browser, phone, or code mockups, and Contact has no form backend.
@@ -113,6 +116,7 @@ Organization/school logos are optional secondary identity marks. They use local 
 - All navigation and theme controls remain keyboard accessible.
 - Hover feedback has a focus-visible equivalent when it conveys interaction.
 - Mobile layouts must not introduce horizontal overflow.
+- The contribution year may scroll horizontally inside its own focused region, but must never create document-level horizontal overflow or shrink cells below legibility.
 - Hidden handoff navigation is inert and absent from the accessibility tree.
 - Active section state uses more than color and exposes `aria-current="location"`.
 - Reduced-motion mode removes scrolling/expansion choreography and looping beam rotation while keeping static state understandable.

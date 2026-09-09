@@ -29,4 +29,16 @@ class PortfolioApplicationTests extends AbstractPostgresSpringTest {
 			.andExpect(jsonPath("$.status").value("UP"));
 	}
 
+	@Test
+	void githubActivityEndpointIsControlledAndUnavailableWhenIdentityIsNotConfigured() throws Exception {
+		mockMvc.perform(get("/api/v1/github/activity"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.available").value(false))
+			.andExpect(jsonPath("$.profileUrl").value((Object) null))
+			.andExpect(jsonPath("$.repositories").isEmpty())
+			.andExpect(jsonPath("$.contributionCalendar").value((Object) null))
+			.andExpect(jsonPath("$.lastRefreshedAt").value((Object) null))
+			.andExpect(jsonPath("$.stale").value(false));
+	}
+
 }

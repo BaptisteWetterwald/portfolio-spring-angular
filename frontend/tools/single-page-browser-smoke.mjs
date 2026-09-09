@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 
 const origin = process.env['BROWSER_SMOKE_ORIGIN'] ?? 'http://127.0.0.1:4000';
 const screenshotDirectory = process.env['BROWSER_SMOKE_SCREENSHOT_DIR'];
+const smokeScope = process.env['BROWSER_SMOKE_SCOPE'] ?? 'full';
 const chromePath = resolveChromePath();
 
 async function runBrowserSmoke() {
@@ -55,16 +56,24 @@ async function runBrowserSmoke() {
       }
     });
 
-    await verifyDesktop(cdp);
-    await verifyMobile(cdp, 390, 844, true);
-    await verifyMobile(cdp, 360, 800, false);
+    if (smokeScope === 'github-calendar') {
+      await verifyGitHubCalendarOnly(cdp);
+    } else {
+      await verifyDesktop(cdp);
+      await verifyMobile(cdp, 390, 844, true);
+      await verifyMobile(cdp, 360, 800, false);
+    }
 
     const relevantErrors = browserErrors.filter(
       (message) => !message.includes('favicon.ico') && !message.includes('net::ERR_ABORTED'),
     );
 
     assert(relevantErrors.length === 0, `browser console errors: ${relevantErrors.join(' | ')}`);
-    console.log('Headless Chrome single-page browser checks passed');
+    console.log(
+      smokeScope === 'github-calendar'
+        ? 'Headless Chrome GitHub calendar checks passed'
+        : 'Headless Chrome single-page browser checks passed',
+    );
   } finally {
     cdp?.close();
     browser.kill();
@@ -75,6 +84,54 @@ async function runBrowserSmoke() {
       // Chrome may briefly retain a profile handle on Windows; the OS temp directory can clean it.
     }
   }
+}
+
+async function verifyGitHubCalendarOnly(client) {
+  const reviews = [
+    { width: 1440, height: 900, locale: 'en', theme: 'light' },
+    { width: 1440, height: 900, locale: 'en', theme: 'dark' },
+    { width: 390, height: 844, locale: 'en', theme: 'dark' },
+    { width: 360, height: 800, locale: 'fr', theme: 'dark' },
+  ];
+
+  await setReducedMotion(client, false);
+
+  for (const review of reviews) {
+    await setViewport(client, review.width, review.height);
+    await goto(client, `/${review.locale}`);
+    await waitFor(client, `document.querySelector('[data-github-contribution-calendar]') !== null`);
+    await evaluate(client, `document.documentElement.dataset.theme = '${review.theme}'`);
+    await assertGitHubCalendarPresentation(
+      client,
+      review.width,
+      review.height,
+      review.locale,
+      review.theme,
+    );
+  }
+
+  await setReducedMotion(client, true);
+  await setViewport(client, 390, 844);
+  await goto(client, '/en');
+  await waitFor(client, `document.querySelector('[data-github-contribution-calendar]') !== null`);
+  await evaluate(client, `document.documentElement.dataset.theme = 'dark'`);
+  await assertGitHubCalendarPresentation(client, 390, 844, 'en', 'dark');
+  const reducedMotionTooltip = await value(
+    client,
+    `(() => {
+      const style = getComputedStyle(document.querySelector('[data-browser-smoke-tooltip-target]'), '::before');
+      return {
+        matches: matchMedia('(prefers-reduced-motion: reduce)').matches,
+        duration: style.transitionDuration,
+        property: style.transitionProperty,
+      };
+    })()`,
+  );
+  assert(
+    reducedMotionTooltip.matches &&
+      (reducedMotionTooltip.property === 'none' || reducedMotionTooltip.duration === '0s'),
+    `GitHub calendar tooltip transition ignored reduced-motion preference: ${JSON.stringify(reducedMotionTooltip)}`,
+  );
 }
 
 async function verifyDesktop(client) {
@@ -133,6 +190,7 @@ async function verifyDesktop(client) {
     )),
     'inert top-state sonar accepted programmatic focus',
   );
+  await assertGitHubCalendarPresentation(client, 1440, 900, 'en', 'light');
 
   if ((await value(client, `document.documentElement.dataset.theme`)) !== 'dark') {
     await clickElement(client, '.maritime-floating-controls .theme-toggle');
@@ -166,6 +224,7 @@ async function verifyDesktop(client) {
     'beam did not use the single floating lantern with the tuned duration and width',
   );
   await captureScreenshot(client, 'desktop-1440x900-header-navigation-state.png');
+  await assertGitHubCalendarPresentation(client, 1440, 900, 'en', 'dark');
 
   await evaluate(
     client,
@@ -589,6 +648,11 @@ async function verifyMobile(client, width, height, navigateAllSections) {
     `persistent lighthouse was not safely visible at the top at ${width}x${height}`,
   );
   await captureScreenshot(client, `mobile-${width}x${height}-home-persistent-controls.png`);
+  await assertGitHubCalendarPresentation(client, width, height, 'en', 'dark');
+  if (width === 360) {
+    await goto(client, '/fr');
+    await assertGitHubCalendarPresentation(client, width, height, 'fr', 'dark');
+  }
   await goto(client, '/fr#experience');
   await waitFor(client, `document.querySelector('#experience').getBoundingClientRect().top < 80`);
   await assertMajorSectionPresentation(client, 'fr');
@@ -904,6 +968,192 @@ async function captureBeamAcrossSections(client) {
   }
 
   await evaluate(client, `document.querySelector('.lighthouse-beam').getAnimations()[0].play()`);
+}
+
+async function assertGitHubCalendarPresentation(client, width, height, locale, theme) {
+  const calendarExists = await value(
+    client,
+    `document.querySelector('[data-github-contribution-calendar]') !== null`,
+  );
+
+  if (!calendarExists) {
+    console.log(
+      `SKIP ${locale} ${theme} GitHub calendar at ${width}x${height}: no contribution data`,
+    );
+    return;
+  }
+
+  await evaluate(
+    client,
+    `document.querySelector('[data-github-contribution-calendar]').scrollIntoView({ behavior: 'instant', block: 'center' })`,
+  );
+  await delay(100);
+
+  await evaluate(
+    client,
+    `(() => {
+      const calendar = document.querySelector('[data-github-contribution-calendar]');
+      const region = calendar.querySelector('[role="region"]');
+      const visibleDays = [...calendar.querySelectorAll('[data-contribution-count]')]
+        .filter((day) => {
+          const bounds = day.getBoundingClientRect();
+          const regionBounds = region.getBoundingClientRect();
+          return bounds.left >= regionBounds.left && bounds.right <= regionBounds.right;
+        })
+        .sort((first, second) => second.getBoundingClientRect().right - first.getBoundingClientRect().right);
+      visibleDays[0]?.setAttribute('data-browser-smoke-tooltip-target', 'true');
+    })()`,
+  );
+  const tooltipTargetBounds = await rect(client, '[data-browser-smoke-tooltip-target]');
+  await moveMouse(client, ...center(tooltipTargetBounds));
+  await delay(240);
+
+  const presentation = await value(
+    client,
+    `(() => {
+      const calendar = document.querySelector('[data-github-contribution-calendar]');
+      const region = calendar.querySelector('[role="region"]');
+      const days = [...calendar.querySelectorAll('[data-contribution-count]')];
+      const tooltipTarget = calendar.querySelector('[data-browser-smoke-tooltip-target]');
+      const levels = [...new Set(days.map((day) => day.dataset.contributionLevel))].sort();
+      const levelColors = [0, 1, 2, 3, 4].map((level) =>
+        getComputedStyle(calendar.querySelector('.github-contribution-calendar__day--level-' + level)).backgroundColor,
+      );
+      const cells = days.map((day) => day.getBoundingClientRect());
+      const github = document.querySelector('[data-github-activity]');
+      const languages = document.querySelector('#home-languages-title')?.closest('section');
+      const education = document.querySelector('#education');
+      const calendarBounds = calendar.getBoundingClientRect();
+      const calendarDataBounds = calendar.querySelector('.github-contribution-calendar__weeks').getBoundingClientRect();
+      const regionBounds = region.getBoundingClientRect();
+      const tooltipTargetBounds = tooltipTarget.getBoundingClientRect();
+      const tooltipEdgeRange = Math.min(120, regionBounds.width / 3);
+      const visibleDays = days.filter((day) => {
+        const bounds = day.getBoundingClientRect();
+        return bounds.left >= regionBounds.left && bounds.right <= regionBounds.right;
+      });
+      const leftEdgeDay = visibleDays.reduce((leftmost, day) =>
+        day.getBoundingClientRect().left < leftmost.getBoundingClientRect().left ? day : leftmost
+      );
+      const rightEdgeDay = visibleDays.reduce((rightmost, day) =>
+        day.getBoundingClientRect().right > rightmost.getBoundingClientRect().right ? day : rightmost
+      );
+      const expectedAlignment = (day) => {
+        const bounds = day.getBoundingClientRect();
+        return bounds.left - regionBounds.left < tooltipEdgeRange
+          ? 'tooltip-start'
+          : regionBounds.right - bounds.right < tooltipEdgeRange
+            ? 'tooltip-end'
+            : 'tooltip-center';
+      };
+      leftEdgeDay.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+      rightEdgeDay.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+      const expectedTooltipAlignment = tooltipTargetBounds.left - regionBounds.left < tooltipEdgeRange
+        ? 'tooltip-start'
+        : regionBounds.right - tooltipTargetBounds.right < tooltipEdgeRange
+          ? 'tooltip-end'
+          : 'tooltip-center';
+      const sonarBounds = document.querySelector('.sonar-nav__compact-button')?.getBoundingClientRect();
+      const lighthouseBounds = document.querySelector('.maritime-floating-controls__lighthouse')?.getBoundingClientRect();
+      const overlaps = (first, second) => first && second &&
+        first.left < second.right && first.right > second.left &&
+        first.top < second.bottom && first.bottom > second.top;
+
+      region.focus();
+
+      return {
+        theme: document.documentElement.dataset.theme,
+        cellCount: days.length,
+        levels,
+        distinctLevelColors: new Set(levelColors).size,
+        cellSizesReadable: cells.every((cell) => cell.width >= 10 && cell.height >= 10),
+        monthCount: calendar.querySelectorAll('.github-contribution-calendar__months span').length,
+        regionFocused: document.activeElement === region,
+        regionTabIndex: region.getAttribute('tabindex'),
+        focusableCells: days.filter((day) => day.hasAttribute('tabindex')).length,
+        labelledCells: days.every((day) => day.getAttribute('aria-label')),
+        daisyTooltips: days.every((day) => day.classList.contains('tooltip')),
+        nativeTitles: days.filter((day) => day.hasAttribute('title')).length,
+        multilineTooltips: days.every((day) => day.dataset.tip?.includes('\\n')),
+        zeroContributionTooltip: days.find((day) => day.dataset.contributionCount === '0')?.dataset.tip,
+        edgePlacements: days.every((day) => day.classList.contains('tooltip-top') || day.classList.contains('tooltip-bottom')),
+        verticalEdgePlacements: days.every((day) => {
+          const weekday = [...day.parentElement.children].indexOf(day);
+          return weekday < 3 ? day.classList.contains('tooltip-bottom') : day.classList.contains('tooltip-top');
+        }),
+        horizontalEdgeAlignments:
+          leftEdgeDay.classList.contains(expectedAlignment(leftEdgeDay)) &&
+          rightEdgeDay.classList.contains(expectedAlignment(rightEdgeDay)),
+        hoveredTooltipVisible: Number(getComputedStyle(tooltipTarget, '::before').opacity) > .9,
+        hoveredTooltipAlignedForViewport: tooltipTarget?.classList.contains(expectedTooltipAlignment),
+        calendarScrolls: region.scrollWidth > region.clientWidth,
+        recentWeeksInitiallyVisible: region.scrollWidth <= region.clientWidth ||
+          Math.abs(region.scrollWidth - region.clientWidth - region.scrollLeft) < 2,
+        documentOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        insideHome: github?.closest('#home') !== null,
+        followsLanguages: languages?.compareDocumentPosition(github) === Node.DOCUMENT_POSITION_FOLLOWING,
+        precedesEducation: github?.compareDocumentPosition(education) === Node.DOCUMENT_POSITION_FOLLOWING,
+        githubNavigationLinks: document.querySelectorAll('nav a[href*="#github"], footer a[href*="#github"]').length,
+        calendarBounds: calendarBounds.toJSON(),
+        calendarDataBounds: calendarDataBounds.toJSON(),
+        sonarBounds: sonarBounds?.toJSON(),
+        lighthouseBounds: lighthouseBounds?.toJSON(),
+        overlapsSonar: overlaps(calendarDataBounds, sonarBounds),
+        overlapsLighthouse: overlaps(calendarDataBounds, lighthouseBounds),
+      };
+    })()`,
+  );
+
+  assert(
+    presentation.theme === theme &&
+      presentation.cellCount >= 350 &&
+      JSON.stringify(presentation.levels) === JSON.stringify(['0', '1', '2', '3', '4']) &&
+      presentation.distinctLevelColors === 5 &&
+      presentation.cellSizesReadable &&
+      presentation.monthCount >= 12,
+    `${locale} ${theme} GitHub calendar cells or theme were invalid at ${width}x${height}: ${JSON.stringify(presentation)}`,
+  );
+  assert(
+    presentation.regionFocused &&
+      presentation.regionTabIndex === '0' &&
+      presentation.focusableCells === 0 &&
+      presentation.labelledCells &&
+      presentation.daisyTooltips &&
+      presentation.nativeTitles === 0 &&
+      presentation.multilineTooltips &&
+      /\n0 contributions?$/.test(presentation.zeroContributionTooltip) &&
+      presentation.edgePlacements &&
+      presentation.verticalEdgePlacements &&
+      presentation.horizontalEdgeAlignments &&
+      presentation.hoveredTooltipVisible &&
+      presentation.hoveredTooltipAlignedForViewport,
+    `${locale} GitHub calendar accessibility was invalid: ${JSON.stringify(presentation)}`,
+  );
+  assert(
+    presentation.insideHome &&
+      presentation.followsLanguages &&
+      presentation.precedesEducation &&
+      presentation.githubNavigationLinks === 0,
+    `${locale} GitHub calendar escaped the Home content hierarchy: ${JSON.stringify(presentation)}`,
+  );
+  assert(
+    !presentation.documentOverflows &&
+      presentation.calendarScrolls === width <= 640 &&
+      presentation.recentWeeksInitiallyVisible &&
+      !presentation.overlapsSonar &&
+      !presentation.overlapsLighthouse,
+    `${locale} GitHub calendar containment or floating-control safety failed at ${width}x${height}: ${JSON.stringify(presentation)}`,
+  );
+
+  await captureScreenshot(client, `github-calendar-${locale}-${theme}-${width}x${height}.png`);
+  await evaluate(client, `window.scrollTo({ top: 0, behavior: 'instant' })`);
+  await delay(100);
+  if (width > 640) {
+    await waitFor(
+      client,
+      `document.querySelector('.public-shell').dataset.navigationHandoffState === 'header'`,
+    );
+  }
 }
 
 async function assertMajorSectionPresentation(client, locale) {

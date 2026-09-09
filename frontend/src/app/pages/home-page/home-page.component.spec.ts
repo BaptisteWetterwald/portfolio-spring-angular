@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 
+import {
+  GitHubActivityState,
+  GitHubContributionCalendarDto,
+} from '../../core/github/github-activity.models';
+import { githubActivityStateKey } from '../../core/github/github-activity.resolver';
 import { PageMetadataService } from '../../core/metadata/page-metadata.service';
 import { HomePageComponent } from './home-page.component';
 
@@ -168,6 +173,109 @@ describe('HomePageComponent', () => {
     expect(page.querySelector('[role="progressbar"]')).toBeNull();
   });
 
+  it.each([
+    [
+      'en',
+      'GitHub activity',
+      'A snapshot of my public development activity on GitHub.',
+      'Public repositories',
+      'View GitHub profile',
+      'Last activity:',
+      '18 contributions',
+    ],
+    [
+      'fr',
+      'Activité GitHub',
+      'Un aperçu de mon activité de développement publique sur GitHub.',
+      'Dépôts publics',
+      'Voir le profil GitHub',
+      'Dernière activité :',
+      '18 contributions',
+    ],
+  ] as const)(
+    'renders localized %s GitHub activity with safe external-link semantics',
+    async (
+      locale,
+      heading,
+      introduction,
+      repositoriesLabel,
+      profileLabel,
+      activityLabel,
+      contributionLabel,
+    ) => {
+      const fixture = await createFixture(locale, undefined, availableGitHubState());
+      const page = fixture.nativeElement as HTMLElement;
+      const block = page.querySelector('[data-github-activity]');
+      const repositoryLink = block?.querySelector<HTMLAnchorElement>(
+        '.home-page__github-repository-name a',
+      );
+      const profileLink = block?.querySelector<HTMLAnchorElement>(
+        '.home-page__github-profile-link',
+      );
+
+      expect(block?.querySelector('h2')?.textContent).toContain(heading);
+      expect(block?.textContent).toContain(introduction);
+      expect(block?.querySelector('.home-page__github-repositories-title')?.textContent).toContain(
+        repositoriesLabel,
+      );
+      expect(block?.textContent).toContain(
+        'repository-with-a-very-long-name-for-responsive-testing',
+      );
+      expect(block?.textContent).toContain(profileLabel);
+      expect(block?.textContent).toContain(activityLabel);
+      expect(block?.textContent).toContain(contributionLabel);
+      expect(block?.querySelector('[data-github-contribution-calendar]')).not.toBeNull();
+      expect(block?.querySelector('.home-page__github-metadata')).not.toBeNull();
+      expect(block?.querySelector('time')?.getAttribute('datetime')).toBe('2026-09-01T10:00:00Z');
+      expect(repositoryLink?.getAttribute('target')).toBe('_blank');
+      expect(repositoryLink?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(repositoryLink?.getAttribute('href')).toBe(
+        'https://github.com/octocat/repository-with-a-very-long-name-for-responsive-testing',
+      );
+      expect(profileLink?.getAttribute('target')).toBe('_blank');
+      expect(profileLink?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(profileLink?.getAttribute('href')).toBe('https://github.com/octocat');
+    },
+  );
+
+  it('places GitHub after the existing skills and languages content without creating a primary section', async () => {
+    const fixture = await createFixture('en', undefined, availableGitHubState());
+    const page = fixture.nativeElement as HTMLElement;
+    const home = page.querySelector('#home');
+    const github = home?.querySelector('[data-github-activity]');
+    const languages = home?.querySelector('[aria-labelledby="home-languages-title"]');
+
+    expect(github).not.toBeNull();
+    expect(languages).not.toBeNull();
+    expect(
+      (languages as Element).compareDocumentPosition(github as Node) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(github?.hasAttribute('data-portfolio-section')).toBe(false);
+    expect(github?.id).toBe('');
+    expect(page.querySelector('#github')).toBeNull();
+  });
+
+  it('degrades quietly when GitHub is unavailable or has no validated repository data', async () => {
+    const fixture = await createFixture('en');
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('[data-github-activity]')).toBeNull();
+    expect(page.querySelector('#home-title')?.textContent).toContain('Baptiste Wetterwald');
+    expect(page.querySelector('#home-languages-title')).not.toBeNull();
+  });
+
+  it('keeps repository activity available when the contribution calendar is unavailable', async () => {
+    const fixture = await createFixture('en', undefined, availableGitHubState(null));
+    const page = fixture.nativeElement as HTMLElement;
+    const block = page.querySelector('[data-github-activity]');
+
+    expect(block).not.toBeNull();
+    expect(block?.querySelector('[data-github-contribution-calendar]')).toBeNull();
+    expect(block?.textContent).toContain('A selection of my public repositories on GitHub.');
+    expect(block?.textContent).toContain('repository-with-a-very-long-name-for-responsive-testing');
+  });
+
   it('uses natural French labels for skill groups and AI-assisted tooling', async () => {
     const fixture = await createFixture('fr');
     const page = fixture.nativeElement as HTMLElement;
@@ -199,7 +307,8 @@ describe('HomePageComponent', () => {
 
 async function createFixture(
   locale: 'fr' | 'en',
-  metadata: Partial<PageMetadataService> = { applyStaticPage: vi.fn() },
+  metadata: Partial<PageMetadataService> | undefined = { applyStaticPage: vi.fn() },
+  githubState: GitHubActivityState = { kind: 'unavailable' },
 ): Promise<ComponentFixture<HomePageComponent>> {
   await TestBed.configureTestingModule({
     imports: [HomePageComponent],
@@ -208,6 +317,9 @@ async function createFixture(
       {
         provide: ActivatedRoute,
         useValue: {
+          snapshot: {
+            data: { [githubActivityStateKey]: githubState },
+          },
           parent: {
             snapshot: {
               data: { locale },
@@ -217,7 +329,7 @@ async function createFixture(
       },
       {
         provide: PageMetadataService,
-        useValue: metadata,
+        useValue: metadata ?? { applyStaticPage: vi.fn() },
       },
     ],
   }).compileComponents();
@@ -229,6 +341,45 @@ async function createFixture(
   fixture.detectChanges();
 
   return fixture;
+}
+
+function availableGitHubState(
+  contributionCalendar: GitHubContributionCalendarDto | null = {
+    totalContributions: 18,
+    startsOn: '2026-09-06',
+    endsOn: '2026-09-12',
+    days: [
+      { date: '2026-09-06', contributionCount: 0 },
+      { date: '2026-09-07', contributionCount: 1 },
+      { date: '2026-09-08', contributionCount: 2 },
+      { date: '2026-09-09', contributionCount: 3 },
+      { date: '2026-09-10', contributionCount: 5 },
+      { date: '2026-09-11', contributionCount: 7 },
+      { date: '2026-09-12', contributionCount: 0 },
+    ],
+  },
+): GitHubActivityState {
+  return {
+    kind: 'available',
+    activity: {
+      available: true,
+      profileUrl: 'https://github.com/octocat',
+      repositories: [
+        {
+          name: 'repository-with-a-very-long-name-for-responsive-testing',
+          url: 'https://github.com/octocat/repository-with-a-very-long-name-for-responsive-testing',
+          description:
+            'A deliberately long repository description used to verify compact responsive wrapping without horizontal overflow.',
+          primaryLanguage: 'TypeScript',
+          stars: 7,
+          lastActivityAt: '2026-09-01T10:00:00Z',
+        },
+      ],
+      contributionCalendar,
+      lastRefreshedAt: '2026-09-07T10:00:00Z',
+      stale: false,
+    },
+  };
 }
 
 function primaryStack(page: HTMLElement): string[] {

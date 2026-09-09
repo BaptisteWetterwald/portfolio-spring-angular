@@ -1,0 +1,82 @@
+<div
+  class="card card-border card-sm github-contribution-calendar"
+  data-github-contribution-calendar
+>
+  <div class="card-body github-contribution-calendar__body">
+    <div class="github-contribution-calendar__summary">
+      <p class="github-contribution-calendar__total">{{ totalLabel() }}</p>
+      <p class="github-contribution-calendar__range">{{ rangeLabel() }}</p>
+    </div>
+
+    <p class="github-contribution-calendar__scroll-hint">{{ scrollHint() }}</p>
+
+    <div
+      #scrollRegion
+      class="github-contribution-calendar__scroll"
+      role="region"
+      tabindex="0"
+      [attr.aria-label]="scrollLabel()"
+      (pointerover)="positionTooltip($event)"
+    >
+      <div class="github-contribution-calendar__canvas">
+        <div
+          class="github-contribution-calendar__months"
+          aria-hidden="true"
+          [style.grid-template-columns]="
+            'repeat(' + view().weeks.length + ', var(--github-calendar-cell-size))'
+          "
+        >
+          @for (month of view().months; track month.key) {
+            <span [style.grid-column]="month.column + ' / span ' + month.span">
+              {{ month.label }}
+            </span>
+          }
+        </div>
+
+        <div class="github-contribution-calendar__plot">
+          <ol class="github-contribution-calendar__weekdays" aria-hidden="true">
+            @for (weekday of view().weekdayLabels; track $index) {
+              <li>{{ weekday }}</li>
+            }
+          </ol>
+
+          <div class="github-contribution-calendar__weeks">
+            @for (week of view().weeks; track week.startsOn) {
+              <div class="github-contribution-calendar__week">
+                @for (day of week.days; track $index) {
+                  @if (day) {
+                    <span
+                      [class]="dayClass(day, $index)"
+                      role="img"
+                      [attr.aria-label]="dayLabel(day)"
+                      [attr.data-tip]="dayTooltipLabel(day)"
+                      [attr.data-contribution-count]="day.contributionCount"
+                      [attr.data-contribution-level]="day.intensity"
+                    ></span>
+                  } @else {
+                    <span
+                      class="github-contribution-calendar__day-placeholder"
+                      aria-hidden="true"
+                    ></span>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="github-contribution-calendar__legend" aria-hidden="true">
+      <span>{{ lessLabel() }}</span>
+      @for (level of [0, 1, 2, 3, 4]; track level) {
+        <span
+          [class]="
+            'github-contribution-calendar__day github-contribution-calendar__day--level-' + level
+          "
+        ></span>
+      }
+      <span>{{ moreLabel() }}</span>
+    </div>
+  </div>
+</div>

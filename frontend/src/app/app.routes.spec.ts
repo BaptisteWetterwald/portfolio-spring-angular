@@ -5,6 +5,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 
 import { localeCookieName, localeStorageKey } from './core/i18n/locales';
+import { GitHubActivityApiService } from './core/github/github-activity-api.service';
+import { GitHubActivityDto } from './core/github/github-activity.models';
 import { ProjectApiService } from './core/projects/project-api.service';
 import { ProjectDetailDto, ProjectSummaryDto } from './core/projects/project.models';
 import { routes } from './app.routes';
@@ -64,6 +66,32 @@ describe('localized app routes', () => {
       'Projects',
     );
     expect(harness.routeNativeElement?.textContent).toContain('Portfolio API');
+  });
+
+  it('renders GitHub activity only inside Home after profile content and before Education', async () => {
+    const harness = await createHarness('/en', {}, { getActivity: () => of(githubActivity()) });
+    const root = harness.routeNativeElement;
+    const home = root?.querySelector('#home');
+    const github = root?.querySelector('[data-github-activity]');
+    const languages = root?.querySelector('#home-languages-title')?.closest('section');
+    const education = root?.querySelector('#education');
+
+    expect(github?.closest('#home')).toBe(home);
+    expect((languages as Element).compareDocumentPosition(github as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect((github as Element).compareDocumentPosition(education as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(root?.querySelector('#github')).toBeNull();
+    expect(root?.querySelector('nav a[href*="#github"], footer a[href*="#github"]')).toBeNull();
+    expect(portfolioSectionIds(root)).toEqual([
+      'home',
+      'education',
+      'experience',
+      'projects',
+      'contact',
+    ]);
   });
 
   it('keeps localized project detail routes with shared slugs', async () => {
@@ -152,6 +180,7 @@ describe('localized app routes', () => {
 async function createHarness(
   initialUrl: string,
   projectApiOverrides: Partial<ProjectApiService> = {},
+  githubApiOverrides: Partial<GitHubActivityApiService> = {},
 ): Promise<RouterTestingHarness> {
   TestBed.configureTestingModule({
     providers: [
@@ -159,6 +188,13 @@ async function createHarness(
       {
         provide: ProjectApiService,
         useValue: projectApiStub(projectApiOverrides),
+      },
+      {
+        provide: GitHubActivityApiService,
+        useValue: {
+          getActivity: () => of(unavailableGitHubActivity()),
+          ...githubApiOverrides,
+        },
       },
     ],
   });
@@ -168,6 +204,37 @@ async function createHarness(
   await settleHarness(harness);
 
   return harness;
+}
+
+function unavailableGitHubActivity(): GitHubActivityDto {
+  return {
+    available: false,
+    profileUrl: null,
+    repositories: [],
+    contributionCalendar: null,
+    lastRefreshedAt: null,
+    stale: false,
+  };
+}
+
+function githubActivity(): GitHubActivityDto {
+  return {
+    available: true,
+    profileUrl: 'https://github.com/octocat',
+    repositories: [
+      {
+        name: 'portfolio',
+        url: 'https://github.com/octocat/portfolio',
+        description: 'A repository fixture.',
+        primaryLanguage: 'TypeScript',
+        stars: 3,
+        lastActivityAt: '2026-09-01T10:00:00Z',
+      },
+    ],
+    contributionCalendar: null,
+    lastRefreshedAt: '2026-09-07T10:00:00Z',
+    stale: false,
+  };
 }
 
 function projectApiStub(overrides: Partial<ProjectApiService>) {

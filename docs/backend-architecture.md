@@ -1,6 +1,6 @@
 # Backend Architecture
 
-This document describes the current Spring Boot backend. Future contact and GitHub integrations are explicitly out of scope for the implemented service.
+This document describes the current Spring Boot backend, including the first incremental M11 GitHub integration. Contact delivery remains deferred pending approved product and delivery values.
 
 ## Current Stack
 
@@ -31,9 +31,14 @@ project
   persistence
 technology
   persistence
+github
+  api
+  application
+  client
+  config
 ```
 
-There are no contact, GitHub-integration, authentication, admin, or technology API modules in the current implementation.
+There are no contact, authentication, admin, or technology API modules in the current implementation. The GitHub feature is a read-only integration boundary and does not use persistence.
 
 Controllers handle HTTP binding, application services own visibility/validation/mapping policy, repositories own persistence queries, and public DTOs prevent JPA entities from leaking through the API.
 
@@ -47,10 +52,53 @@ Controllers handle HTTP binding, application services own visibility/validation/
 | `GET`  | `/api/v1/projects?locale={fr\|en}&status=ARCHIVED`  | Archived summaries only                        |
 | `GET`  | `/api/v1/projects/featured?locale={fr\|en}`         | Featured `PUBLISHED` summaries only            |
 | `GET`  | `/api/v1/projects/{slug}?locale={fr\|en}`           | Localized public detail for a `DETAIL` project |
+| `GET`  | `/api/v1/github/activity`                           | Controlled portfolio GitHub activity state     |
 
 `locale` is required and limited to `fr` or `en`. Public status filters accept only `PUBLISHED` and `ARCHIVED`; `DRAFT` is rejected rather than exposed. Slugs use lowercase URL-safe validation.
 
 There is no implemented `GET /api/v1/technologies` endpoint. Technology data is nested in project DTOs because no standalone frontend use case currently requires it.
+
+The GitHub endpoint accepts no username or URL parameters. Its upstream targets are the application-controlled `https://api.github.com/users/{configuredUsername}/repos` REST endpoint with fixed owner/pushed-order/page-size query parameters and the fixed `https://api.github.com/graphql` endpoint with one static contribution-calendar query.
+
+## GitHub Integration
+
+`GitHubHttpClient` uses the Java 21 HTTP client with a two-second connection timeout, four-second request timeout, GitHub JSON media type, explicit API version, and a stable user agent. REST public-repository reads work anonymously. The official GraphQL `user(login) -> contributionsCollection -> contributionCalendar` query requires `PORTFOLIO_GITHUB_TOKEN`; it requests only `totalContributions`, `date`, and `contributionCount`. The token is sent only in backend bearer headers and is never returned, logged, placed in the GraphQL body, or included in configuration diagnostics.
+
+The recommended token is a fine-grained personal access token targeted to `BaptisteWetterwald`. GitHub automatically gives fine-grained tokens read access to public repositories, which is sufficient for this public-only calendar query; no write permission is needed. Private/internal contribution counts are not an integration requirement and would require separately approved access (`read:user` for a classic token according to GitHub's schema reference).
+
+`GitHubActivityService` maps only UI-required fields and constructs canonical `github.com` profile/repository URLs from the validated configured username and validated repository names. It excludes forks, archived or disabled repositories, items without a valid push timestamp, and malformed partial items. It sorts by last push and returns at most three entries.
+
+Public contract:
+
+```text
+GitHubActivityDto
+  available
+  profileUrl (nullable)
+  repositories[]
+  contributionCalendar (nullable)
+  lastRefreshedAt (nullable)
+  stale
+
+GitHubRepositoryActivityDto
+  name
+  url
+  description (nullable)
+  primaryLanguage (nullable)
+  stars
+  lastActivityAt
+
+GitHubContributionCalendarDto
+  totalContributions
+  startsOn
+  endsOn
+  days[]
+
+GitHubContributionDayDto
+  date
+  contributionCount
+```
+
+The cache has two fixed application-controlled component entries (repositories and contribution calendar) for one identity, is guarded by a lock, and has a 30-minute freshness TTL. Expired components refresh independently. A failed component refresh preserves its previous successful value as stale; a cold failure omits only that component. This means REST success plus GraphQL failure still returns repositories, and GraphQL success plus REST failure still returns the calendar. Both failures use a two-minute retry backoff so a failing upstream is not called once per visitor request. GitHub exceptions and response bodies never cross the public boundary.
 
 ## Visibility and Presentation
 
@@ -112,7 +160,7 @@ List responses never include section bodies. Detail responses include ordered lo
 - Detail sections are queried only for detail responses and preserve section display order.
 - Public detail queries require a public status, `DETAIL` mode, slug, and requested translation.
 
-No general application-level cache or Redis is implemented. The current database queries are proportionate to the portfolio workload.
+No general application-level cache or Redis is implemented. The GitHub feature uses only its two fixed, single-identity in-process component entries; current database queries remain uncached and proportionate to the portfolio workload.
 
 ## Persistence and Migrations
 
@@ -170,14 +218,14 @@ Backend tests cover:
 - public status/presentation/locale rules;
 - API DTOs and error responses;
 - real seed-data responses;
-- isolated PostgreSQL-schema infrastructure.
+- isolated PostgreSQL-schema infrastructure;
+- anonymous/authenticated GitHub requests, REST/GraphQL mapping, partial failures, fixed-cardinality caching, stale fallback, and secret-safe errors.
 
 Tests require a reachable PostgreSQL instance. The test support creates a unique schema, applies Flyway, validates it with Hibernate, and removes it after the run.
 
 ## Deferred Backend Work
 
 - contact submission, email delivery, spam/rate limiting, and privacy controls;
-- credentialed GitHub integration and caching;
 - authentication or administrative editing;
 - standalone technology endpoint;
 - richer multi-item project media domain;

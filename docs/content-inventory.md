@@ -28,6 +28,8 @@ Do not move CV/profile content into PostgreSQL, create profile CMS tables, or ad
 | Portrait          | Approved original portrait asset rendered from `frontend/public/assets/portrait/baptiste-wetterwald-portrait.png` with CSS object cropping inside the porthole frame.                                                 |
 | Social/contact/CV | Not published until real URLs, contact method, or CV files are supplied.                                                                                                                                              |
 
+The approved global GitHub identity is `BaptisteWetterwald`, now used as the backend default for the M11 activity block and profile URL. Project-specific repository owners remain non-authoritative. Recent public repositories work anonymously; contribution-calendar data remains absent until a backend-only GitHub token is configured.
+
 ## Education
 
 Reverse chronological public Education entries:
@@ -154,7 +156,6 @@ Current public display order uses `projects.display_order` ascending: Portfolio 
 
 ## Missing Or Deferred Public Content
 
-- real GitHub profile URL;
 - real LinkedIn profile URL;
 - public contact method or contact form policy;
 - downloadable CV file(s);

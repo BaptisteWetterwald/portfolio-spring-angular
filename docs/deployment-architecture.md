@@ -76,16 +76,18 @@ Both contexts have `.dockerignore` files excluding build outputs, VCS/IDE data, 
 
 `.env.example` documents safe development defaults:
 
-| Variable             | Default                    |
-| -------------------- | -------------------------- |
-| `POSTGRES_DB`        | `portfolio`                |
-| `POSTGRES_USER`      | `portfolio`                |
-| `POSTGRES_PASSWORD`  | `portfolio-local-password` |
-| `POSTGRES_HOST_PORT` | `5432`                     |
-| `BACKEND_HOST_PORT`  | `8080`                     |
-| `FRONTEND_HOST_PORT` | `4000`                     |
+| Variable                    | Default                    |
+| --------------------------- | -------------------------- |
+| `POSTGRES_DB`               | `portfolio`                |
+| `POSTGRES_USER`             | `portfolio`                |
+| `POSTGRES_PASSWORD`         | `portfolio-local-password` |
+| `POSTGRES_HOST_PORT`        | `5432`                     |
+| `BACKEND_HOST_PORT`         | `8080`                     |
+| `FRONTEND_HOST_PORT`        | `4000`                     |
+| `PORTFOLIO_GITHUB_USERNAME` | `BaptisteWetterwald`       |
+| `PORTFOLIO_GITHUB_TOKEN`    | empty / repositories only  |
 
-Compose sets `SPRING_DATASOURCE_*`, enables Flyway, and sets the frontend `BACKEND_INTERNAL_ORIGIN`. The checked-in password is intentionally a local default and must not be reused for production.
+Compose sets `SPRING_DATASOURCE_*`, enables Flyway, passes GitHub configuration to the backend, and sets the frontend `BACKEND_INTERNAL_ORIGIN`. The checked-in password is intentionally a local default and must not be reused for production. The optional GitHub token is a server-side secret and must be provisioned outside Git. Without it, anonymous REST repository activity remains enabled and the GraphQL contribution calendar is omitted. To enable the public-only calendar, provision a fine-grained personal access token targeted to `BaptisteWetterwald`; its automatic public-repository read access is sufficient, and no write permission is required.
 
 ## Local Operation
 

@@ -109,4 +109,103 @@
       }
     </ul>
   </section>
+
+  @if (githubActivity; as activity) {
+    <section
+      class="home-page__section home-page__github"
+      data-github-activity
+      aria-labelledby="home-github-title"
+    >
+      <div class="home-page__github-heading">
+        <div class="home-page__section-heading">
+          <h2 id="home-github-title">{{ t('github.heading') }}</h2>
+          <p>
+            {{
+              t(
+                activity.contributionCalendar
+                  ? 'github.introduction'
+                  : 'github.introductionRepositories'
+              )
+            }}
+          </p>
+        </div>
+        <div class="home-page__github-controls">
+          @if (activity.stale) {
+            <span class="badge badge-outline badge-sm home-page__github-stale">
+              {{ t('github.cached') }}
+            </span>
+          }
+          <a
+            class="btn btn-sm btn-ghost home-page__github-profile-link"
+            [href]="activity.profileUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="profileLinkAria()"
+          >
+            {{ t('github.profileLink') }}
+            <span class="home-page__github-external-mark" aria-hidden="true"></span>
+          </a>
+        </div>
+      </div>
+
+      @if (activity.contributionCalendar; as contributionCalendar) {
+        <app-github-contribution-calendar [calendar]="contributionCalendar" [locale]="locale" />
+      }
+
+      @if (activity.repositories.length > 0) {
+        <h3 class="home-page__github-repositories-title">{{ t('github.repositories') }}</h3>
+        <ul class="home-page__github-grid" [attr.aria-label]="t('github.repositories')">
+          @for (repository of activity.repositories; track repository.url) {
+            <li>
+              <article class="card card-border card-sm home-page__github-card">
+                <div class="card-body home-page__github-card-body">
+                  <h4 class="card-title home-page__github-repository-name">
+                    <a
+                      [href]="repository.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      [attr.aria-label]="repositoryLinkAria(repository)"
+                    >
+                      {{ repository.name }}
+                      <span class="home-page__github-external-mark" aria-hidden="true"></span>
+                    </a>
+                  </h4>
+
+                  @if (repository.description) {
+                    <p class="home-page__github-description">{{ repository.description }}</p>
+                  }
+
+                  <div class="home-page__github-metadata">
+                    <div class="home-page__github-details">
+                      @if (repository.primaryLanguage) {
+                        <span class="badge badge-outline badge-sm home-page__github-language">
+                          {{ repository.primaryLanguage }}
+                        </span>
+                      }
+                      @if (repository.stars > 0) {
+                        <span
+                          class="badge badge-ghost badge-sm home-page__github-stars"
+                          [attr.aria-label]="starsAria(repository.stars)"
+                        >
+                          <span aria-hidden="true">★</span>
+                          {{ repository.stars }}
+                        </span>
+                      }
+                    </div>
+
+                    <p class="home-page__github-date">
+                      {{ t('github.lastActivity') }}
+                      <time [attr.datetime]="repository.lastActivityAt">
+                        {{ formatActivityDate(repository.lastActivityAt) }}
+                      </time>
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
 </section>

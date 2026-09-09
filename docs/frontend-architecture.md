@@ -35,7 +35,7 @@ Each route activates `PublicLayoutComponent`, then one `PortfolioPageComponent` 
 #contact
 ```
 
-The localized root route runs `projectsResolver` before activation. This makes API-backed project cards part of the complete SSR document.
+The localized root route runs `projectsResolver` and `githubActivityResolver` before activation. This makes API-backed project cards and available supporting GitHub data part of the complete SSR document.
 
 Former section routes remain in the route table only as compatibility redirects:
 
@@ -69,7 +69,7 @@ Dedicated project pages remain:
 - one `<main id="main-content">` router outlet;
 - `SiteFooterComponent`.
 
-`PortfolioPageComponent` composes the existing Home, Education, Experience, Projects, and Contact components. Those section components own their stable IDs and retain their internal semantic structure. Four decorative daisyUI dividers separate them.
+`PortfolioPageComponent` composes the existing Home, Education, Experience, Projects, and Contact components. Those section components own their stable IDs and retain their internal semantic structure. Four decorative daisyUI dividers separate them. GitHub activity is an internal Home block after Skills/Languages and before the first divider; it has no stable fragment, permalink, header/footer link, or sonar waypoint.
 
 Project details are not composed into the main document. They reuse the same public layout and project navigation state but render through `ProjectDetailPageComponent`.
 
@@ -147,6 +147,10 @@ GET /api/v1/projects/{slug}?locale=fr|en
 `BackendApiUrlService` keeps browser URLs same-origin under `/api`. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
 
 Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. Angular HTTP transfer cache avoids an unnecessary duplicate fetch after hydration when possible.
+
+`GitHubActivityApiService` calls only `GET /api/v1/github/activity` with Angular HTTP transfer caching. Its root-route resolver validates repository URLs plus the bounded calendar date/count contract and converts unavailable, empty, malformed, or failed responses into a quiet unavailable state. Home renders nothing for that state, so GitHub never replaces or gates the identity, skills, languages, or later sections.
+
+`GitHubContributionCalendarComponent` is a native, SSR-safe Angular renderer rather than an imperative chart dependency. It groups at most 400 validated days into Sunday-based week columns, derives four cyan intensity levels from positive counts, and renders a localized approximately 53-by-7 grid before the existing repository cards. The calendar scrolls horizontally inside its own bounded region on narrow viewports and uses a guarded after-render adjustment to show the most recent weeks first. Its scroll container is the single keyboard stop; date/count descriptions are exposed on non-focusable cells so the graph does not add hundreds of tab stops. Missing contribution data removes only the calendar while repositories remain useful.
 
 Project cards render public status/presentation fields from the API. `DETAIL` adds the localized detail action; `CARD_ONLY` does not. Detail pages prefer ordered localized sections and fall back to deprecated `detailedDescription` only when sections are empty.
 
