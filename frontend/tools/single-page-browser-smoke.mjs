@@ -554,6 +554,7 @@ async function verifyDesktop(client) {
       return bounds.top < innerHeight && bounds.bottom > 0 && document.querySelector('a[href="/en#contact"][aria-current="location"]');
     })()`,
   );
+  await assertContactPresentation(client, 1440, 900, 'en');
 
   await setReducedMotion(client, true);
   await goto(client, '/en');
@@ -721,7 +722,104 @@ async function verifyMobile(client, width, height, navigateAllSections) {
     )),
     `horizontal overflow at ${width}x${height}`,
   );
+  const contactLocale = width === 360 ? 'fr' : 'en';
+  await goto(client, `/${contactLocale}#contact`);
+  await assertContactPresentation(client, width, height, contactLocale);
   console.log(`OK mobile ${width}x${height} drag, viewport safety, navigation, and overflow`);
+}
+
+async function assertContactPresentation(client, width, height, locale) {
+  await waitFor(
+    client,
+    `document.querySelector('#contact form') && document.querySelector('#contact button[type="submit"]')`,
+  );
+  await evaluate(
+    client,
+    `document.querySelector('#contact button[type="submit"]').scrollIntoView({ behavior: 'instant', block: 'center' })`,
+  );
+  await delay(80);
+
+  const expectedLabels =
+    locale === 'fr'
+      ? ['Nom', 'E-mail', 'Sujet', 'Message']
+      : ['Name', 'Email', 'Subject', 'Message'];
+  const presentation = await value(
+    client,
+    `(() => {
+      const form = document.querySelector('#contact form');
+      const visibleControls = [...form.querySelectorAll('#contact-name, #contact-email, #contact-subject, #contact-message')];
+      const labels = visibleControls.map((control) =>
+        form.querySelector('label[for="' + control.id + '"]')?.textContent.trim(),
+      );
+      const button = form.querySelector('button[type="submit"]');
+      const decoy = form.querySelector('#contact-organization-website');
+      const decoyContainer = decoy.closest('[aria-hidden="true"]');
+      const sonar = document.querySelector('.sonar-nav__compact-button');
+      const lighthouse = document.querySelector('.maritime-floating-controls__lighthouse');
+      const overlaps = (first, second) => first && second &&
+        first.left < second.right && first.right > second.left &&
+        first.top < second.bottom && first.bottom > second.top;
+      const buttonBounds = button.getBoundingClientRect();
+      return {
+        labels,
+        fieldsetCount: form.querySelectorAll('.fieldset').length,
+        daisyInputs: form.querySelectorAll('.input.validator').length,
+        daisyTextareas: form.querySelectorAll('.textarea.validator').length,
+        buttonText: button.textContent.trim(),
+        buttonVisible: buttonBounds.top >= 0 && buttonBounds.bottom <= innerHeight,
+        controlsWithinViewport: visibleControls.every((control) => {
+          const bounds = control.getBoundingClientRect();
+          return bounds.left >= 0 && bounds.right <= innerWidth && bounds.width >= 220;
+        }),
+        decoySafe: decoy.tabIndex === -1 && decoy.autocomplete === 'off' && decoyContainer !== null,
+        overlapsSonar: overlaps(buttonBounds, sonar?.getBoundingClientRect()),
+        overlapsLighthouse: overlaps(buttonBounds, lighthouse?.getBoundingClientRect()),
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    })()`,
+  );
+
+  assert(
+    JSON.stringify(presentation.labels) === JSON.stringify(expectedLabels),
+    `${locale} Contact labels were missing or reordered: ${JSON.stringify(presentation)}`,
+  );
+  assert(
+    presentation.fieldsetCount === 4 &&
+      presentation.daisyInputs === 3 &&
+      presentation.daisyTextareas === 1,
+    `Contact did not retain its daisyUI field structure at ${width}x${height}`,
+  );
+  assert(
+    presentation.buttonText === (locale === 'fr' ? 'Envoyer le message' : 'Send message') &&
+      presentation.buttonVisible &&
+      presentation.controlsWithinViewport &&
+      presentation.decoySafe &&
+      !presentation.overlapsSonar &&
+      !presentation.overlapsLighthouse &&
+      !presentation.horizontalOverflow,
+    `Contact layout or floating-control safety failed at ${width}x${height}: ${JSON.stringify(presentation)}`,
+  );
+
+  await clickElement(client, '#contact button[type="submit"]');
+  await waitFor(client, `document.querySelector('#contact [role="alert"]') !== null`);
+  const validation = await value(
+    client,
+    `(() => ({
+      alertText: document.querySelector('#contact [role="alert"]')?.textContent.trim(),
+      invalidCount: document.querySelectorAll('#contact [aria-invalid="true"]').length,
+      describedCount: document.querySelectorAll('#contact [aria-describedby]').length,
+      visibleErrors: document.querySelectorAll('#contact .validator-hint').length,
+    }))()`,
+  );
+
+  assert(
+    validation.invalidCount === 4 &&
+      validation.describedCount === 4 &&
+      validation.visibleErrors === 4 &&
+      validation.alertText,
+    `Contact validation semantics failed at ${width}x${height}: ${JSON.stringify(validation)}`,
+  );
+  await captureScreenshot(client, `contact-${width}x${height}-${locale}-validation.png`);
 }
 
 async function assertExpandedSonarSafe(client, width, height) {

@@ -76,18 +76,25 @@ Both contexts have `.dockerignore` files excluding build outputs, VCS/IDE data, 
 
 `.env.example` documents safe development defaults:
 
-| Variable                    | Default                    |
-| --------------------------- | -------------------------- |
-| `POSTGRES_DB`               | `portfolio`                |
-| `POSTGRES_USER`             | `portfolio`                |
-| `POSTGRES_PASSWORD`         | `portfolio-local-password` |
-| `POSTGRES_HOST_PORT`        | `5432`                     |
-| `BACKEND_HOST_PORT`         | `8080`                     |
-| `FRONTEND_HOST_PORT`        | `4000`                     |
-| `PORTFOLIO_GITHUB_USERNAME` | `BaptisteWetterwald`       |
-| `PORTFOLIO_GITHUB_TOKEN`    | empty / repositories only  |
+| Variable                           | Default                      |
+| ---------------------------------- | ---------------------------- |
+| `POSTGRES_DB`                      | `portfolio`                  |
+| `POSTGRES_USER`                    | `portfolio`                  |
+| `POSTGRES_PASSWORD`                | `portfolio-local-password`   |
+| `POSTGRES_HOST_PORT`               | `5432`                       |
+| `BACKEND_HOST_PORT`                | `8080`                       |
+| `FRONTEND_HOST_PORT`               | `4000`                       |
+| `PORTFOLIO_GITHUB_USERNAME`        | `BaptisteWetterwald`         |
+| `PORTFOLIO_GITHUB_TOKEN`           | empty / repositories only    |
+| `PORTFOLIO_CONTACT_DELIVERY_MODE`  | `log` / no external delivery |
+| `PORTFOLIO_CONTACT_SUBJECT_PREFIX` | `[Contact Portfolio]`        |
+| Contact rate-limit variables       | `5` / `15m` / `2048`         |
+| `MANAGEMENT_HEALTH_MAIL_ENABLED`   | `false`                      |
+| `SERVER_FORWARD_HEADERS_STRATEGY`  | `none`                       |
 
 Compose sets `SPRING_DATASOURCE_*`, enables Flyway, passes GitHub configuration to the backend, and sets the frontend `BACKEND_INTERNAL_ORIGIN`. The checked-in password is intentionally a local default and must not be reused for production. The optional GitHub token is a server-side secret and must be provisioned outside Git. Without it, anonymous REST repository activity remains enabled and the GraphQL contribution calendar is omitted. To enable the public-only calendar, provision a fine-grained personal access token targeted to `BaptisteWetterwald`; its automatic public-repository read access is sufficient, and no write permission is required.
+
+The local Contact sender is explicitly `log`: it accepts valid requests and logs only message-length metadata without external delivery. Production must select `smtp` and privately provision `PORTFOLIO_CONTACT_RECIPIENT`, `PORTFOLIO_CONTACT_SENDER`, `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, and `SPRING_MAIL_PASSWORD`. `PORTFOLIO_CONTACT_SUBJECT_PREFIX` is non-secret, defaults to `[Contact Portfolio]`, and is validated as a bounded single-line header value. `SPRING_MAIL_TEST_CONNECTION` is optional. Actuator mail health is disabled by default so local `log`/`disabled` modes do not probe an unconfigured SMTP service; an SMTP deployment can set `MANAGEMENT_HEALTH_MAIL_ENABLED=true` after the provider settings are provisioned. The example file contains no address, endpoint, or credential. A transactional SMTP provider may authorize a `bwetterwald.fr` sender after DNS verification without that sender being a paid mailbox; the owner can continue receiving at an existing private Gmail inbox and later change the recipient by configuration alone.
 
 ## Local Operation
 
@@ -129,6 +136,8 @@ host Nginx / HTTPS
 ```
 
 Host Nginx is the current preferred direction because it is proportionate to a single server and can preserve host/scheme forwarding for canonical metadata. Exact configuration, certificate automation, security headers, and upstream exposure have not been implemented.
+
+For Contact rate limiting, the production backend must remain inaccessible from the public internet and receive `/api/*` only from trusted host Nginx. Nginx must replace the incoming client-address header (for example, `proxy_set_header X-Forwarded-For $remote_addr`) instead of appending arbitrary client input. Only then should the backend use `SERVER_FORWARD_HEADERS_STRATEGY=native`. The safe default `none` ignores forwarded headers and therefore groups proxied traffic under the proxy address. Exact Nginx implementation remains M15; this requirement does not claim it is deployed.
 
 Do not add Kubernetes, multi-server orchestration, or another proxy without a concrete requirement.
 
