@@ -88,6 +88,7 @@ The composed document implements:
 - ordered semantic Education/Experience timelines with real `<time>` elements;
 - project cards as articles and actions as real links;
 - the GitHub evidence block as an internal Home subsection with a localized date/count contribution grid, repository articles, and safe external-link semantics;
+- the Contact section as one labelled form with four visible controls and an action button;
 - detail content as one article with section headings;
 - buttons only for actions and links for navigation.
 
@@ -106,6 +107,9 @@ Implemented behavior includes:
 - keyboard section activation moving focus to the destination section;
 - passive scroll-spy never moving focus.
 - one focusable horizontal contribution-calendar region with non-focusable, individually labelled date/count cells instead of hundreds of tab stops.
+- Contact controls with real associated labels, normal tab order, visible focus, and no focus trap.
+
+Contact validation messages appear only after a field has been touched or submission has been attempted. Invalid controls use `aria-invalid` and `aria-describedby`; submitting uses a polite live status and `aria-busy`; success, rate limiting, and failure use assertive text alerts so meaning is not carried by color or animation. The visually clipped anti-bot control is `aria-hidden`, has `tabindex="-1"`, and is absent from normal keyboard/assistive-technology navigation.
 
 The header-to-sonar handoff does not force focus to a new control. Hidden duplicate navigation is inert and `aria-hidden`; a focused outgoing control remains available until focus leaves.
 
@@ -149,6 +153,6 @@ The absence of a `robots.txt` file does not replace the per-page robots metadata
 
 ## Validation Direction
 
-Current automated coverage includes route/metadata tests, SSR 404 tests, semantic navigation states, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
+Current automated coverage includes route/metadata tests, SSR 404 tests, semantic navigation states, Contact validation and live-region semantics, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
 
 Before production deployment, add the missing crawl artifacts and complete keyboard-only, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits against the deployed origin.

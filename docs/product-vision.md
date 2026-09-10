@@ -45,9 +45,9 @@ The main document contains:
 - education;
 - professional experience;
 - API-backed projects;
-- a conservative Contact section that explicitly does not invent a contact method.
+- a concise localized Contact form backed by server-side delivery.
 
-The approved global GitHub identity and profile link are `BaptisteWetterwald`; project-specific GitHub URLs remain separately sourced project content. LinkedIn, a downloadable CV, a public contact method, and a contact form are not implemented because approved values and delivery policy have not been supplied.
+The approved global GitHub identity and profile link are `BaptisteWetterwald`; project-specific GitHub URLs remain separately sourced project content. LinkedIn and a downloadable CV are not implemented because approved values/files have not been supplied. The Contact recipient and sender remain private deployment configuration and are not public content.
 
 ## Visual Identity
 

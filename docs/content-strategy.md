@@ -122,6 +122,14 @@ DaisyUI mockups, Aura, and Hover 3D treatments should only be used for future pr
 
 The GitHub integration must use only the explicitly approved `BaptisteWetterwald` username. Static owners visible in project repository URLs do not establish identity. The contribution calendar uses official GraphQL data and a native portfolio-styled Angular grid; follower totals, trophies, streak widgets, third-party GitHub-stat images, scraping, and browser-to-GitHub requests remain outside the compact evidence direction.
 
+## Contact Strategy
+
+Contact remains the fifth section of the localized single-page document. Its visible fields are only name, email, subject, and message. The UI must not publish the owner's recipient address or imply that an unconfigured custom-domain mailbox exists.
+
+The backend owns delivery policy and private identities. The current destination may be an existing personal Gmail inbox supplied only through deployment configuration; a future custom-domain recipient or sender must be a configuration change rather than a frontend/API change. Visitor email is used only as `Reply-To`, never as `From`.
+
+Contact submissions are transient delivery input and do not belong in PostgreSQL or the frontend content catalog. The implementation may document that it processes submitted fields and transient client-address information for abuse protection, but public privacy/legal copy, notices, and retention language require owner approval and must not be invented.
+
 ## Supporting Materials
 
 Bureau Veritas supporting material exists as owner-provided context: an approximately 40-page school report and a recommendation letter from a former manager. These may become portfolio supporting material later, but must not be published without appropriate permission and approval.

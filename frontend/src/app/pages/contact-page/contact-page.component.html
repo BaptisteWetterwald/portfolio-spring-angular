@@ -14,14 +14,159 @@
 
   <article class="card card-border contact-page__panel">
     <div class="card-body contact-page__body">
-      <div class="contact-page__beacon" aria-hidden="true">
-        <span class="contact-page__beam"></span>
-        <span class="contact-page__lantern"></span>
-        <span class="contact-page__tower"></span>
-        <span class="contact-page__base"></span>
+      <div class="contact-page__introduction">
+        <span class="contact-page__signal" aria-hidden="true"></span>
+        <p>{{ t('contact.introduction') }}</p>
       </div>
 
-      <p>{{ t('pages.contact.placeholder') }}</p>
+      <form
+        class="contact-page__form"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        (input)="clearStatusOnInput()"
+        novalidate
+      >
+        <div class="contact-page__fields">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              <label for="contact-name">{{ t('contact.form.name') }}</label>
+            </legend>
+            <input
+              id="contact-name"
+              class="input validator w-full"
+              [class.input-error]="showError(form.controls.name)"
+              type="text"
+              autocomplete="name"
+              formControlName="name"
+              maxlength="100"
+              required
+              [attr.aria-invalid]="showError(form.controls.name)"
+              [attr.aria-describedby]="showError(form.controls.name) ? 'contact-name-error' : null"
+            />
+            @if (showError(form.controls.name)) {
+              <p id="contact-name-error" class="validator-hint contact-page__field-error">
+                {{ errorMessage('name') }}
+              </p>
+            }
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              <label for="contact-email">{{ t('contact.form.email') }}</label>
+            </legend>
+            <input
+              id="contact-email"
+              class="input validator w-full"
+              [class.input-error]="showError(form.controls.email)"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              formControlName="email"
+              maxlength="254"
+              required
+              [attr.aria-invalid]="showError(form.controls.email)"
+              [attr.aria-describedby]="
+                showError(form.controls.email) ? 'contact-email-error' : null
+              "
+            />
+            @if (showError(form.controls.email)) {
+              <p id="contact-email-error" class="validator-hint contact-page__field-error">
+                {{ errorMessage('email') }}
+              </p>
+            }
+          </fieldset>
+
+          <fieldset class="fieldset contact-page__field--wide">
+            <legend class="fieldset-legend">
+              <label for="contact-subject">{{ t('contact.form.subject') }}</label>
+            </legend>
+            <input
+              id="contact-subject"
+              class="input validator w-full"
+              [class.input-error]="showError(form.controls.subject)"
+              type="text"
+              autocomplete="off"
+              formControlName="subject"
+              maxlength="160"
+              required
+              [attr.aria-invalid]="showError(form.controls.subject)"
+              [attr.aria-describedby]="
+                showError(form.controls.subject) ? 'contact-subject-error' : null
+              "
+            />
+            @if (showError(form.controls.subject)) {
+              <p id="contact-subject-error" class="validator-hint contact-page__field-error">
+                {{ errorMessage('subject') }}
+              </p>
+            }
+          </fieldset>
+
+          <fieldset class="fieldset contact-page__field--wide">
+            <legend class="fieldset-legend">
+              <label for="contact-message">{{ t('contact.form.message') }}</label>
+            </legend>
+            <textarea
+              id="contact-message"
+              class="textarea validator w-full"
+              [class.textarea-error]="showError(form.controls.message)"
+              autocomplete="off"
+              formControlName="message"
+              minlength="20"
+              maxlength="5000"
+              rows="7"
+              required
+              [attr.aria-invalid]="showError(form.controls.message)"
+              [attr.aria-describedby]="
+                showError(form.controls.message) ? 'contact-message-error' : null
+              "
+            ></textarea>
+            @if (showError(form.controls.message)) {
+              <p id="contact-message-error" class="validator-hint contact-page__field-error">
+                {{ errorMessage('message') }}
+              </p>
+            }
+          </fieldset>
+        </div>
+
+        <div class="contact-page__verification" aria-hidden="true">
+          <label for="contact-organization-website">Organization website</label>
+          <input
+            id="contact-organization-website"
+            type="text"
+            autocomplete="off"
+            formControlName="organizationWebsite"
+            tabindex="-1"
+          />
+        </div>
+
+        @if (submissionState() !== 'idle') {
+          <div
+            class="alert alert-soft contact-page__status"
+            [class.alert-success]="submissionState() === 'success'"
+            [class.alert-info]="submissionState() === 'submitting'"
+            [class.alert-error]="submissionState() === 'invalid' || submissionState() === 'failure'"
+            [class.alert-warning]="submissionState() === 'rate-limited'"
+            [attr.role]="submissionState() === 'submitting' ? 'status' : 'alert'"
+            [attr.aria-live]="submissionState() === 'submitting' ? 'polite' : 'assertive'"
+          >
+            <span>{{ statusMessage() }}</span>
+          </div>
+        }
+
+        <button
+          class="btn btn-primary contact-page__submit"
+          type="submit"
+          [disabled]="submissionState() === 'submitting'"
+          [attr.aria-busy]="submissionState() === 'submitting'"
+        >
+          @if (submissionState() === 'submitting') {
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+          }
+          {{
+            submissionState() === 'submitting' ? t('contact.form.sending') : t('contact.form.send')
+          }}
+        </button>
+      </form>
     </div>
   </article>
 </section>

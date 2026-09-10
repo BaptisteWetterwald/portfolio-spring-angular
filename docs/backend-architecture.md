@@ -1,12 +1,13 @@
 # Backend Architecture
 
-This document describes the current Spring Boot backend, including the first incremental M11 GitHub integration. Contact delivery remains deferred pending approved product and delivery values.
+This document describes the current Spring Boot backend, including the M11 GitHub activity and Contact delivery integrations.
 
 ## Current Stack
 
 - Java 21;
 - Spring Boot 4.1;
 - Spring MVC public REST API;
+- Spring Mail/Jakarta Mail SMTP delivery;
 - Spring Data JPA with Hibernate;
 - Jakarta Bean Validation;
 - PostgreSQL;
@@ -36,9 +37,15 @@ github
   application
   client
   config
+contact
+  abuse
+  api
+  application
+  config
+  delivery
 ```
 
-There are no contact, authentication, admin, or technology API modules in the current implementation. The GitHub feature is a read-only integration boundary and does not use persistence.
+There are no authentication, admin, or technology API modules in the current implementation. GitHub and Contact are integration boundaries and neither uses persistence.
 
 Controllers handle HTTP binding, application services own visibility/validation/mapping policy, repositories own persistence queries, and public DTOs prevent JPA entities from leaking through the API.
 
@@ -53,12 +60,35 @@ Controllers handle HTTP binding, application services own visibility/validation/
 | `GET`  | `/api/v1/projects/featured?locale={fr\|en}`         | Featured `PUBLISHED` summaries only            |
 | `GET`  | `/api/v1/projects/{slug}?locale={fr\|en}`           | Localized public detail for a `DETAIL` project |
 | `GET`  | `/api/v1/github/activity`                           | Controlled portfolio GitHub activity state     |
+| `POST` | `/api/v1/contact`                                   | Validate and deliver one Contact message       |
 
 `locale` is required and limited to `fr` or `en`. Public status filters accept only `PUBLISHED` and `ARCHIVED`; `DRAFT` is rejected rather than exposed. Slugs use lowercase URL-safe validation.
 
 There is no implemented `GET /api/v1/technologies` endpoint. Technology data is nested in project DTOs because no standalone frontend use case currently requires it.
 
 The GitHub endpoint accepts no username or URL parameters. Its upstream targets are the application-controlled `https://api.github.com/users/{configuredUsername}/repos` REST endpoint with fixed owner/pushed-order/page-size query parameters and the fixed `https://api.github.com/graphql` endpoint with one static contribution-calendar query.
+
+The Contact endpoint consumes JSON `name`, `email`, `subject`, `message`, plus the empty `organizationWebsite` decoy field. Successful sender acceptance returns `204` with no body. Validation failures use `400 bad_request`; rate limiting uses `429 contact_rate_limited` plus `Retry-After`; disabled delivery uses `503 contact_unavailable`; SMTP handoff failure uses `502 contact_delivery_failed`.
+
+## Contact Delivery
+
+```text
+ContactController -> ContactService -> ContactMessageSender -> log | disabled | SMTP
+```
+
+`ContactRequestDto` normalizes outer whitespace and line endings in its constructor before Jakarta Bean Validation runs. Limits are name 1–100, email 1–254 plus email syntax, subject 1–160, and message 20–5,000 after trimming. Single-line/header-bearing fields reject CR, LF, and NUL; message rejects NUL while retaining ordinary line breaks and Unicode.
+
+`ContactMessageSender` prevents the controller/service contract from depending on a provider. `LoggingContactMessageSender` is the explicit local default and logs only subject/message lengths. `DisabledContactMessageSender` makes the capability return a controlled unavailable response. `SmtpContactMessageSender` builds a UTF-8 plain-text MIME message using the fixed configured sender as `From`, the private configured recipient as `To`, the validated visitor address as `Reply-To`, and a validated fixed subject prefix. It never uses visitor input as `From`, renders HTML, adds arbitrary submitted headers, or returns the SMTP/provider exception.
+
+Spring Mail/SMTP is the production mechanism because Spring Boot provides the abstraction and auto-configuration, SMTP is supported by low-volume transactional providers, and changing providers does not change application code. A provider-specific HTTP API was considered: it can offer API-level idempotency and detailed responses, but it would add provider-specific authentication/payload/error policy while still requiring an account, secret, and verified sender domain. A full Gmail/Google Workspace mailbox is not required for either receiving at the owner's existing Gmail inbox or sending from a separately verified domain identity.
+
+`PORTFOLIO_CONTACT_DELIVERY_MODE=smtp` requires private `PORTFOLIO_CONTACT_RECIPIENT` and fixed `PORTFOLIO_CONTACT_SENDER` identities plus Spring Mail host, port, username, and password. `PORTFOLIO_CONTACT_SUBJECT_PREFIX` defaults to `[Contact Portfolio]`; blank, multiline, NUL-containing, or overlong prefixes fail application startup in SMTP mode. Invalid/missing mandatory SMTP settings fail application startup. TLS, authentication, UTF-8, and five-second SMTP connection/read/write timeouts are the checked-in defaults. Provider credential and sender-domain DNS verification remain deployment work.
+
+`ContactRateLimiter` is a synchronized per-process sliding window. Defaults allow five attempts per client over 15 minutes, retain at most 2,048 client entries, remove expired timestamps during requests, and evict the least-recently-used client when full. It stores salted SHA-256 address keys only; the random salt and all limiter state disappear on restart. The limiter runs before decoy handling, so invalid automated attempts cannot bypass it by filling the decoy. No Redis or database state is used.
+
+The controller reads only `HttpServletRequest.getRemoteAddr()` and never parses `X-Forwarded-For`. Production may set `SERVER_FORWARD_HEADERS_STRATEGY=native` only when the backend is reachable solely through trusted Nginx and Nginx overwrites—not appends—forwarded client-address headers. With the safe default `none`, direct/untrusted headers cannot create limiter identities; traffic through an unconfigured proxy shares the proxy address.
+
+Contact data is used transiently for validation, limiting, and one delivery attempt. It is not persisted in PostgreSQL. Application logs contain neither submitted name/email/subject/message content nor recipient/sender/credential/provider response. Site-wide privacy/legal copy remains an owner decision; no retention promise is invented here.
 
 ## GitHub Integration
 
@@ -200,6 +230,9 @@ The migrations contain deterministic, version-controlled public seed data. Tests
 | Unsupported locale                             | `400 unsupported_locale`          |
 | Unsupported public status filter               | `400 invalid_project_status`      |
 | Bean-validation failure                        | `400`                             |
+| Contact rate limit                             | `429 contact_rate_limited`        |
+| Contact delivery disabled                      | `503 contact_unavailable`         |
+| Contact SMTP handoff failure                   | `502 contact_delivery_failed`     |
 | Unexpected failure                             | `500` with generic public message |
 
 ## Health and Container Behavior
@@ -220,12 +253,12 @@ Backend tests cover:
 - real seed-data responses;
 - isolated PostgreSQL-schema infrastructure;
 - anonymous/authenticated GitHub requests, REST/GraphQL mapping, partial failures, fixed-cardinality caching, stale fallback, and secret-safe errors.
+- Contact normalization/validation boundaries, fixed sender/recipient/Reply-To semantics, delivery failures, decoy handling, bounded/expiring rate limits, proxy-header resistance, and secret-safe errors.
 
 Tests require a reachable PostgreSQL instance. The test support creates a unique schema, applies Flyway, validates it with Hibernate, and removes it after the run.
 
 ## Deferred Backend Work
 
-- contact submission, email delivery, spam/rate limiting, and privacy controls;
 - authentication or administrative editing;
 - standalone technology endpoint;
 - richer multi-item project media domain;

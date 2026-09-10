@@ -16,7 +16,7 @@ This roadmap records what the repository currently implements and what remains. 
 | M8 Real portfolio content                   | Complete for supplied content      | Profile, skills, languages, education, experience, six seeded projects; unprovided contact/CV/social content remains omitted |
 | M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
 | M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
-| M11 GitHub/contact integrations             | In progress                        | Approved GitHub REST activity and token-gated GraphQL calendar exist; Contact remains blocked on approved values             |
+| M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
 | M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, 404s, keyboard/reduced-motion coverage exist; sitemap, robots file, structured data, formal audits remain     |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
 | M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
@@ -177,7 +177,7 @@ GSAP was not added. Decorative Home waves, bathymetric drift, parallax, and part
 
 ## M11 — GitHub and Contact Integrations
 
-Status: in progress.
+Status: complete in code. Production Contact delivery still requires private deployment configuration and external sender/domain verification.
 
 Implemented:
 
@@ -190,12 +190,20 @@ Implemented:
 - thread-safe fixed-cardinality 30-minute in-process component caches, two-minute error retry backoff, partial stale-on-refresh-error fallback, and controlled unavailable state;
 - request-time Angular resolver with HTTP transfer caching and a compact localized block after Skills/Languages inside Home;
 - native SSR-safe Angular contribution grid with maritime cyan intensity levels, month/weekday context, accessible date/count labels, and calendar-only horizontal scrolling;
-- quiet component-level omission when REST or GraphQL data is unavailable, with no page-level failure and no new primary section or navigation waypoint.
+- quiet component-level omission when REST or GraphQL data is unavailable, with no page-level failure and no new primary section or navigation waypoint;
+- localized, accessible typed reactive Contact form inside the existing `#contact` section;
+- normalized Jakarta Bean Validation request contract and `POST /api/v1/contact` with stable `204`, `400`, `429`, `502`, and `503` behavior;
+- `ContactMessageSender` boundary with safe local logging, explicit disabled mode, and production SMTP delivery using fixed configured `From`/`To` identities plus visitor `Reply-To`;
+- bounded salted in-memory per-client sliding-window limiting and an assistive-technology-safe decoy field;
+- no Contact persistence and no exposure or logging of submitted content, private identities, credentials, or provider responses.
 
-Not yet implemented:
+Production configuration remaining outside source control:
 
 - production provisioning of the optional backend-only token needed to populate the GraphQL contribution calendar; repositories work anonymously without it;
-- Contact form/API, validation, spam/rate limiting, privacy copy, or delivery, because no recipient/sender identity, delivery mechanism, public contact policy, or provider configuration has been approved.
+- private Contact recipient and fixed sender identity;
+- SMTP provider credential and sender/domain DNS verification;
+- trusted Nginx forwarding configuration and production-only `SERVER_FORWARD_HEADERS_STRATEGY=native`;
+- owner-approved site-wide privacy/legal wording, if desired. The implementation documents its actual minimal data flow without inventing policy or retention promises.
 
 Project-specific GitHub links stored in seeded data remain static content and are separate from this API integration.
 

@@ -20,6 +20,7 @@ docs/      Product, architecture, content, and operations documentation
 - Profile, skills, languages, education, and experience are typed, version-controlled frontend content. Projects are Spring Boot/PostgreSQL-owned content seeded through Flyway migrations.
 - Angular renders all public routes at request time. Project resolvers load API data before SSR completes.
 - Home renders a compact server-enriched GitHub activity block after Skills/Languages. Anonymous REST data supplies recent repositories; an optional backend token enables the contribution calendar. It is not a primary section or navigation target.
+- Contact is a localized typed reactive form in the existing `#contact` section. It posts to a backend-only delivery boundary; recipient, sender, SMTP credentials, and provider details never enter the Angular bundle or public response.
 
 ## Navigation and Visual Identity
 
@@ -31,14 +32,14 @@ The restrained maritime design uses dark navy and off-white surfaces, cyan navig
 
 ## Stack
 
-| Area           | Current implementation                                                                        |
-| -------------- | --------------------------------------------------------------------------------------------- |
-| Frontend       | Angular 22, TypeScript 6, Angular Router, request-time SSR/hydration                          |
-| UI             | Tailwind CSS 4, daisyUI 5, custom CSS/SVG maritime components                                 |
-| Frontend tests | Angular unit-test builder with Vitest and jsdom, SSR and browser smoke scripts                |
-| Backend        | Java 21, Spring Boot 4.1, Spring MVC, Spring Data JPA, Hibernate ORM, Jakarta Bean Validation |
-| Data           | PostgreSQL 18 in Compose, Flyway migrations, Hibernate schema validation                      |
-| Runtime        | Separate multi-stage frontend and backend images plus Docker Compose                          |
+| Area           | Current implementation                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| Frontend       | Angular 22, TypeScript 6, Angular Router, request-time SSR/hydration                       |
+| UI             | Tailwind CSS 4, daisyUI 5, custom CSS/SVG maritime components                              |
+| Frontend tests | Angular unit-test builder with Vitest and jsdom, SSR and browser smoke scripts             |
+| Backend        | Java 21, Spring Boot 4.1, Spring MVC/Mail, Spring Data JPA, Hibernate ORM, Bean Validation |
+| Data           | PostgreSQL 18 in Compose, Flyway migrations, Hibernate schema validation                   |
+| Runtime        | Separate multi-stage frontend and backend images plus Docker Compose                       |
 
 The lockfile is the source of truth for exact frontend dependency versions. The Maven parent manages Spring ecosystem dependency versions.
 
@@ -132,9 +133,14 @@ SPRING_DATASOURCE_PASSWORD=portfolio-local-password
 SPRING_FLYWAY_ENABLED=true
 PORTFOLIO_GITHUB_USERNAME=BaptisteWetterwald
 PORTFOLIO_GITHUB_TOKEN=
+PORTFOLIO_CONTACT_DELIVERY_MODE=log
+PORTFOLIO_CONTACT_SUBJECT_PREFIX=[Contact Portfolio]
+MANAGEMENT_HEALTH_MAIL_ENABLED=false
 ```
 
 `BaptisteWetterwald` is the approved global GitHub identity and the backend default. `PORTFOLIO_GITHUB_USERNAME` can override it or be set to a blank value to disable the enhancement. `PORTFOLIO_GITHUB_TOKEN` is optional and stays backend-only: anonymous operation still loads recent public repositories, while a token enables GitHub GraphQL contribution-calendar data and raises REST rate limits. Use a fine-grained personal access token targeted to `BaptisteWetterwald`; GitHub's automatic read access to public repositories is sufficient for the public-only query, and no write permission is required. Do not put the token in frontend configuration or Git.
+
+Contact defaults to the explicit development `log` sender, which records only subject/message lengths and does not deliver externally. Production must set `PORTFOLIO_CONTACT_DELIVERY_MODE=smtp` and provide `PORTFOLIO_CONTACT_RECIPIENT`, `PORTFOLIO_CONTACT_SENDER`, `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, and `SPRING_MAIL_PASSWORD` outside Git. `PORTFOLIO_CONTACT_SUBJECT_PREFIX` controls the fixed, single-line subject prefix and defaults to `[Contact Portfolio]`. SMTP mode validates these settings at startup. The configured sender is used as `From`, the private recipient as `To`, and the validated visitor address only as `Reply-To`. `SPRING_MAIL_TEST_CONNECTION=true` can optionally verify connectivity during startup. `MANAGEMENT_HEALTH_MAIL_ENABLED=true` can add the SMTP provider to Actuator health only after that configuration is provisioned; it remains disabled in local `log`/`disabled` modes.
 
 Flyway is the schema source of truth. Hibernate runs with `spring.jpa.hibernate.ddl-auto=validate`. Tests create and remove isolated PostgreSQL schemas.
 
@@ -148,11 +154,14 @@ GET /api/v1/projects?locale=en&status=ARCHIVED
 GET /api/v1/projects/featured?locale=en
 GET /api/v1/projects/{slug}?locale=en
 GET /api/v1/github/activity
+POST /api/v1/contact
 ```
 
 There is no standalone public technologies endpoint in the current implementation.
 
 The GitHub endpoint exposes only a portfolio-owned activity contract: availability, profile URL, up to three recently pushed non-fork/non-archived public repositories, an optional contribution calendar containing total/date/count values, refresh time, and stale status. It uses fixed-cardinality, single-identity in-process caches with a 30-minute TTL, briefly backs off after errors, and preserves successful REST or GraphQL data independently when the other source fails.
+
+`POST /api/v1/contact` accepts JSON `name`, `email`, `subject`, `message`, and the empty anti-bot field `organizationWebsite`. A delivered/accepted submission returns `204`. Invalid input returns `400`, rate limiting returns `429` with `Retry-After`, disabled delivery returns `503`, and an SMTP handoff failure returns `502`; error bodies use the existing `ApiErrorDto` contract and never disclose delivery configuration. Submissions are validated, sent as plain text, and never stored in PostgreSQL.
 
 ## Docker Compose
 

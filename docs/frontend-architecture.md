@@ -154,6 +154,18 @@ Resolvers expose loaded/error states for the list and loaded/not-found/error sta
 
 Project cards render public status/presentation fields from the API. `DETAIL` adds the localized detail action; `CARD_ONLY` does not. Detail pages prefer ordered localized sections and fall back to deprecated `detailedDescription` only when sections are empty.
 
+## Contact Submission Flow
+
+`ContactPageComponent` remains the fifth section of the composed `/fr` and `/en` document; it does not introduce a route or resolver. It uses Angular's typed reactive forms and the existing HTTP configuration:
+
+```text
+visitor form -> ContactApiService -> POST /api/v1/contact -> backend delivery boundary
+```
+
+The visible form fields are name, email, subject, and message. The client trims values before submission and mirrors the backend's limits: name 100, email 254, subject 160, and message 20–5,000 characters. A fifth `organizationWebsite` control is visually clipped, hidden from assistive technology, removed from tab order, and must remain empty; it is only a low-cost decoy and is not treated as complete bot protection.
+
+Submission state is component-local: idle, invalid, submitting, success, rate limited, or failure. Invalid controls are announced only after touch or attempted submit. A pending request disables the button; success resets the form only after backend `204`; `429` receives distinct localized feedback; all other failures preserve input and use generic copy. The async interaction starts only from a user event and uses no browser globals, so static form markup remains SSR/hydration safe.
+
 ## Content Ownership
 
 Frontend/version-controlled content:
@@ -183,11 +195,12 @@ Do not introduce a frontend project fixture as public content or move static CV/
 - decorative sonar SVG, beam, and dividers hidden from assistive technology;
 - section roots focusable programmatically with `tabindex="-1"`;
 - localized section-permalink labels;
+- Contact labels bound to controls, delayed `aria-invalid`/`aria-describedby` errors, live async status, and non-color-only feedback;
 - reduced-motion fallbacks for every animated behavior.
 
 ## Validation
 
-Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, header/sonar handoff, focus retention, mobile drag/snap geometry, theme/beam behavior, and section permalinks/dividers.
+Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, Contact validation/submission states, header/sonar handoff, focus retention, mobile drag/snap geometry, theme/beam behavior, and section permalinks/dividers.
 
 `npm run smoke:ssr` validates built request-time responses and project data. `npm run smoke:browser` uses installed headless Chrome through CDP to validate wide/mobile navigation, fragments, history, viewport safety, reduced motion, and visual structure.
 
