@@ -214,8 +214,9 @@ Status: in progress.
 Already implemented:
 
 - request-time localized SSR;
-- localized metadata, canonical and `hreflang` links, OpenGraph metadata;
-- localized SSR 404/noindex behavior;
+- localized metadata, canonical and translation-accurate `hreflang` links, OpenGraph metadata;
+- localized SSR 404/noindex behavior for missing or non-public content and distinct HTTP 503/noindex behavior for bounded project-backend failures;
+- permanent compatibility redirects to section fragments while locale negotiation at `/` remains temporary;
 - dynamic backend-owned localized `sitemap.xml` and a public `robots.txt` crawl policy;
 - semantic navigation/content, keyboard states, focus handling, and reduced motion;
 - unit, SSR smoke, and responsive headless-browser checks.

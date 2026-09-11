@@ -114,7 +114,7 @@ export class PageMetadataService {
       imageUrl: absoluteProjectMediaUrl(project.logoMediaRef),
     });
     this.#setCanonical(canonicalUrl);
-    this.#setAlternates(alternates);
+    this.#setAlternates(alternates, false);
   }
 
   applyNotFound(locale: SupportedLocale, currentPath: string): void {
@@ -126,6 +126,26 @@ export class PageMetadataService {
 
     this.#applyMetadata({
       title,
+      description,
+      url: absoluteUrl(stripQueryAndFragment(currentPath)),
+      locale,
+      robots: 'noindex,follow',
+      includeOpenGraphAlternateLocales: false,
+      openGraphType: 'website',
+    });
+    this.#removeManagedLinks();
+  }
+
+  applyProjectUnavailable(locale: SupportedLocale, currentPath: string): void {
+    this.#localeContext.setLocale(locale);
+    this.#setHtmlLang(locale);
+
+    const heading = this.#translations.translateFor(locale, 'projectDetail.error.heading');
+    const siteName = this.#translations.translateFor(locale, 'site.name');
+    const description = this.#translations.translateFor(locale, 'projectDetail.error.message');
+
+    this.#applyMetadata({
+      title: `${heading} | ${siteName}`,
       description,
       url: absoluteUrl(stripQueryAndFragment(currentPath)),
       locale,
@@ -195,7 +215,10 @@ export class PageMetadataService {
     this.#document.head.appendChild(link);
   }
 
-  #setAlternates(alternates: Partial<Record<SupportedLocale, string>>): void {
+  #setAlternates(
+    alternates: Partial<Record<SupportedLocale, string>>,
+    includeXDefault = true,
+  ): void {
     for (const locale of supportedLocales) {
       const alternate = alternates[locale];
 
@@ -209,6 +232,10 @@ export class PageMetadataService {
       link.setAttribute('hreflang', locale);
       link.setAttribute('href', absoluteUrl(alternate));
       this.#document.head.appendChild(link);
+    }
+
+    if (!includeXDefault) {
+      return;
     }
 
     const defaultLink = this.#createManagedLink();

@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, of, timeout } from 'rxjs';
 
 import { defaultLocale, SupportedLocale, toSupportedLocale } from '../i18n/locales';
 import { ProjectApiService } from './project-api.service';
@@ -9,6 +9,9 @@ import { ProjectDetailPageState, ProjectsPageState } from './project.models';
 
 export const projectsPageStateKey = 'projectsState';
 export const projectDetailStateKey = 'projectDetailState';
+export const projectDetailRequestTimeoutMs = 5_000;
+
+const publicProjectSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const projectsResolver: ResolveFn<ProjectsPageState> = (route) => {
   const locale = routeLocale(route);
@@ -25,13 +28,14 @@ export const projectDetailResolver: ResolveFn<ProjectDetailPageState> = (route) 
   const locale = routeLocale(route);
   const slug = route.paramMap.get('slug');
 
-  if (!slug) {
+  if (!slug || !publicProjectSlugPattern.test(slug)) {
     return of({ kind: 'notFound' } satisfies ProjectDetailPageState);
   }
 
   return inject(ProjectApiService)
     .getProject(locale, slug)
     .pipe(
+      timeout({ first: projectDetailRequestTimeoutMs }),
       map((project): ProjectDetailPageState => ({ kind: 'loaded', project })),
       catchError((error: unknown) =>
         of(

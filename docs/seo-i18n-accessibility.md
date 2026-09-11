@@ -8,7 +8,7 @@ The site supports French and English through canonical `/fr` and `/en` documents
 
 Runtime UI dictionaries are frontend-owned. Profile/education/experience/skill/language content is typed and localized in the frontend; project translations are loaded from the backend.
 
-The root `/` is not canonical content. The built Express SSR server returns HTTP 302 using:
+The root `/` is not canonical content. The built Express SSR server returns a temporary HTTP 302 because the destination varies by request, using:
 
 1. explicit `portfolio_locale` cookie;
 2. `Accept-Language`;
@@ -35,13 +35,13 @@ Main documents and fragments:
 
 Fragments identify locations inside `/fr` or `/en`; they are not separate canonical documents.
 
-Former localized section paths return redirects to these fragments. Dedicated project details remain `/fr/projets/:slug` and `/en/projects/:slug`, with one shared slug across languages.
+Former localized section paths are permanent architecture migrations and return HTTP 308 from the built SSR server to these fragments. Dedicated project details remain `/fr/projets/:slug` and `/en/projects/:slug`, with one shared slug across languages.
 
 FR/EN switching preserves a recognized current section. On project details it preserves the slug when the API reports the target locale in `availableLocales`; otherwise it returns to the target locale's Projects section.
 
 ## SSR and Hydration
 
-All public routes use request-time SSR. The localized root resolvers load project summaries and controlled GitHub activity before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent. Angular HTTP transfer caching prevents an immediate duplicate GitHub request after hydration.
+All public routes use request-time SSR. The localized root resolvers load project summaries and controlled GitHub activity before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent. Angular HTTP transfer caching prevents immediate duplicate API requests after hydration.
 
 Angular hydration uses event replay. Browser-only fragment scrolling, scroll-spy, header visibility, lighthouse measurement, media-query handling, animation frames, and mobile drag geometry are platform-guarded and initialized after render.
 
@@ -55,13 +55,13 @@ Direct fragment loads are positioned immediately after hydration and checked aga
 - localized `<title>` and description;
 - `robots`;
 - canonical link;
-- `fr`, `en`, and `x-default` alternates;
+- localized `hreflang` alternates and, for the main documents, `x-default`;
 - OpenGraph title, description, type, URL, locale, and alternate locale;
 - optional project `og:image` from a validated media reference.
 
 The main composed document canonicalizes to `/fr` or `/en` and uses one localized document metadata set. It does not create separate canonical/alternate entries for fragments.
 
-Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to API-reported translations. `og:image` is omitted when no media reference exists.
+Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to actual API-reported translations of that project: bilingual details advertise reciprocal French and English URLs, while a single-language detail advertises only that locale. Project details do not emit `x-default`, because the portfolio root is not an equivalent version of a project. `og:image` is omitted when no media reference exists.
 
 ## Crawl Discovery
 
@@ -79,12 +79,15 @@ For local built-server validation, start the backend and set `BACKEND_INTERNAL_O
 - `DRAFT` projects are absent from public APIs.
 - Only `DETAIL` projects have crawlable detail pages.
 - Unknown, private, `CARD_ONLY`, and untranslated detail URLs render localized 404 content.
+- Project-detail backend failures are temporary availability failures rather than evidence that a project does not exist.
 
 Structured detail sections are rendered as ordinary localized HTML. The deprecated long-description field is used only when a detail project has no structured sections.
 
 ## Errors
 
-Unknown localized routes and project-detail misses set SSR HTTP 404 where Angular handles the request. Their metadata is localized, uses `noindex,follow`, and removes managed canonical/hreflang links.
+Unknown localized routes and invalid, missing, non-public, `CARD_ONLY`, or untranslated project details set SSR HTTP 404. Their metadata is localized, uses `noindex,follow`, and removes managed canonical/hreflang links.
+
+Project-detail resolution bounds its backend request to five seconds, matching sitemap generation. A network/backend failure or timeout instead sets SSR HTTP 503 and renders localized temporary-unavailable copy. The response remains `noindex,follow`, has no canonical or `hreflang` links, clears any previously managed successful-project metadata, and does not expose backend or timeout details to the client. This is request-time behavior through the normal SSR backend origin selected by `BackendApiUrlService`, including `BACKEND_INTERNAL_ORIGIN` when configured.
 
 Unsupported locale prefixes such as `/de` do not silently render English canonical content. Project-specific misses recover to the localized `#projects` section; generic misses recover to the localized document root.
 

@@ -50,6 +50,8 @@ Former section routes remain in the route table only as compatibility redirects:
 /en/contact    -> /en#contact
 ```
 
+The built SSR server returns these architecture migrations as permanent HTTP 308 redirects. The locale-negotiating root `/` remains a temporary HTTP 302 because its target depends on the locale cookie and `Accept-Language`.
+
 Dedicated project pages remain:
 
 ```text
@@ -129,9 +131,9 @@ The root redirect uses explicit preference, `Accept-Language`, then English. Loc
 
 `PageMetadataService` applies HTML language, title, description, robots, canonical, `hreflang`, OpenGraph URL/title/description/type/locale, alternate OpenGraph locales, and optional project images.
 
-The composed document applies Home/document metadata once, canonicalizing to `/fr` or `/en`. Section fragments do not receive separate metadata documents. Project details use the localized API title/short description and advertise only returned `availableLocales`.
+The composed document applies Home/document metadata once, canonicalizing to `/fr` or `/en`. Section fragments do not receive separate metadata documents. Its French/English alternates retain the root `x-default`. Project details use the localized API title/short description and advertise only returned `availableLocales`: bilingual details emit reciprocal French and English links, single-language details emit only their available locale, and project details never emit `x-default`.
 
-Wildcard and project-detail not-found rendering sets SSR HTTP 404 through `RESPONSE_INIT`, uses localized copy, emits `noindex,follow`, and removes managed canonical/hreflang links.
+Wildcard and invalid, missing, non-public, `CARD_ONLY`, or untranslated project-detail rendering sets SSR HTTP 404 through `RESPONSE_INIT`, uses localized copy, emits `noindex,follow`, and removes managed canonical/hreflang links. A project-detail backend failure or five-second resolver timeout instead renders localized generic temporary-unavailable content with HTTP 503 and the same noindex/no-canonical/no-hreflang protections; backend and network details are not exposed.
 
 The Express server serves the version-controlled `robots.txt` with a short cache policy and generates `sitemap.xml` from the backend-owned French and English public project indexes. Sitemap generation requires `BACKEND_INTERNAL_ORIGIN` at runtime and bounds each parallel localized backend request to five seconds. The sitemap lists the two canonical portfolio documents and only public `DETAIL` project translations; malformed, private, and `CARD_ONLY` candidates are excluded without duplicating project content in Angular. Successful sitemap cache headers enable downstream browser or proxy caching; the SSR application does not keep an internal sitemap cache.
 
@@ -148,7 +150,7 @@ GET /api/v1/projects/{slug}?locale=fr|en
 
 `BackendApiUrlService` keeps browser URLs same-origin under `/api`. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
 
-Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. Angular HTTP transfer cache avoids an unnecessary duplicate fetch after hydration when possible.
+Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. The detail resolver rejects syntactically invalid public slugs locally and bounds backend resolution to five seconds; backend 404 maps to not-found, while network, upstream, and timeout failures remain temporary error states. During SSR, `BackendApiUrlService` resolves the configured `BACKEND_INTERNAL_ORIGIN`. Angular HTTP transfer cache avoids an unnecessary duplicate fetch after hydration when possible.
 
 `GitHubActivityApiService` calls only `GET /api/v1/github/activity` with Angular HTTP transfer caching. Its root-route resolver validates repository URLs plus the bounded calendar date/count contract and converts unavailable, empty, malformed, or failed responses into a quiet unavailable state. Home renders nothing for that state, so GitHub never replaces or gates the identity, skills, languages, or later sections.
 

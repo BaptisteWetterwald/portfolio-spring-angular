@@ -59,7 +59,13 @@ describe('PageMetadataService', () => {
   it('marks not-found metadata as noindex without canonical alternates', () => {
     const metadata = TestBed.inject(PageMetadataService);
 
-    metadata.applyStaticPage('home', 'en');
+    metadata.applyProjectDetail('en', {
+      slug: 'portfolio-api',
+      title: 'Portfolio API',
+      shortDescription: 'Public project API.',
+      logoMediaRef: '/assets/projects/portfolio-api.png',
+      availableLocales: ['en', 'fr'],
+    });
     metadata.applyNotFound('fr', '/fr/inconnu?x=1');
 
     expect(document.documentElement.getAttribute('lang')).toBe('fr');
@@ -70,6 +76,10 @@ describe('PageMetadataService', () => {
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
     expect(document.querySelector('link[rel="alternate"]')).toBeNull();
     expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:image"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
+      'website',
+    );
   });
 
   it('applies localized project detail metadata and available hreflang alternates', () => {
@@ -94,6 +104,10 @@ describe('PageMetadataService', () => {
     expect(
       document.querySelector('link[rel="alternate"][hreflang="fr"]')?.getAttribute('href'),
     ).toBe('https://bwetterwald.fr/fr/projets/portfolio-api');
+    expect(
+      document.querySelector('link[rel="alternate"][hreflang="en"]')?.getAttribute('href'),
+    ).toBe('https://bwetterwald.fr/en/projects/portfolio-api');
+    expect(document.querySelector('link[rel="alternate"][hreflang="x-default"]')).toBeNull();
     expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
       'article',
     );
@@ -119,7 +133,40 @@ describe('PageMetadataService', () => {
       document.querySelector('link[rel="alternate"][hreflang="en"]')?.getAttribute('href'),
     ).toBe('https://bwetterwald.fr/en/projects/english-only');
     expect(document.querySelector('link[rel="alternate"][hreflang="fr"]')).toBeNull();
+    expect(document.querySelector('link[rel="alternate"][hreflang="x-default"]')).toBeNull();
     expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
+  });
+
+  it('marks temporary project failures as noindex and clears successful project links', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyProjectDetail('fr', {
+      slug: 'portfolio-api',
+      title: 'Portfolio API',
+      shortDescription: 'API publique.',
+      logoMediaRef: '/assets/projects/portfolio-api.png',
+      availableLocales: ['fr', 'en'],
+    });
+    metadata.applyProjectUnavailable('en', '/en/projects/portfolio-api?retry=1');
+
+    expect(document.documentElement.getAttribute('lang')).toBe('en');
+    expect(document.title).toBe('Project could not be loaded | Baptiste Wetterwald');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
+      'The project API is temporarily unavailable.',
+    );
+    expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
+      'noindex,follow',
+    );
+    expect(document.querySelector('link[rel="canonical"]')).toBeNull();
+    expect(document.querySelector('link[rel="alternate"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:image"]')).toBeNull();
+    expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
+      'website',
+    );
+    expect(document.querySelector('meta[property="og:url"]')?.getAttribute('content')).toBe(
+      'https://bwetterwald.fr/en/projects/portfolio-api',
+    );
   });
 
   it('builds production absolute URLs', () => {
