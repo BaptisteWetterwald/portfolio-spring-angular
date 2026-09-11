@@ -7,13 +7,13 @@ import {
   BackendApiUrlService,
 } from './backend-api-url.service';
 
-type GlobalWithProcess = typeof globalThis & {
+interface GlobalWithProcess {
   process?: {
     env?: Record<string, string | undefined>;
   };
-};
+}
 
-const globalWithProcess = globalThis as GlobalWithProcess;
+const globalWithProcess = globalThis as unknown as GlobalWithProcess;
 
 describe('BackendApiUrlService', () => {
   let hadProcess: boolean;
