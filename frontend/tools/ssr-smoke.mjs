@@ -3,6 +3,33 @@ const runControlledDetailSmoke = process.env['SSR_SMOKE_CONTROLLED_DETAIL'] === 
 
 const checks = [
   {
+    name: 'robots crawl policy',
+    path: '/robots.txt',
+    expectedStatus: 200,
+    expectedContentType: 'text/plain',
+    expectedBody: [
+      'User-agent: *',
+      'Disallow: /api/',
+      'Sitemap: https://bwetterwald.fr/sitemap.xml',
+    ],
+  },
+  {
+    name: 'localized sitemap discovery',
+    path: '/sitemap.xml',
+    expectedStatus: 200,
+    expectedContentType: 'application/xml',
+    expectedBody: [
+      '<loc>https://bwetterwald.fr/fr</loc>',
+      '<loc>https://bwetterwald.fr/en</loc>',
+      '<loc>https://bwetterwald.fr/fr/projets/blaze4</loc>',
+      '<loc>https://bwetterwald.fr/en/projects/blaze4</loc>',
+      '<loc>https://bwetterwald.fr/fr/projets/portfolio-spring-angular</loc>',
+      '<loc>https://bwetterwald.fr/en/projects/portfolio-spring-angular</loc>',
+      'hreflang="x-default" href="https://bwetterwald.fr/"',
+    ],
+    unexpectedBody: ['card-only', 'frequensisa', 'summercamp', 'bot-discord-ir'],
+  },
+  {
     name: 'root fallback redirects to English',
     path: '/',
     expectedStatus: 302,
@@ -567,6 +594,15 @@ for (const check of checks) {
     response.status === check.expectedStatus,
     `${check.name}: expected status ${check.expectedStatus}, received ${response.status}`,
   );
+
+  if (check.expectedContentType) {
+    assert(
+      response.headers.get('content-type')?.includes(check.expectedContentType),
+      `${check.name}: expected Content-Type containing ${check.expectedContentType}, received ${response.headers.get(
+        'content-type',
+      )}`,
+    );
+  }
 
   if (check.expectedLocation) {
     assert(

@@ -63,6 +63,16 @@ The main composed document canonicalizes to `/fr` or `/en` and uses one localize
 
 Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to API-reported translations. `og:image` is omitted when no media reference exists.
 
+## Crawl Discovery
+
+The public `robots.txt` allows general site crawling, instructs compliant crawlers not to crawl `/api/`, and advertises the production sitemap URL. This policy is not access control and cannot by itself prevent API URLs from being discovered, indexed from other signals, or requested directly.
+
+The SSR server generates `/sitemap.xml` from the backend-owned localized public project indexes. Generation requires `BACKEND_INTERNAL_ORIGIN` at runtime, and each of the parallel French and English backend requests has a five-second application-controlled timeout. The sitemap contains the canonical `/fr` and `/en` documents plus only localized `DETAIL` routes for `PUBLISHED` and `ARCHIVED` projects. It emits reciprocal `hreflang` entries for available localized project routes, excludes `CARD_ONLY` projects, and returns a plain-text, non-cacheable `503` rather than publishing an incomplete project index when the backend is unavailable or times out. Malformed individual project entries remain safely excluded without failing an otherwise valid localized index.
+
+Successful sitemap responses advertise `public, max-age=900, stale-while-revalidate=3600` for downstream browser or proxy caching. The SSR process does not keep an application-level or last-known-good sitemap cache.
+
+For local built-server validation, start the backend and set `BACKEND_INTERNAL_ORIGIN` to an origin reachable from the frontend process, such as `http://127.0.0.1:8080` when both processes run directly on the host. Compose supplies `http://backend:8080` inside its frontend container. After building and starting the SSR server, `npm run smoke:ssr` validates the healthy sitemap; a missing or unreachable backend origin is expected to make `/sitemap.xml` return `503`.
+
 ## Public Project Indexing Rules
 
 - `PUBLISHED` and `ARCHIVED` projects may appear in the SSR-rendered Projects section.
@@ -141,18 +151,16 @@ The approved portrait has localized meaningful alt text, explicit intrinsic dime
 
 The following remain part of the SEO/accessibility/performance hardening roadmap and must not be claimed as current features:
 
-- `sitemap.xml`;
-- `robots.txt` file;
 - JSON-LD/Schema.org structured data;
 - approved site-wide OpenGraph image assets;
 - a recorded full screen-reader audit;
 - published Lighthouse/performance/accessibility thresholds;
 - production analytics or monitoring.
 
-The absence of a `robots.txt` file does not replace the per-page robots metadata already implemented.
+The crawl files complement rather than replace the per-page robots metadata already implemented.
 
 ## Validation Direction
 
-Current automated coverage includes route/metadata tests, SSR 404 tests, semantic navigation states, Contact validation and live-region semantics, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
+Current automated coverage includes route/metadata tests, SSR 404 tests, crawl-policy and Express sitemap response tests, semantic navigation states, Contact validation and live-region semantics, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
 
-Before production deployment, add the missing crawl artifacts and complete keyboard-only, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits against the deployed origin.
+Before production deployment, complete keyboard-only, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits against the deployed origin.

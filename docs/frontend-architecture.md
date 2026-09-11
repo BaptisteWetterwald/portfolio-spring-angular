@@ -133,6 +133,8 @@ The composed document applies Home/document metadata once, canonicalizing to `/f
 
 Wildcard and project-detail not-found rendering sets SSR HTTP 404 through `RESPONSE_INIT`, uses localized copy, emits `noindex,follow`, and removes managed canonical/hreflang links.
 
+The Express server serves the version-controlled `robots.txt` with a short cache policy and generates `sitemap.xml` from the backend-owned French and English public project indexes. Sitemap generation requires `BACKEND_INTERNAL_ORIGIN` at runtime and bounds each parallel localized backend request to five seconds. The sitemap lists the two canonical portfolio documents and only public `DETAIL` project translations; malformed, private, and `CARD_ONLY` candidates are excluded without duplicating project content in Angular. Successful sitemap cache headers enable downstream browser or proxy caching; the SSR application does not keep an internal sitemap cache.
+
 ## Project Data Flow
 
 `ProjectApiService` centralizes these calls:
