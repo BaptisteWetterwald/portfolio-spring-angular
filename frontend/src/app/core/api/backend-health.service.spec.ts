@@ -28,7 +28,7 @@ describe('BackendHealthService', () => {
       status = health.status;
     });
 
-    const request = http.expectOne('/api/health');
+    const request = http.expectOne('http://localhost:3000/api/health');
     expect(request.request.method).toBe('GET');
 
     request.flush({ status: 'UP' });

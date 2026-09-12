@@ -33,7 +33,7 @@ describe('ContactApiService', () => {
 
     service.submit(payload).subscribe({ complete: () => (completed = true) });
 
-    const request = http.expectOne('/api/v1/contact');
+    const request = http.expectOne('http://localhost:3000/api/v1/contact');
 
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(payload);

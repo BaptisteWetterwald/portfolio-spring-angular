@@ -1,10 +1,12 @@
 # Information Architecture
 
-This document describes the routing, document hierarchy, and navigation behavior implemented on the single-page candidate branch.
+This document describes the routing, document hierarchy, and navigation behavior of the
+implemented single-page architecture.
 
 ## Status
 
-`experiment/single-page-navigation` is the implemented candidate architecture before merge into `main`. The former multi-page routes are retained only as compatibility redirects and historical context.
+The single-page architecture is implemented on `main`. Former multi-page routes remain only as
+compatibility redirects and historical context.
 
 ## Canonical Localized Documents
 
@@ -13,7 +15,7 @@ This document describes the routing, document hierarchy, and navigation behavior
 | French  | `/fr`              | French content and metadata  |
 | English | `/en`              | English content and metadata |
 
-The root `/` is a non-canonical entry point. The built SSR server returns HTTP 302 according to:
+The root `/` is a non-canonical entry point. The built SSR server returns temporary HTTP 302 according to:
 
 1. explicit `portfolio_locale` cookie;
 2. `Accept-Language`;
@@ -39,7 +41,7 @@ Canonical section links therefore use forms such as `/fr#education` and `/en#pro
 
 ## Compatibility and Detail Routes
 
-The former section URLs issue Angular SSR/client redirects to the matching main-document fragment:
+The former section URLs issue redirects to the matching main-document fragment. The built SSR response is permanent HTTP 308 because these are architecture migrations; client-side Angular navigation uses the same targets.
 
 | Former route     | Redirect target  |
 | ---------------- | ---------------- |
@@ -59,7 +61,7 @@ Project details remain separate pages:
 /en/projects/:slug
 ```
 
-Slugs are shared across locales. Only public projects with `presentationMode = DETAIL` and the requested translation resolve. Unknown, `DRAFT`, `CARD_ONLY`, or untranslated detail requests return localized 404 behavior. A missed project detail links back to the localized `#projects` section.
+Slugs are shared across locales. Only public projects with `presentationMode = DETAIL` and the requested translation resolve. Invalid slugs and unknown, `DRAFT`, `CARD_ONLY`, or untranslated detail requests return localized HTTP 404 behavior. A missed project detail links back to the localized `#projects` section. Backend failures and the bounded five-second detail timeout instead return localized temporary-unavailable content with HTTP 503.
 
 ## Navigation Model
 
@@ -128,7 +130,7 @@ Four restrained daisyUI dividers with small route waypoints separate the five to
 
 The composed document owns one metadata set per locale and canonicalizes to `/fr` or `/en`; fragments are not separate canonical documents. Alternate `fr`, `en`, and `x-default` links are emitted.
 
-Project detail pages use API-provided titles, descriptions, available locales, and optional media. Localized wildcard and project-detail misses set SSR HTTP 404, use `noindex,follow`, and omit canonical/hreflang links.
+Project detail pages use API-provided titles, descriptions, available locales, and optional media. They advertise only actual translations of that project: bilingual pages link reciprocally, single-language pages advertise only their locale, and no project detail emits `x-default`. Localized wildcard and project-detail misses set SSR HTTP 404, use `noindex,follow`, and omit canonical/hreflang links. Temporary backend failures and timeouts use HTTP 503 with the same noindex/no-canonical/no-hreflang policy rather than being misclassified as missing content.
 
 Unsupported locale prefixes are not silently normalized to English. They render not-found behavior selected using the normal locale preference fallback.
 

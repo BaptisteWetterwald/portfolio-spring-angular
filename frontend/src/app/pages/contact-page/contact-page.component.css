@@ -73,8 +73,17 @@
 }
 
 .contact-page :is(.input, .textarea) {
-  border-color: color-mix(in srgb, var(--color-accent-maritime) 24%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-border));
   background: var(--color-surface-raised);
+}
+
+.contact-page
+  :is(.input, .textarea):not(.input-error):not(.textarea-error):hover:not(:focus-visible) {
+  border-color: color-mix(in srgb, var(--color-accent-maritime) 70%, var(--color-text-muted));
+}
+
+.contact-page :is(.input.input-error, .textarea.textarea-error) {
+  border-color: var(--color-error);
 }
 
 .contact-page :is(.input, .textarea):focus-visible {

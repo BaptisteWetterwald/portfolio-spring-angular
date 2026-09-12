@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
+import { RouteFocusService } from './core/routing/route-focus.service';
 
 @Component({
   selector: 'app-root',
@@ -8,4 +10,8 @@ import { RouterOutlet } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.css',
 })
-export class App {}
+export class App {
+  constructor() {
+    inject(RouteFocusService).initialize();
+  }
+}

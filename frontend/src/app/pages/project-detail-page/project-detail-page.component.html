@@ -5,7 +5,9 @@
       aria-labelledby="project-error-title"
     >
       <div class="card-body">
-        <h1 id="project-error-title" class="card-title">{{ t('projectDetail.error.heading') }}</h1>
+        <h1 id="project-error-title" class="card-title" data-route-focus-target tabindex="-1">
+          {{ t('projectDetail.error.heading') }}
+        </h1>
         <p>{{ t('projectDetail.error.message') }}</p>
         <a class="btn btn-sm btn-outline project-detail__action" [routerLink]="projectsPath">
           {{ t('projects.backToProjects') }}
@@ -30,14 +32,13 @@
                 {{ t('projects.status.' + project.status) }}
               </p>
             }
-            <h1 id="project-title">{{ project.title }}</h1>
+            <h1 id="project-title" data-route-focus-target tabindex="-1">
+              {{ project.title }}
+            </h1>
             <p class="project-detail__pitch">{{ project.shortDescription }}</p>
 
             @if (project.githubUrl || project.demoUrl) {
-              <nav
-                class="project-detail__actions card-actions"
-                [attr.aria-label]="t('projects.links')"
-              >
+              <div class="project-detail__actions card-actions">
                 @if (project.githubUrl; as githubUrl) {
                   <a
                     class="btn btn-outline project-detail__action project-detail__action--external"
@@ -62,7 +63,7 @@
                     <span class="project-detail__external-mark" aria-hidden="true"></span>
                   </a>
                 }
-              </nav>
+              </div>
             }
           </div>
 

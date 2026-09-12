@@ -11,7 +11,9 @@
         <app-section-permalink sectionId="home" />
         <p class="home-page__eyebrow">{{ content.home.hero.role }}</p>
       </div>
-      <h1 id="home-title">{{ content.home.hero.name }}</h1>
+      <h1 id="home-title" data-route-focus-target tabindex="-1">
+        {{ content.home.hero.name }}
+      </h1>
       <p class="home-page__orientation">{{ content.home.hero.orientation }}</p>
       <p class="home-page__stack-line">{{ content.home.hero.stackLine }}</p>
 
@@ -24,15 +26,39 @@
 
     <div class="home-page__portrait-slot" data-portrait-slot>
       <div class="home-page__portrait-photo-frame">
-        <img
-          class="home-page__portrait"
-          src="/assets/portrait/baptiste-wetterwald-portrait.png"
-          width="4916"
-          height="7370"
-          [alt]="content.home.hero.portraitAlt"
-          decoding="async"
-          fetchpriority="high"
-        />
+        <picture>
+          <source
+            type="image/avif"
+            srcset="
+              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.avif 240w,
+              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.avif 480w
+            "
+            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+          />
+          <source
+            type="image/webp"
+            srcset="
+              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
+              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
+            "
+            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+          />
+          <img
+            class="home-page__portrait"
+            src="/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp"
+            srcset="
+              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
+              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
+            "
+            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+            width="480"
+            height="720"
+            [alt]="content.home.hero.portraitAlt"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </picture>
       </div>
     </div>
   </header>

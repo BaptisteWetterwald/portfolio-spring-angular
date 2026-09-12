@@ -2,11 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, RouterStateSnapshot } from '@angular/router';
-import { lastValueFrom, Observable, of, throwError } from 'rxjs';
+import { lastValueFrom, NEVER, Observable, of, throwError } from 'rxjs';
 
 import { ProjectApiService } from './project-api.service';
 import {
   projectDetailResolver,
+  projectDetailRequestTimeoutMs,
   projectDetailStateFromRouteData,
   projectsResolver,
   projectsStateFromRouteData,
@@ -68,6 +69,20 @@ describe('project route resolvers', () => {
     expect(result).toEqual({ kind: 'notFound' });
   });
 
+  it.each(['Not-Valid', 'project slug', '-project', 'project-', 'project--slug'])(
+    'rejects an invalid public project slug without calling the backend: %s',
+    async (slug) => {
+      const getProject = vi.fn(() => of(detailProject()));
+
+      configureProjectApi({ getProject });
+
+      const result = await resolveProjectDetail(routeSnapshot('en', slug));
+
+      expect(result).toEqual({ kind: 'notFound' });
+      expect(getProject).not.toHaveBeenCalled();
+    },
+  );
+
   it('converts non-404 detail failures to an error state', async () => {
     configureProjectApi({
       getProject: () =>
@@ -77,6 +92,24 @@ describe('project route resolvers', () => {
     const result = await resolveProjectDetail(routeSnapshot('en', 'broken-project'));
 
     expect(result).toEqual({ kind: 'error' });
+  });
+
+  it('converts a project detail request timeout to an error state', async () => {
+    vi.useFakeTimers();
+
+    try {
+      configureProjectApi({
+        getProject: () => NEVER,
+      });
+
+      const resultPromise = resolveProjectDetail(routeSnapshot('en', 'slow-project'));
+
+      await vi.advanceTimersByTimeAsync(projectDetailRequestTimeoutMs);
+
+      await expect(resultPromise).resolves.toEqual({ kind: 'error' });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('does not synthesize unreachable loading states from missing route data', () => {

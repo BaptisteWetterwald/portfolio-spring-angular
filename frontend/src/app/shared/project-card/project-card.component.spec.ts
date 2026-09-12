@@ -32,8 +32,12 @@ describe('ProjectCardComponent', () => {
 
   it('renders semantic project content and technology labels', () => {
     const card = fixture.nativeElement as HTMLElement;
+    const actions = card.querySelector('.project-card__links');
 
     expect(card.querySelector('article')).not.toBeNull();
+    expect(actions?.tagName).toBe('DIV');
+    expect(actions?.getAttribute('role')).toBeNull();
+    expect(card.querySelector('nav')).toBeNull();
     expect(card.querySelector('h4')?.textContent).toContain('Portfolio API');
     expect(Array.from(card.querySelectorAll('li')).map((item) => item.textContent?.trim())).toEqual(
       ['Angular', 'Spring Boot'],
@@ -120,7 +124,9 @@ describe('ProjectCardComponent', () => {
 
   it('renders optional external links only when present', () => {
     const card = fixture.nativeElement as HTMLElement;
-    const externalLinks = Array.from(card.querySelectorAll<HTMLAnchorElement>('nav a'));
+    const externalLinks = Array.from(
+      card.querySelectorAll<HTMLAnchorElement>('.project-card__links a'),
+    );
 
     expect(externalLinks.map((link) => link.textContent?.trim())).toEqual([
       'View project',
@@ -146,7 +152,9 @@ describe('ProjectCardComponent', () => {
 
     expect(
       Array.from(
-        (noLinksFixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('nav a'),
+        (noLinksFixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>(
+          '.project-card__links a',
+        ),
       ).map((link) => link.textContent?.trim()),
     ).toEqual(['View project']);
   });

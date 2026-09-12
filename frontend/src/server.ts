@@ -12,6 +12,7 @@ import {
   isHopByHopHeader,
   proxyBackendApiRequest,
 } from './server-api-proxy';
+import { registerSitemapRoute } from './server-sitemap-route';
 import {
   readLocalePreferenceCookie,
   resolvePreferredLocale,
@@ -21,6 +22,13 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+app.get('/robots.txt', (_req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(join(browserDistFolder, 'robots.txt'));
+});
+
+registerSitemapRoute(app);
 
 /**
  * Proxy browser-facing API requests to the backend over the internal Docker network.

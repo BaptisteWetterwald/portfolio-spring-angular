@@ -30,7 +30,8 @@ describe('ProjectApiService', () => {
 
     const request = http.expectOne(
       (candidate) =>
-        candidate.url === '/api/v1/projects' && candidate.params.get('locale') === 'fr',
+        candidate.url === 'http://localhost:3000/api/v1/projects' &&
+        candidate.params.get('locale') === 'fr',
     );
 
     expect(request.request.method).toBe('GET');
@@ -46,7 +47,7 @@ describe('ProjectApiService', () => {
 
     const request = http.expectOne(
       (candidate) =>
-        candidate.url === '/api/v1/projects' &&
+        candidate.url === 'http://localhost:3000/api/v1/projects' &&
         candidate.params.get('locale') === 'en' &&
         candidate.params.get('status') === 'ARCHIVED',
     );
@@ -60,7 +61,8 @@ describe('ProjectApiService', () => {
 
     const request = http.expectOne(
       (candidate) =>
-        candidate.url === '/api/v1/projects/featured' && candidate.params.get('locale') === 'fr',
+        candidate.url === 'http://localhost:3000/api/v1/projects/featured' &&
+        candidate.params.get('locale') === 'fr',
     );
 
     expect(request.request.method).toBe('GET');
@@ -72,7 +74,7 @@ describe('ProjectApiService', () => {
 
     const request = http.expectOne(
       (candidate) =>
-        candidate.url === '/api/v1/projects/project%20slug' &&
+        candidate.url === 'http://localhost:3000/api/v1/projects/project%20slug' &&
         candidate.params.get('locale') === 'en',
     );
 

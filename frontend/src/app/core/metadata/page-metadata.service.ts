@@ -2,11 +2,11 @@ import { DOCUMENT } from '@angular/core';
 import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { portfolioContentFor, portfolioPublicProfile } from '../content/portfolio-content';
 import { LocaleContextService } from '../i18n/locale-context.service';
 import { isSupportedLocale, SupportedLocale, supportedLocales } from '../i18n/locales';
 import { TranslationService } from '../i18n/translation.service';
 import { TranslationKey } from '../i18n/translations';
-import { absoluteProjectMediaUrl } from '../projects/project-media';
 import {
   localizedAlternates,
   localizedPath,
@@ -19,6 +19,8 @@ const productionOrigin = 'https://bwetterwald.fr';
 const managedAttribute = 'data-managed-by';
 const managedAttributeValue = 'page-metadata-service';
 const xDefaultUrl = `${productionOrigin}/`;
+const jsonLdMediaType = 'application/ld+json';
+const socialMetadataAttributeValue = `${managedAttributeValue}:social-sharing`;
 
 const metadataKeys = {
   home: {
@@ -52,8 +54,24 @@ export interface ProjectPageMetadata {
   readonly slug: string;
   readonly title: string;
   readonly shortDescription: string;
-  readonly logoMediaRef?: string | null;
   readonly availableLocales?: readonly string[];
+}
+
+interface ProfilePageStructuredData {
+  readonly '@context': 'https://schema.org';
+  readonly '@type': 'ProfilePage';
+  readonly '@id': string;
+  readonly url: string;
+  readonly inLanguage: SupportedLocale;
+  readonly mainEntity: {
+    readonly '@type': 'Person';
+    readonly '@id': string;
+    readonly name: string;
+    readonly description: string;
+    readonly jobTitle: string;
+    readonly image: string;
+    readonly sameAs: readonly string[];
+  };
 }
 
 @Injectable({
@@ -84,9 +102,16 @@ export class PageMetadataService {
       locale,
       robots: 'index,follow',
       includeOpenGraphAlternateLocales: true,
+      includeSocialSharing: true,
     });
     this.#setCanonical(canonicalUrl);
     this.#setAlternates(alternates);
+
+    if (pageId === 'home') {
+      this.#setProfilePageStructuredData(locale, description);
+    } else {
+      this.#removeManagedStructuredData();
+    }
   }
 
   applyProjectDetail(locale: SupportedLocale, project: ProjectPageMetadata): void {
@@ -111,10 +136,11 @@ export class PageMetadataService {
         (availableLocale) => availableLocale !== locale,
       ),
       openGraphType: 'article',
-      imageUrl: absoluteProjectMediaUrl(project.logoMediaRef),
+      includeSocialSharing: true,
     });
     this.#setCanonical(canonicalUrl);
-    this.#setAlternates(alternates);
+    this.#setAlternates(alternates, false);
+    this.#removeManagedStructuredData();
   }
 
   applyNotFound(locale: SupportedLocale, currentPath: string): void {
@@ -134,6 +160,56 @@ export class PageMetadataService {
       openGraphType: 'website',
     });
     this.#removeManagedLinks();
+    this.#removeManagedStructuredData();
+  }
+
+  applyProjectUnavailable(locale: SupportedLocale, currentPath: string): void {
+    this.#localeContext.setLocale(locale);
+    this.#setHtmlLang(locale);
+
+    const heading = this.#translations.translateFor(locale, 'projectDetail.error.heading');
+    const siteName = this.#translations.translateFor(locale, 'site.name');
+    const description = this.#translations.translateFor(locale, 'projectDetail.error.message');
+
+    this.#applyMetadata({
+      title: `${heading} | ${siteName}`,
+      description,
+      url: absoluteUrl(stripQueryAndFragment(currentPath)),
+      locale,
+      robots: 'noindex,follow',
+      includeOpenGraphAlternateLocales: false,
+      openGraphType: 'website',
+    });
+    this.#removeManagedLinks();
+    this.#removeManagedStructuredData();
+  }
+
+  #setProfilePageStructuredData(locale: SupportedLocale, description: string): void {
+    const hero = portfolioContentFor(locale).home.hero;
+    const pageUrl = absoluteUrl(localizedPath(locale, 'home'));
+    const structuredData: ProfilePageStructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      '@id': `${pageUrl}#profile-page`,
+      url: pageUrl,
+      inLanguage: locale,
+      mainEntity: {
+        '@type': 'Person',
+        '@id': `${productionOrigin}/#person`,
+        name: hero.name,
+        description,
+        jobTitle: hero.role,
+        image: absoluteUrl(portfolioPublicProfile.portraitPath),
+        sameAs: [...portfolioPublicProfile.sameAs],
+      },
+    };
+    const script = this.#document.createElement('script');
+
+    this.#removeManagedStructuredData();
+    script.setAttribute('type', jsonLdMediaType);
+    script.setAttribute(managedAttribute, `${managedAttributeValue}:structured-data`);
+    script.textContent = serializeJsonLd(structuredData);
+    this.#document.head.appendChild(script);
   }
 
   #applyMetadata(metadata: {
@@ -145,7 +221,7 @@ export class PageMetadataService {
     readonly includeOpenGraphAlternateLocales: boolean;
     readonly openGraphAlternateLocales?: readonly SupportedLocale[];
     readonly openGraphType?: 'website' | 'article';
-    readonly imageUrl?: string;
+    readonly includeSocialSharing?: boolean;
   }): void {
     this.#title.setTitle(metadata.title);
     this.#meta.updateTag(
@@ -175,16 +251,44 @@ export class PageMetadataService {
     } else {
       this.#removeManagedOpenGraphAlternateLocales();
     }
-    if (metadata.imageUrl) {
-      const imageMeta = this.#meta.updateTag(
-        { property: 'og:image', content: metadata.imageUrl },
-        'property="og:image"',
-      );
-
-      imageMeta?.setAttribute(managedAttribute, `${managedAttributeValue}:og-image`);
+    if (metadata.includeSocialSharing) {
+      this.#setSocialSharingMetadata(metadata);
     } else {
-      this.#removeManagedImage();
+      this.#removeManagedSocialSharingMetadata();
     }
+  }
+
+  #setSocialSharingMetadata(metadata: {
+    readonly title: string;
+    readonly description: string;
+    readonly locale: SupportedLocale;
+  }): void {
+    const socialCard = portfolioPublicProfile.socialCard;
+    const imageUrl = absoluteUrl(socialCard.path);
+    const imageAlt = this.#translations.translateFor(metadata.locale, 'metadata.socialImageAlt');
+    const siteName = this.#translations.translateFor(metadata.locale, 'site.name');
+
+    this.#removeManagedSocialSharingMetadata();
+    this.#appendManagedMeta('property', 'og:image', imageUrl);
+    this.#appendManagedMeta('property', 'og:image:alt', imageAlt);
+    this.#appendManagedMeta('property', 'og:image:width', String(socialCard.width));
+    this.#appendManagedMeta('property', 'og:image:height', String(socialCard.height));
+    this.#appendManagedMeta('property', 'og:image:type', socialCard.mimeType);
+    this.#appendManagedMeta('property', 'og:site_name', siteName);
+    this.#appendManagedMeta('name', 'twitter:card', 'summary_large_image');
+    this.#appendManagedMeta('name', 'twitter:title', metadata.title);
+    this.#appendManagedMeta('name', 'twitter:description', metadata.description);
+    this.#appendManagedMeta('name', 'twitter:image', imageUrl);
+    this.#appendManagedMeta('name', 'twitter:image:alt', imageAlt);
+  }
+
+  #appendManagedMeta(attribute: 'name' | 'property', key: string, content: string): void {
+    const meta = this.#document.createElement('meta');
+
+    meta.setAttribute(attribute, key);
+    meta.setAttribute('content', content);
+    meta.setAttribute(managedAttribute, socialMetadataAttributeValue);
+    this.#document.head.appendChild(meta);
   }
 
   #setCanonical(url: string): void {
@@ -195,7 +299,10 @@ export class PageMetadataService {
     this.#document.head.appendChild(link);
   }
 
-  #setAlternates(alternates: Partial<Record<SupportedLocale, string>>): void {
+  #setAlternates(
+    alternates: Partial<Record<SupportedLocale, string>>,
+    includeXDefault = true,
+  ): void {
     for (const locale of supportedLocales) {
       const alternate = alternates[locale];
 
@@ -209,6 +316,10 @@ export class PageMetadataService {
       link.setAttribute('hreflang', locale);
       link.setAttribute('href', absoluteUrl(alternate));
       this.#document.head.appendChild(link);
+    }
+
+    if (!includeXDefault) {
+      return;
     }
 
     const defaultLink = this.#createManagedLink();
@@ -252,9 +363,17 @@ export class PageMetadataService {
       .forEach((element) => element.remove());
   }
 
-  #removeManagedImage(): void {
+  #removeManagedSocialSharingMetadata(): void {
     this.#document
-      .querySelectorAll(`meta[${managedAttribute}="${managedAttributeValue}:og-image"]`)
+      .querySelectorAll(`meta[${managedAttribute}="${socialMetadataAttributeValue}"]`)
+      .forEach((element) => element.remove());
+  }
+
+  #removeManagedStructuredData(): void {
+    this.#document
+      .querySelectorAll(
+        `script[type="${jsonLdMediaType}"][${managedAttribute}="${managedAttributeValue}:structured-data"]`,
+      )
       .forEach((element) => element.remove());
   }
 
@@ -267,8 +386,17 @@ export function absoluteUrl(path: string): string {
   return `${productionOrigin}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-export function absoluteMediaUrl(mediaRef: string | null | undefined): string | undefined {
-  return absoluteProjectMediaUrl(mediaRef);
+export function serializeJsonLd(value: unknown): string {
+  const serialized = JSON.stringify(value);
+
+  if (serialized === undefined) {
+    throw new TypeError('JSON-LD value must be serializable.');
+  }
+
+  return serialized.replace(
+    /[<>&\u2028\u2029]/gu,
+    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()}`,
+  );
 }
 
 function stripQueryAndFragment(path: string): string {

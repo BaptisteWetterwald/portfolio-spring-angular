@@ -43,7 +43,7 @@
     }
 
     @if (hasDetailPage() || project().githubUrl || project().demoUrl) {
-      <nav class="card-actions project-card__links" [attr.aria-label]="t('projects.links')">
+      <div class="card-actions project-card__links">
         @if (hasDetailPage()) {
           <a
             class="btn btn-sm project-card__action project-card__action--detail"
@@ -77,7 +77,7 @@
             <span class="project-card__external-mark" aria-hidden="true"></span>
           </a>
         }
-      </nav>
+      </div>
     }
   </div>
 </article>

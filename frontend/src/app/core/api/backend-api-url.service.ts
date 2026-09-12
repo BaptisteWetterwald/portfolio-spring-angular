@@ -1,4 +1,4 @@
-import { isPlatformServer } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { inject, Injectable, InjectionToken, PLATFORM_ID, REQUEST } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
@@ -21,6 +21,7 @@ export const BACKEND_API_CONFIG = new InjectionToken<BackendApiConfig>('Backend 
 })
 export class BackendApiUrlService {
   readonly #config = inject(BACKEND_API_CONFIG);
+  readonly #document = inject(DOCUMENT);
   readonly #platformId = inject(PLATFORM_ID);
   readonly #request = inject(REQUEST, { optional: true });
 
@@ -29,10 +30,18 @@ export class BackendApiUrlService {
     const endpointPath = normalizePath(path);
 
     if (isPlatformServer(this.#platformId)) {
-      const serverOrigin = this.#config.ssrInternalOrigin ?? this.#requestOrigin();
+      const serverOrigin = httpOrigin(this.#config.ssrInternalOrigin) ?? this.#requestOrigin();
 
       if (serverOrigin) {
-        return `${trimTrailingSlash(serverOrigin)}${basePath}${endpointPath}`;
+        return `${serverOrigin}${basePath}${endpointPath}`;
+      }
+    }
+
+    if (isPlatformBrowser(this.#platformId)) {
+      const browserOrigin = httpOrigin(this.#document.location?.origin);
+
+      if (browserOrigin) {
+        return `${browserOrigin}${basePath}${endpointPath}`;
       }
     }
 
@@ -44,7 +53,7 @@ export class BackendApiUrlService {
       return undefined;
     }
 
-    return new URL(this.#request.url).origin;
+    return httpOrigin(this.#request.url);
   }
 }
 
@@ -58,8 +67,18 @@ function normalizePath(path: string): string {
   return `/${trimmedPath.replace(/^\/+|\/+$/g, '')}`;
 }
 
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/g, '');
+export function httpOrigin(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.origin : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function readServerEnvironment(name: string): string | undefined {

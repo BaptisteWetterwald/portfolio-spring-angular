@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { PLATFORM_ID, REQUEST } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
@@ -7,13 +8,13 @@ import {
   BackendApiUrlService,
 } from './backend-api-url.service';
 
-type GlobalWithProcess = typeof globalThis & {
+interface GlobalWithProcess {
   process?: {
     env?: Record<string, string | undefined>;
   };
-};
+}
 
-const globalWithProcess = globalThis as GlobalWithProcess;
+const globalWithProcess = globalThis as unknown as GlobalWithProcess;
 
 describe('BackendApiUrlService', () => {
   let hadProcess: boolean;
@@ -50,7 +51,15 @@ describe('BackendApiUrlService', () => {
   });
 
   it('resolves browser requests to the same-origin API path', () => {
-    configureUrlService('browser', { basePath: '/api' });
+    configureUrlService('browser', { basePath: '/api' }, undefined, 'https://portfolio.test');
+
+    expect(TestBed.inject(BackendApiUrlService).resolve('/health')).toBe(
+      'https://portfolio.test/api/health',
+    );
+  });
+
+  it('falls back to the relative API path when the browser origin is unusable', () => {
+    configureUrlService('browser', { basePath: '/api' }, undefined, 'null');
 
     expect(TestBed.inject(BackendApiUrlService).resolve('/health')).toBe('/api/health');
   });
@@ -86,7 +95,7 @@ describe('BackendApiUrlService', () => {
   it('normalizes slashes between origin, base path, and endpoint path', () => {
     configureUrlService('server', {
       basePath: '///api///',
-      ssrInternalOrigin: 'http://backend:8080///',
+      ssrInternalOrigin: 'http://backend:8080/internal/path/',
     });
 
     expect(TestBed.inject(BackendApiUrlService).resolve('///v1/projects///')).toBe(
@@ -99,11 +108,15 @@ function configureUrlService(
   platformId: 'browser' | 'server',
   config: BackendApiConfig,
   requestUrl?: string,
+  browserOrigin?: string,
 ): void {
   TestBed.configureTestingModule({
     providers: [
       { provide: PLATFORM_ID, useValue: platformId },
       { provide: BACKEND_API_CONFIG, useValue: config },
+      ...(browserOrigin
+        ? [{ provide: DOCUMENT, useValue: { location: { origin: browserOrigin } } }]
+        : []),
       ...(requestUrl ? [{ provide: REQUEST, useValue: new Request(requestUrl) }] : []),
     ],
   });

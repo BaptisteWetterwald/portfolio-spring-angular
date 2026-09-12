@@ -35,15 +35,22 @@ describe('ProjectDetailPageComponent', () => {
     ).toEqual(['Angular']);
     expect(page.querySelector('.project-detail__status.badge')).toBeNull();
     expect(page.querySelector('.project-detail__technology.badge')).not.toBeNull();
+    expect(page.querySelector('.project-detail__actions')?.tagName).toBe('DIV');
+    expect(page.querySelector('.project-detail__actions')?.getAttribute('role')).toBeNull();
+    expect(page.querySelector('.project-detail__actions nav')).toBeNull();
     expect(
-      Array.from(page.querySelectorAll<HTMLAnchorElement>('nav a')).map((link) => link.href),
+      Array.from(page.querySelectorAll<HTMLAnchorElement>('.project-detail__actions a')).map(
+        (link) => link.href,
+      ),
     ).toEqual([
       'https://example.test/portfolio-api.git',
       'https://demo.example.test/portfolio-api',
     ]);
-    expect(page.querySelector<HTMLAnchorElement>('nav a')?.getAttribute('aria-label')).toBe(
-      'GitHub (opens in a new tab): Portfolio API',
-    );
+    expect(
+      page
+        .querySelector<HTMLAnchorElement>('.project-detail__actions a')
+        ?.getAttribute('aria-label'),
+    ).toBe('GitHub (opens in a new tab): Portfolio API');
   });
 
   it('renders an archived badge when historical context is meaningful', async () => {
@@ -121,6 +128,7 @@ describe('ProjectDetailPageComponent', () => {
   it('applies project metadata from the loaded DTO', async () => {
     const metadata = metadataSpy();
     const project = detailProject();
+    const responseInit: ResponseInit = { status: 200 };
 
     await createFixture(
       {
@@ -129,34 +137,50 @@ describe('ProjectDetailPageComponent', () => {
       },
       'fr',
       metadata,
+      responseInit,
     );
 
     expect(metadata.applyProjectDetail).toHaveBeenCalledWith('fr', project);
+    expect(responseInit.status).toBe(200);
   });
 
-  it('renders generic error state with a localized recovery link', async () => {
-    const fixture = await createFixture({
-      kind: 'error',
-    });
+  it('renders generic error state, applies safe metadata, and sets SSR status 503', async () => {
+    const metadata = metadataSpy();
+    const responseInit: ResponseInit = { status: 200 };
+    const fixture = await createFixture(
+      {
+        kind: 'error',
+      },
+      'en',
+      metadata,
+      responseInit,
+    );
     const page = fixture.nativeElement as HTMLElement;
 
     expect(page.textContent).toContain('Project could not be loaded');
     expect(page.querySelector<HTMLAnchorElement>('a')?.getAttribute('href')).toBe('/en#projects');
+    expect(metadata.applyProjectUnavailable).toHaveBeenCalledWith('en', '/');
+    expect(metadata.applyProjectDetail).not.toHaveBeenCalled();
+    expect(responseInit.status).toBe(503);
   });
 
   it('renders localized not-found UI and sets SSR response status', async () => {
     const responseInit: ResponseInit = { status: 200 };
+    const metadata = metadataSpy();
     const fixture = await createFixture(
       {
         kind: 'notFound',
       },
       'fr',
-      metadataSpy(),
+      metadata,
       responseInit,
     );
     const page = fixture.nativeElement as HTMLElement;
 
     expect(page.querySelector('app-not-found-page h1')?.textContent).toContain('Page introuvable');
+    expect(metadata.applyNotFound).toHaveBeenCalled();
+    expect(metadata.applyProjectDetail).not.toHaveBeenCalled();
+    expect(metadata.applyProjectUnavailable).not.toHaveBeenCalled();
     expect(responseInit.status).toBe(404);
   });
 });
@@ -204,11 +228,11 @@ async function createFixture(
 
 function metadataSpy(): Pick<
   PageMetadataService,
-  'applyProjectDetail' | 'applyStaticPage' | 'applyNotFound'
+  'applyProjectDetail' | 'applyProjectUnavailable' | 'applyNotFound'
 > {
   return {
     applyProjectDetail: vi.fn(),
-    applyStaticPage: vi.fn(),
+    applyProjectUnavailable: vi.fn(),
     applyNotFound: vi.fn(),
   };
 }

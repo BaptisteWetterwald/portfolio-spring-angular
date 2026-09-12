@@ -31,12 +31,13 @@ import { NotFoundPageComponent } from '../not-found-page/not-found-page.componen
 })
 export class ProjectDetailPageComponent {
   readonly #route = inject(ActivatedRoute);
+  readonly #router = inject(Router);
   readonly #routeData = toSignal(this.#route.data, { initialValue: this.#route.snapshot.data });
   readonly #translations = inject(TranslationService);
 
   protected readonly locale =
     toSupportedLocale(this.#route.parent?.snapshot.data['locale']) ?? defaultLocale;
-  protected readonly projectsPath = inject(Router).parseUrl(
+  protected readonly projectsPath = this.#router.parseUrl(
     localizedPortfolioSectionUrl(this.locale, 'projects'),
   );
   protected readonly state = computed(() =>
@@ -77,7 +78,10 @@ export class ProjectDetailPageComponent {
       }
 
       this.#navigation.setActiveSection('projects');
-      this.#metadata.applyStaticPage('projects', this.locale);
+      this.#metadata.applyProjectUnavailable(this.locale, this.#router.url);
+      if (this.#responseInit) {
+        this.#responseInit.status = 503;
+      }
     });
   }
 

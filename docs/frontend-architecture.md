@@ -50,6 +50,8 @@ Former section routes remain in the route table only as compatibility redirects:
 /en/contact    -> /en#contact
 ```
 
+The built SSR server returns these architecture migrations as permanent HTTP 308 redirects. The locale-negotiating root `/` remains a temporary HTTP 302 because its target depends on the locale cookie and `Accept-Language`.
+
 Dedicated project pages remain:
 
 ```text
@@ -89,6 +91,8 @@ Modified clicks and SSR are not intercepted, so the anchors retain normal platfo
 
 `PortfolioPageComponent` initializes fragment navigation after render, rechecks initial deep links after browser restoration, handles back/forward without new history writes, and observes the five section roots for passive scroll-spy. Scroll-spy changes state only; it never replaces the current URL fragment.
 
+`RouteFocusService` provides the separate SPA page-change policy. After the initial render, a change to the routed path focuses the new route's programmatically focusable primary heading, or the requested portfolio section when a full route change returns to a fragment. Fragment-only navigation is excluded so passive scroll-spy and the existing section-anchor policy do not steal focus. The service is browser-guarded and does not alter SSR markup beyond the static focus targets.
+
 ## Header, Sonar, and Footer
 
 `SiteHeaderComponent` contains conventional desktop section navigation, locale switching, and a conventional mobile menu. It contains no sonar and no lighthouse.
@@ -101,7 +105,7 @@ On wide viewports, `PublicLayoutComponent` observes the header and applies a two
 
 Outgoing navigation is inert/hidden from assistive technology unless it already contains focus. This avoids forced focus movement during handoff.
 
-On narrow viewports, the compact sonar is active from initial render. `SonarNavigationComponent` supports pointer dragging for the collapsed bubble, safe-area clamping, left/right edge snapping, a lighthouse avoidance zone, and an inward viewport-constrained expanded panel. It also expands through hover, focus, click, or tap as appropriate and closes on Escape or navigation.
+On narrow viewports, the compact sonar is active from initial render. `SonarNavigationComponent` supports pointer dragging for the collapsed bubble, safe-area clamping, left/right edge snapping, a lighthouse avoidance zone, and an inward viewport-constrained expanded panel. It also expands through hover, focus, click, or tap as appropriate and closes on navigation. Escape collapses a focused panel and returns focus to its disclosure button, so `focus-within` cannot leave the panel reported as expanded.
 
 `SiteFooterComponent` exposes conventional text links to all five fragments.
 
@@ -127,11 +131,19 @@ The root redirect uses explicit preference, `Accept-Language`, then English. Loc
 
 ## Metadata and SSR Errors
 
-`PageMetadataService` applies HTML language, title, description, robots, canonical, `hreflang`, OpenGraph URL/title/description/type/locale, alternate OpenGraph locales, and optional project images.
+`PageMetadataService` applies HTML language, title, description, robots, canonical, `hreflang`, OpenGraph URL/title/description/type/locale, alternate OpenGraph locales, and one managed OpenGraph/Twitter social-card group.
 
-The composed document applies Home/document metadata once, canonicalizing to `/fr` or `/en`. Section fragments do not receive separate metadata documents. Project details use the localized API title/short description and advertise only returned `availableLocales`.
+The composed document applies Home/document metadata once, canonicalizing to `/fr` or `/en`. Section fragments do not receive separate metadata documents. Its French/English alternates retain the root `x-default`. Project details use the localized API title/short description and advertise only returned `availableLocales`: bilingual details emit reciprocal French and English links, single-language details emit only their available locale, and project details never emit `x-default`.
 
-Wildcard and project-detail not-found rendering sets SSR HTTP 404 through `RESPONSE_INIT`, uses localized copy, emits `noindex,follow`, and removes managed canonical/hreflang links.
+Healthy main documents and public project details use the same language-neutral `1200 × 630` PNG at `/assets/social/baptiste-wetterwald-social-card-v1.png`. Its absolute production URL is derived by the existing metadata origin helper; project `logoMediaRef` is not used for social sharing. The versioned filename permits future cache-safe replacement because public static assets receive long-lived cache headers. SSR emits the final OpenGraph image/site-name and Twitter card fields before hydration. Client navigation replaces their localized title, description, and alt text, while 404, untranslated-detail, and temporary 503 states remove the whole managed group.
+
+Healthy `/fr` and `/en` documents also receive one managed, SSR-rendered JSON-LD `ProfilePage` whose localized page identity contains a shared `Person` identity. The Person name and job title come from typed localized profile content, the description reuses the localized Home metadata description, and the portrait plus approved GitHub `sameAs` URL come from locale-neutral frontend profile configuration. The stable GitHub identity is independent of the optional activity API response. Project details, 404s, and temporary 503 states remove the managed script so client navigation cannot retain stale profile data.
+
+M12 deliberately implements no project structured-data type. `SoftwareSourceCode` may be reconsidered only after `githubUrl` has a formal public-source guarantee, programming languages are explicitly classified, and repository data is verified. `CreativeWork` and other project-schema fallbacks are intentionally omitted.
+
+Wildcard and invalid, missing, non-public, `CARD_ONLY`, or untranslated project-detail rendering sets SSR HTTP 404 through `RESPONSE_INIT`, uses localized copy, emits `noindex,follow`, and removes managed canonical/hreflang links. A project-detail backend failure or five-second resolver timeout instead renders localized generic temporary-unavailable content with HTTP 503 and the same noindex/no-canonical/no-hreflang protections; backend and network details are not exposed.
+
+The Express server serves the version-controlled `robots.txt` with a short cache policy and generates `sitemap.xml` from the backend-owned French and English public project indexes. Sitemap generation requires `BACKEND_INTERNAL_ORIGIN` at runtime and bounds each parallel localized backend request to five seconds. The sitemap lists the two canonical portfolio documents and only public `DETAIL` project translations; malformed, private, and `CARD_ONLY` candidates are excluded without duplicating project content in Angular. Successful sitemap cache headers enable downstream browser or proxy caching; the SSR application does not keep an internal sitemap cache.
 
 ## Project Data Flow
 
@@ -144,13 +156,13 @@ GET /api/v1/projects/featured?locale=fr|en
 GET /api/v1/projects/{slug}?locale=fr|en
 ```
 
-`BackendApiUrlService` keeps browser URLs same-origin under `/api`. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
+`BackendApiUrlService` keeps browser URLs under `/api` and canonicalizes them to an absolute current-origin URL when a usable browser origin exists, retaining a relative fallback for non-browser or origin-less contexts. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
 
-Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. Angular HTTP transfer cache avoids an unnecessary duplicate fetch after hydration when possible.
+Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. The detail resolver rejects syntactically invalid public slugs locally and bounds backend resolution to five seconds; backend 404 maps to not-found, while network, upstream, and timeout failures remain temporary error states. During SSR, `BackendApiUrlService` resolves the configured `BACKEND_INTERNAL_ORIGIN`. A server-only Angular `HTTP_TRANSFER_CACHE_ORIGIN_MAP` provider maps that normalized internal origin to the incoming public request origin, so successful project and GitHub responses use the same absolute cache identity during SSR and hydration. The internal origin is absent from transferred state, hydration performs no immediate duplicate GET, and Angular stops serving the transfer cache after application stability so later locale navigation performs normal browser requests.
 
 `GitHubActivityApiService` calls only `GET /api/v1/github/activity` with Angular HTTP transfer caching. Its root-route resolver validates repository URLs plus the bounded calendar date/count contract and converts unavailable, empty, malformed, or failed responses into a quiet unavailable state. Home renders nothing for that state, so GitHub never replaces or gates the identity, skills, languages, or later sections.
 
-`GitHubContributionCalendarComponent` is a native, SSR-safe Angular renderer rather than an imperative chart dependency. It groups at most 400 validated days into Sunday-based week columns, derives four cyan intensity levels from positive counts, and renders a localized approximately 53-by-7 grid before the existing repository cards. The calendar scrolls horizontally inside its own bounded region on narrow viewports and uses a guarded after-render adjustment to show the most recent weeks first. Its scroll container is the single keyboard stop; date/count descriptions are exposed on non-focusable cells so the graph does not add hundreds of tab stops. Missing contribution data removes only the calendar while repositories remain useful.
+`GitHubContributionCalendarComponent` is a native, SSR-safe Angular renderer rather than an imperative chart dependency. It groups at most 400 validated days into Sunday-based week columns, derives four cyan intensity levels from positive counts, and renders a localized approximately 53-by-7 grid before the existing repository cards. Every positive level uses a high-contrast maritime-cyan boundary, while an outlined-to-filled progression communicates relative intensity without turning the calendar into a dominant block. The calendar scrolls horizontally inside its own bounded region on narrow viewports and uses a guarded after-render adjustment to show the most recent weeks first. Its scroll container is the single keyboard stop; date/count descriptions are exposed on non-focusable cells so the graph does not add hundreds of tab stops. Missing contribution data removes only the calendar while repositories remain useful.
 
 Project cards render public status/presentation fields from the API. `DETAIL` adds the localized detail action; `CARD_ONLY` does not. Detail pages prefer ordered localized sections and fall back to deprecated `detailedDescription` only when sections are empty.
 
@@ -184,24 +196,34 @@ Backend/PostgreSQL content:
 
 Do not introduce a frontend project fixture as public content or move static CV/profile facts into persistence without a new requirement.
 
+## Performance Contracts
+
+The Home portrait retains the approved high-resolution source master unchanged at `public/assets/portrait/baptiste-wetterwald-portrait.png`, but ordinary page markup and `ProfilePage` structured data do not reference it. The visible portrait uses a versioned `<picture>` contract with 240w and 480w AVIF candidates followed by equivalent WebP fallbacks. Its measured responsive `sizes` values are 88px up to 360 CSS pixels, 108px up to 640 CSS pixels, and 203px otherwise. Because it is above the fold and a likely LCP candidate, it remains explicitly eager, asynchronously decoded, and high fetch priority; the existing porthole crop and composition are unchanged.
+
+The production build remains intentionally unsplit for M12. The localized portfolio is one composed document, and bundle splitting is deferred until user-facing scripting or main-thread measurements justify a targeted boundary rather than merely silencing the current initial-bundle warning. The SSR contribution calendar remains server-rendered; its repeated HTML compresses effectively and does not justify a separate rendering model.
+
+HTTP compression remains a future host-Nginx deployment responsibility. Express compression is not installed because the intended production reverse proxy should compress HTML, JavaScript, CSS, JSON, SVG, and XML once at the public edge.
+
 ## Accessibility Contracts
 
 - one document `h1` in the Home hero and `h2` headings for major composed sections;
-- semantic header/nav/main/section/article/footer landmarks;
+- semantic header/nav/main/section/article/footer landmarks, without navigation landmarks around individual project action groups or a complementary landmark around the global floating-control wrapper;
 - real anchors for all navigation targets;
 - visible focus and no keyboard traps;
 - mobile menu `aria-expanded`/`aria-controls`, Escape close, and focus restoration;
 - sonar expansion state and active location exposed accessibly;
 - decorative sonar SVG, beam, and dividers hidden from assistive technology;
 - section roots focusable programmatically with `tabindex="-1"`;
+- centralized full-route focus movement to a primary heading or destination section, excluding same-document fragment changes;
 - localized section-permalink labels;
 - Contact labels bound to controls, delayed `aria-invalid`/`aria-describedby` errors, live async status, and non-color-only feedback;
+- Contact field boundaries with at least 3:1 non-text contrast in both themes and distinct hover, focus, and error states;
 - reduced-motion fallbacks for every animated behavior.
 
 ## Validation
 
-Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, Contact validation/submission states, header/sonar handoff, focus retention, mobile drag/snap geometry, theme/beam behavior, and section permalinks/dividers.
+Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, Contact validation/submission states, full-route focus management, header/sonar handoff, focused Escape collapse, mobile drag/snap geometry, theme/beam behavior, simplified landmark markup, and section permalinks/dividers.
 
-`npm run smoke:ssr` validates built request-time responses and project data. `npm run smoke:browser` uses installed headless Chrome through CDP to validate wide/mobile navigation, fragments, history, viewport safety, reduced motion, and visual structure.
+`npm run smoke:ssr` validates built request-time responses and project data. `npm run smoke:browser` uses installed headless Chrome through CDP to validate wide/mobile navigation, fragments, history, viewport safety, reduced motion, and visual structure. `npm run smoke:a11y` adds focused full-route focus, sonar Escape/Tab, landmark-tree, field/calendar contrast, 320 CSS-pixel reflow, and reduced-motion assertions.
 
 Standard validation is `npm run format:check`, `npm run lint`, `npm test`, and `npm run build`.

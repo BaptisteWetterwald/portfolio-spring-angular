@@ -9,10 +9,17 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server,
   },
   ...supportedLocales.flatMap((locale): ServerRoute[] => [
-    ...staticPageIds.map((pageId): ServerRoute => ({
-      path: toServerRoutePath(localizedPath(locale, pageId)),
+    {
+      path: toServerRoutePath(localizedPath(locale, 'home')),
       renderMode: RenderMode.Server,
-    })),
+    },
+    ...staticPageIds
+      .filter((pageId) => pageId !== 'home')
+      .map((pageId): ServerRoute => ({
+        path: toServerRoutePath(localizedPath(locale, pageId)),
+        renderMode: RenderMode.Server,
+        status: 308,
+      })),
     {
       path: toServerRoutePath(`${localizedPath(locale, 'projects')}/:slug`),
       renderMode: RenderMode.Server,

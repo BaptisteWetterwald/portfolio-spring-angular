@@ -54,6 +54,12 @@ describe('PublicLayoutComponent integration', () => {
     expect(
       harness.fixture.nativeElement.querySelectorAll('app-lighthouse-theme-toggle'),
     ).toHaveLength(1);
+    expect(
+      harness.fixture.nativeElement.querySelector('app-maritime-floating-controls aside'),
+    ).toBe(null);
+    expect(
+      requiredElement(harness.fixture.nativeElement, '.maritime-floating-controls').tagName,
+    ).toBe('DIV');
     expect(beam(harness).getAttribute('data-lighthouse-beam-source')).toBe('floating');
   });
 
@@ -199,6 +205,37 @@ describe('PublicLayoutComponent integration', () => {
     await settleHarness(harness);
 
     expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('collapses a focused floating sonar on Escape and returns focus to its disclosure button', async () => {
+    const harness = await createHarness('/en');
+    activateFloatingSonar(harness, observers);
+    await settleHarness(harness);
+
+    const button = compactSonarButton(harness);
+    const links = floatingSonarLinks(harness);
+
+    button.focus();
+    await settleHarness(harness);
+    links[0]?.focus();
+    await settleHarness(harness);
+
+    expect(document.activeElement).toBe(links[0]);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    document.dispatchEvent(escapeEvent);
+    await settleHarness(harness);
+
+    expect(escapeEvent.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(button);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(links.every((link) => link.getAttribute('tabindex') === '-1')).toBe(true);
   });
 
   it('supports click expansion for touch-style interaction and closes after route navigation', async () => {

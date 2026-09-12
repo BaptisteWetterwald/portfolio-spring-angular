@@ -38,21 +38,50 @@ describe('HomePageComponent', () => {
     expect(page.textContent).toContain('Angular');
   });
 
-  it('renders the provided portrait source without fake social profile links', async () => {
+  it('renders the responsive portrait contract without fake social profile links', async () => {
     const fixture = await createFixture('en');
     const page = fixture.nativeElement as HTMLElement;
     const links = Array.from(page.querySelectorAll<HTMLAnchorElement>('a'));
     const portraitSlot = page.querySelector('[data-portrait-slot]');
     const portraitFrame = portraitSlot?.querySelector('.home-page__portrait-photo-frame');
+    const picture = portraitFrame?.querySelector('picture');
+    const sources = Array.from(picture?.querySelectorAll('source') ?? []);
     const portrait = portraitSlot?.querySelector('img');
 
     expect(portraitSlot).not.toBeNull();
     expect(portraitFrame).not.toBeNull();
+    expect(picture).not.toBeNull();
     expect(portraitSlot?.querySelector('.home-page__portrait-ring')).toBeNull();
-    expect(portrait?.getAttribute('src')).toBe('/assets/portrait/baptiste-wetterwald-portrait.png');
+    expect(sources.map((source) => source.getAttribute('type'))).toEqual([
+      'image/avif',
+      'image/webp',
+    ]);
+    expect(normalizedAttribute(sources[0], 'srcset')).toBe(
+      '/assets/portrait/baptiste-wetterwald-portrait-v1-240w.avif 240w, /assets/portrait/baptiste-wetterwald-portrait-v1-480w.avif 480w',
+    );
+    expect(normalizedAttribute(sources[1], 'srcset')).toBe(
+      '/assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w, /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w',
+    );
+    expect(sources.map((source) => source.getAttribute('sizes'))).toEqual([
+      '(max-width: 360px) 88px, (max-width: 640px) 108px, 203px',
+      '(max-width: 360px) 88px, (max-width: 640px) 108px, 203px',
+    ]);
+    expect(portrait?.getAttribute('src')).toBe(
+      '/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
+    );
+    expect(normalizedAttribute(portrait, 'srcset')).toBe(
+      '/assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w, /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w',
+    );
+    expect(portrait?.getAttribute('sizes')).toBe(
+      '(max-width: 360px) 88px, (max-width: 640px) 108px, 203px',
+    );
     expect(portrait?.getAttribute('alt')).toBe('Portrait of Baptiste Wetterwald');
-    expect(portrait?.getAttribute('width')).toBe('4916');
-    expect(portrait?.getAttribute('height')).toBe('7370');
+    expect(portrait?.getAttribute('width')).toBe('480');
+    expect(portrait?.getAttribute('height')).toBe('720');
+    expect(portrait?.getAttribute('loading')).toBe('eager');
+    expect(portrait?.getAttribute('decoding')).toBe('async');
+    expect(portrait?.getAttribute('fetchpriority')).toBe('high');
+    expect(picture?.innerHTML).not.toContain('baptiste-wetterwald-portrait.png');
     expect(links.some((link) => (link.getAttribute('href') ?? '').includes('github'))).toBe(false);
     expect(links.some((link) => (link.getAttribute('href') ?? '').includes('linkedin'))).toBe(
       false,
@@ -304,6 +333,10 @@ describe('HomePageComponent', () => {
     expect(permalink?.closest('h1')).toBeNull();
   });
 });
+
+function normalizedAttribute(element: Element | null | undefined, name: string): string | null {
+  return element?.getAttribute(name)?.replace(/\s+/gu, ' ').trim() ?? null;
+}
 
 async function createFixture(
   locale: 'fr' | 'en',
