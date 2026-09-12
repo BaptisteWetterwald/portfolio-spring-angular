@@ -1,0 +1,43 @@
+# Candidate configuration for the existing Cloudflare Tunnel origin.
+# It replaces only the portfolio upstream after the new stack has passed local verification.
+
+server {
+    listen 127.0.0.1:8008;
+    server_name www.bwetterwald.fr;
+
+    return 301 https://bwetterwald.fr$request_uri;
+}
+
+server {
+    listen 127.0.0.1:8008;
+    server_name bwetterwald.fr;
+
+    # Existing Wakommute route: preserve this location and upstream unchanged.
+    location /wakommute/api/ {
+        proxy_pass http://127.0.0.1:3000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+
+        # This listener is reachable only from the local Cloudflare Tunnel. Replace the browser's
+        # forwarding headers with the public host/scheme and Cloudflare's trusted client address.
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $http_cf_connecting_ip;
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Port 443;
+        proxy_set_header Forwarded "";
+
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+}

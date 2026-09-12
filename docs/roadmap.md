@@ -4,24 +4,24 @@ This roadmap records what the repository currently implements and what remains. 
 
 ## Current Status
 
-| Milestone                                   | Status                             | Current evidence                                                                                                             |
-| ------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| M1 Bootstrap                                | Complete                           | Angular/Spring projects, wrappers, formatting/linting configuration, repository layout                                       |
-| M2 Health/connectivity                      | Complete                           | Actuator `/api/health`, Angular API URL service, native development proxy                                                    |
-| M3 Docker Compose                           | Complete                           | Frontend, backend, PostgreSQL, local networking, health checks, named volume                                                 |
-| M4 Persistence/Flyway                       | Complete                           | JPA domain, PostgreSQL repositories, Flyway V1-V8, schema/query tests                                                        |
-| M5 FR/EN SSR/SEO foundation                 | Complete                           | Request-time SSR, `/fr` and `/en`, root redirect, runtime i18n, metadata, localized 404s                                     |
-| M6 Shell/theme/navigation                   | Complete                           | Semantic shell, locale/theme preferences, accessible header/mobile/footer navigation                                         |
-| M7 Projects API/pages                       | Complete                           | Public API, API-backed listing, dedicated `DETAIL` pages, resolver/SSR states                                                |
-| M8 Real portfolio content                   | Complete for supplied content      | Profile, skills, languages, education, experience, six seeded projects; unprovided contact/CV/social content remains omitted |
-| M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
-| M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
-| M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
-| M12 SEO/accessibility/performance hardening | Complete                           | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, accessibility remediation, responsive portrait, transfer-cache mapping  |
-| M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
-| M14 CI                                      | Complete                           | Parallel frontend/backend validation, PostgreSQL CI, gated Docker builds, and GHCR SHA-tag publication                      |
-| M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
-| M16 Production hardening                    | Not started                        | No deployed backup/restore, rollback automation, monitoring, or production security verification                             |
+| Milestone                                   | Status                             | Current evidence                                                                                                              |
+| ------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| M1 Bootstrap                                | Complete                           | Angular/Spring projects, wrappers, formatting/linting configuration, repository layout                                        |
+| M2 Health/connectivity                      | Complete                           | Actuator `/api/health`, Angular API URL service, native development proxy                                                     |
+| M3 Docker Compose                           | Complete                           | Frontend, backend, PostgreSQL, local networking, health checks, named volume                                                  |
+| M4 Persistence/Flyway                       | Complete                           | JPA domain, PostgreSQL repositories, Flyway V1-V8, schema/query tests                                                         |
+| M5 FR/EN SSR/SEO foundation                 | Complete                           | Request-time SSR, `/fr` and `/en`, root redirect, runtime i18n, metadata, localized 404s                                      |
+| M6 Shell/theme/navigation                   | Complete                           | Semantic shell, locale/theme preferences, accessible header/mobile/footer navigation                                          |
+| M7 Projects API/pages                       | Complete                           | Public API, API-backed listing, dedicated `DETAIL` pages, resolver/SSR states                                                 |
+| M8 Real portfolio content                   | Complete for supplied content      | Profile, skills, languages, education, experience, six seeded projects; unprovided contact/CV/social content remains omitted  |
+| M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                      |
+| M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                           |
+| M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary   |
+| M12 SEO/accessibility/performance hardening | Complete                           | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, accessibility remediation, responsive portrait, transfer-cache mapping   |
+| M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                               |
+| M14 CI                                      | Complete                           | Parallel frontend/backend validation, PostgreSQL CI, gated Docker builds, and GHCR SHA-tag publication                        |
+| M15 Homelab deployment                      | Repository implementation complete | Cloudflare/Nginx staging, legacy backup contract, SHA deploy/rollback script, and gated automation; live verification pending |
+| M16 Production hardening                    | Not started                        | No deployed backup/restore, rollback automation, monitoring, or production security verification                              |
 
 The single-page architecture is the approved `main` baseline. It is implemented and validated locally, but it must not be described as production-deployed.
 
@@ -257,7 +257,7 @@ Remaining outside M13: immutable registry publishing, production deployment conf
 
 ## M14 — CI
 
-Status: complete in code; the first hosted GitHub Actions run remains the external verification point.
+Status: complete in code and validated in hosted GitHub Actions runs, including main-branch GHCR publication.
 
 Implemented:
 
@@ -271,19 +271,23 @@ Implemented:
 
 Remaining outside M14: VPS registry authentication, production Compose image selection, deployment orchestration, Nginx/HTTPS, post-rollout health verification, and rollback automation.
 
-## M15 — Automated VPS Deployment
+## M15 — Automated Homelab Deployment
 
-Status: not started.
+Status: repository implementation complete; remote commissioning and live verification pending explicit approval.
 
-Required:
+Implemented in the repository:
 
-- host Nginx and HTTPS for `bwetterwald.fr`;
-- production Compose/environment configuration;
-- authenticated GHCR pulls;
-- controlled frontend/backend update;
-- startup migration coordination;
-- public health verification and deployment traceability;
-- rollback to prior compatible image versions.
+- audited homelab topology using existing Cloudflare HTTPS/Tunnel and loopback host Nginx;
+- candidate Nginx cutover preserving Wakommute and redirecting `www` to the apex;
+- production GHCR Compose and fail-closed environment contract;
+- documented package-read-only GHCR authentication;
+- legacy source/JAR/systemd/Nginx backup contract with Git metadata and checksums;
+- separate staging, local verification, and public-finalization operations;
+- PostgreSQL/Flyway/backend/frontend ordered rollout with bounded local/public health gates;
+- rollback through prior compatible immutable image SHAs;
+- disabled-by-default GitHub Actions SSH automation after successful image publication.
+
+Remaining external work: confirm remote Cloudflare ingress, install/review artifacts without touching the legacy tree, create and verify the legacy backup, provision private configuration and GHCR access, stage the new stack, perform the reviewed Nginx upstream cutover, finalize public verification, and only then provision a dedicated CI identity and enable automation. M15 must not be called live-complete until those checks pass.
 
 ## M16 — Production Verification and Hardening
 

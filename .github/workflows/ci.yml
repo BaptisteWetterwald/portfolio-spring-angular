@@ -14,7 +14,8 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never interrupt an in-flight main deployment. PR/manual validation remains replaceable.
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   frontend-validation:
@@ -102,12 +103,111 @@ jobs:
       - name: Test, compile, and package
         run: ./mvnw -B verify
 
+  deployment-validation:
+    name: Deployment artifact validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APP_VERSION: 0123456789abcdef0123456789abcdef01234567
+      POSTGRES_PASSWORD: deployment-validation-password
+      PORTFOLIO_CONTACT_RECIPIENT: recipient@example.invalid
+      PORTFOLIO_CONTACT_SENDER: sender@example.invalid
+      SPRING_MAIL_HOST: smtp.example.invalid
+      SPRING_MAIL_USERNAME: deployment-validation-user
+      SPRING_MAIL_PASSWORD: deployment-validation-password
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate production Compose and immutable images
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose --env-file deploy/.env.production.example --file deploy/compose.prod.yaml config --quiet
+          docker compose --env-file deploy/.env.production.example --file deploy/compose.prod.yaml config --images \
+            | grep --fixed-strings --line-regexp "ghcr.io/baptistewetterwald/portfolio-spring-angular-backend:${APP_VERSION}"
+          docker compose --env-file deploy/.env.production.example --file deploy/compose.prod.yaml config --images \
+            | grep --fixed-strings --line-regexp "ghcr.io/baptistewetterwald/portfolio-spring-angular-frontend:${APP_VERSION}"
+          config_json="$(docker compose --env-file deploy/.env.production.example --file deploy/compose.prod.yaml config --format json)"
+          jq -e '.name == "portfolio-spring-angular-production"' <<<"${config_json}"
+          jq -e '.services.frontend.ports == [{"mode":"ingress","target":4000,"published":"4000","protocol":"tcp","host_ip":"127.0.0.1"}]' <<<"${config_json}"
+          jq -e '(.services.backend | has("ports") | not) and (.services.postgres | has("ports") | not)' <<<"${config_json}"
+          jq -e '(.networks | keys | sort) == ["app", "data"] and .networks.data.internal == true' <<<"${config_json}"
+          jq -e '(.volumes | keys) == ["postgres-data"]' <<<"${config_json}"
+          ! grep --fixed-strings --quiet 'portfolio-local-password' deploy/compose.prod.yaml
+
+      - name: Verify production secrets fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if env -u POSTGRES_PASSWORD \
+            docker compose --env-file deploy/.env.production.example --file deploy/compose.prod.yaml config --quiet; then
+            echo "Production Compose unexpectedly accepted an empty PostgreSQL password" >&2
+            exit 1
+          fi
+
+      - name: Validate deployment and backup scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n deploy/deploy.sh
+          bash -n deploy/backup-legacy.sh
+          if bash deploy/deploy.sh stage invalid-sha 2>deploy-invalid-sha.log; then
+            echo "Deployment script unexpectedly accepted an invalid SHA" >&2
+            exit 1
+          fi
+          grep --quiet "full 40-character lowercase Git SHA" deploy-invalid-sha.log
+          for operation in stage verify-local finalize; do
+            if ENV_FILE=/definitely-missing-portfolio-env bash deploy/deploy.sh "${operation}" "${APP_VERSION}" 2>"deploy-${operation}.log"; then
+              echo "${operation} unexpectedly ran without production configuration" >&2
+              exit 1
+            fi
+            grep --quiet "production environment file is not readable" "deploy-${operation}.log"
+          done
+          if STATE_DIR=/definitely-missing-deployment-state bash deploy/deploy.sh deploy "${APP_VERSION}" 2>deploy-first-automation.log; then
+            echo "Automation unexpectedly accepted an uncommissioned first deployment" >&2
+            exit 1
+          fi
+          grep --quiet "deploy is disabled until a deployment has been manually finalized" deploy-first-automation.log
+          if bash deploy/deploy.sh unknown "${APP_VERSION}" 2>deploy-unknown-operation.log; then
+            echo "Deployment script unexpectedly accepted an unknown operation" >&2
+            exit 1
+          fi
+          grep --quiet "unknown operation" deploy-unknown-operation.log
+          grep --fixed-strings --quiet 'deploy is disabled until a deployment has been manually finalized' deploy/deploy.sh
+          ! grep -E '(^|[[:space:]])(cp|install).*cloudflared/token' deploy/backup-legacy.sh
+
+      - name: Validate Cloudflare Nginx routing contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          config=deploy/nginx/bwetterwald.fr.conf.example
+          test "$(grep -c 'listen 127.0.0.1:8008;' "${config}")" -eq 2
+          grep --fixed-strings --quiet 'server_name bwetterwald.fr;' "${config}"
+          grep --fixed-strings --quiet 'server_name www.bwetterwald.fr;' "${config}"
+          grep --fixed-strings --quiet 'return 301 https://bwetterwald.fr$request_uri;' "${config}"
+          grep --fixed-strings --quiet 'location /wakommute/api/' "${config}"
+          grep --fixed-strings --quiet 'proxy_pass http://127.0.0.1:3000/;' "${config}"
+          grep --fixed-strings --quiet 'proxy_pass http://127.0.0.1:4000;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header X-Real-IP $http_cf_connecting_ip;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header X-Forwarded-For $http_cf_connecting_ip;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header X-Forwarded-Host $host;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header X-Forwarded-Proto https;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header X-Forwarded-Port 443;' "${config}"
+          grep --fixed-strings --quiet 'proxy_set_header Forwarded "";' "${config}"
+          test ! -e deploy/nginx/bwetterwald.fr-http-bootstrap.conf.example
+          ! grep -Eq 'listen .*(:80|:443)([ ;]|$)|ssl_certificate|certbot|letsencrypt' "${config}"
+
   build-images:
     name: Build ${{ matrix.component }} image
     if: github.event_name != 'push'
     needs:
       - frontend-validation
       - backend-validation
+      - deployment-validation
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -141,6 +241,7 @@ jobs:
     needs:
       - frontend-validation
       - backend-validation
+      - deployment-validation
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -191,3 +292,57 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.component }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+
+  deploy-production:
+    name: Deploy production SHA
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      vars.PRODUCTION_DEPLOYMENT_ENABLED == 'true'
+    needs:
+      - publish-images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+    env:
+      DEPLOY_HOST: ${{ vars.PRODUCTION_DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ vars.PRODUCTION_DEPLOY_PORT }}
+      DEPLOY_USER: ${{ vars.PRODUCTION_DEPLOY_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+
+    steps:
+      - name: Validate deployment connection configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${DEPLOY_HOST}"
+          test -n "${DEPLOY_PORT}"
+          test -n "${DEPLOY_USER}"
+          test -n "${SSH_PRIVATE_KEY}"
+          test -n "${SSH_KNOWN_HOSTS}"
+          [[ "${DEPLOY_PORT}" =~ ^[0-9]+$ ]]
+
+      - name: Configure pinned SSH identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 "${HOME}/.ssh"
+          printf '%s\n' "${SSH_PRIVATE_KEY}" > "${HOME}/.ssh/production"
+          printf '%s\n' "${SSH_KNOWN_HOSTS}" > "${HOME}/.ssh/known_hosts"
+          chmod 600 "${HOME}/.ssh/production" "${HOME}/.ssh/known_hosts"
+
+      - name: Deploy the published immutable SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -i "${HOME}/.ssh/production" \
+            -p "${DEPLOY_PORT}" \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "bash /srv/services/portfolio-spring-angular/deploy/deploy.sh deploy '${GITHUB_SHA}'"

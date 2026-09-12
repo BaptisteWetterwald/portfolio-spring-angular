@@ -2,7 +2,7 @@
 
 Bilingual portfolio for Baptiste Wetterwald, positioned as a Software Engineer focused on backend and full-stack work.
 
-The approved baseline uses the single-page architecture described below. The application, local container stack, and CI image publication are implemented; production deployment is not yet implemented.
+The approved baseline uses the single-page architecture described below. The application, local container stack, CI image publication, and repository-side M15 deployment automation are implemented. The new portfolio has not yet been commissioned or verified on the production homelab, and the legacy portfolio remains live.
 
 ## Current Architecture
 
@@ -182,16 +182,17 @@ docker compose down
 | `backend`  | Eclipse Temurin Java 21 JRE | `127.0.0.1:8080` | Applies Flyway migrations and validates the schema.                    |
 | `frontend` | Node.js 24.19.0 Angular SSR | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080` and proxies `/api`. |
 
-These containers and their local Compose wiring are implemented. Host Nginx/HTTPS, automated VPS deployment, backups, rollback automation, and production monitoring remain planned work.
+These containers and their local Compose wiring are implemented. Production uses the separate `deploy/compose.prod.yaml`; it must not inherit these local defaults. Repository-side Nginx/HTTPS and SHA rollout artifacts exist, but no live deployment has been performed. Backups, restore drills, monitoring, and broader hardening remain M16.
 
 ## Continuous Integration
 
-`.github/workflows/ci.yml` runs for pull requests targeting `main`, pushes to `main`, and manual `workflow_dispatch` runs. Frontend and backend validation run in parallel:
+`.github/workflows/ci.yml` runs for pull requests targeting `main`, pushes to `main`, and manual `workflow_dispatch` runs. Frontend, backend, and deployment-artifact validation run in parallel:
 
 - frontend: Node.js 24.19.0, npm 11.6.2, `npm ci`, formatting, linting, unit tests, and the production SSR build;
 - backend: Java 21 and `./mvnw -B verify` against a PostgreSQL 18 service using CI-only credentials and isolated Flyway-managed test schemas.
+- deployment: production Compose rendering/image references, mandatory-secret failure, and deployment-shell/SHA validation.
 
-Pull-request and manual runs build both production images for `linux/amd64` without logging in to a registry or publishing. After both validation jobs pass on a push to `main`, the workflow publishes:
+Pull-request and manual runs build both production images for `linux/amd64` without logging in to a registry or publishing. After all validation jobs pass on a push to `main`, the workflow publishes:
 
 ```text
 ghcr.io/baptistewetterwald/portfolio-spring-angular-frontend:<full-git-sha>
@@ -200,7 +201,25 @@ ghcr.io/baptistewetterwald/portfolio-spring-angular-backend:<full-git-sha>
 
 Both images also receive the mutable `main` convenience tag. Deployment must select the immutable full-SHA tag; `main` is not a deployment identity. Image names are derived from the lowercased GitHub repository owner/name so forks publish only in their own namespace when their own `main` workflow is authorized.
 
-The workflow defaults to `contents: read`. Only the trusted `main` publication job receives `packages: write`; it authenticates to GHCR with GitHub's short-lived `GITHUB_TOKEN`. No manually configured CI secret, GitHub integration token, Contact identity, or SMTP credential is required. M14 stops at image publication: pulling those images onto a VPS, production Compose configuration, Nginx/HTTPS, rollout health checks, and rollback remain M15.
+The workflow defaults to `contents: read`. Only the trusted `main` publication job receives `packages: write`; it authenticates to GHCR with GitHub's short-lived `GITHUB_TOKEN`. The M15 production job depends on successful publication and deploys the exact `github.sha`, but is disabled unless `PRODUCTION_DEPLOYMENT_ENABLED=true` is deliberately configured. It uses a protected environment, pinned SSH host key, and dedicated deployment identity. Application and SMTP secrets never enter CI.
+
+## Production Deployment
+
+Production targets the audited Fedora homelab. Cloudflare owns public DNS, HTTP-to-HTTPS behavior, and TLS; the existing Cloudflare Tunnel reaches host Nginx on `127.0.0.1:8008`. Nginx preserves `/wakommute/api/` and, after cutover, proxies portfolio traffic to the loopback-only Angular SSR container on `4000`. The SSR server remains the sole `/api` proxy to the private Spring backend, and PostgreSQL is reachable only on a private Docker network. See [Deployment architecture](docs/deployment-architecture.md) for the host audit, trust boundary, backup requirement, phased rollout, and rollback procedure.
+
+Repository artifacts:
+
+```text
+deploy/compose.prod.yaml                 GHCR SHA images and private service topology
+deploy/.env.production.example          safe production variable names/placeholders
+deploy/deploy.sh                         stage/local-verify/public-finalize operations
+deploy/backup-legacy.sh                  unexecuted legacy safety-backup command
+deploy/nginx/bwetterwald.fr.conf.example Cloudflare-Tunnel origin/cutover candidate
+```
+
+The first deployment uses `stage <sha>` while the legacy Java portfolio remains live on `8080`. Staging pulls exact images, waits for PostgreSQL and Flyway/backend health, starts frontend on loopback `4000`, and verifies localized SSR, API health, and a representative project without checking the public domain. After a separately approved Nginx cutover, `finalize <sha>` performs local and public checks before recording the SHA as deployed. Running the same process with a prior SHA is an application rollback only when that image is compatible with the current database schema; Flyway changes are not automatically reversed.
+
+Before cutover, `backup-legacy.sh` must preserve `/srv/services/portfolio`, its Git/JAR/log state, the systemd unit, and the current Nginx file below `/opt/portfolio-backups`. The Cloudflare token is explicitly excluded. The current GHCR packages require authenticated pulls, so commissioning needs a package-read-only Docker credential. Production database, Contact, SMTP, optional GitHub, registry, Tunnel, and SSH secrets remain outside Git and chat. No remote operation or automation enablement is implied by these files.
 
 ## Documentation
 
