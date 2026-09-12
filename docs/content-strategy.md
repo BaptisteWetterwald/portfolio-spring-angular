@@ -19,7 +19,7 @@ Software Engineer -> Java/Spring + C#/.NET + TypeScript/Node.js -> backend/full-
 
 Deeper sections and project-detail pages may show SAP, API/integration work, OAuth 2.0, Power Platform, databases, AI-assisted engineering, international experience, and older academic or exploratory technologies.
 
-Home includes a compact evidence block for the approved `BaptisteWetterwald` GitHub identity after Skills/Languages and before Education. An approximately one-year public contribution calendar provides the primary visual evidence, followed by a few recently pushed public repositories. It remains supporting evidence rather than a primary section, project substitute, or vanity-stat dashboard.
+Home includes a compact evidence block for the approved `BaptisteWetterwald` GitHub identity after Skills/Languages and before Education. The corresponding public profile URL is stable frontend-owned identity metadata and remains valid independently from activity API availability. An approximately one-year public contribution calendar provides the primary visual evidence, followed by a few recently pushed public repositories. It remains supporting evidence rather than a primary section, project substitute, or vanity-stat dashboard.
 
 Old, niche, academic, or self-taught technologies can remain discoverable, but they must not visually compete with the current backend/full-stack direction.
 

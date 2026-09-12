@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PageMetadataService, absoluteMediaUrl, absoluteUrl } from './page-metadata.service';
+import {
+  PageMetadataService,
+  absoluteMediaUrl,
+  absoluteUrl,
+  serializeJsonLd,
+} from './page-metadata.service';
 
 describe('PageMetadataService', () => {
   afterEach(() => {
@@ -40,6 +45,106 @@ describe('PageMetadataService', () => {
     expect(
       document.querySelector('meta[property="og:locale:alternate"]')?.getAttribute('content'),
     ).toBe('en_US');
+  });
+
+  it('emits the exact French ProfilePage and Person structured data', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'fr');
+
+    expect(parsedManagedStructuredData()).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      '@id': 'https://bwetterwald.fr/fr#profile-page',
+      url: 'https://bwetterwald.fr/fr',
+      inLanguage: 'fr',
+      mainEntity: {
+        '@type': 'Person',
+        '@id': 'https://bwetterwald.fr/#person',
+        name: 'Baptiste Wetterwald',
+        description:
+          'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
+        jobTitle: 'Ingénieur logiciel',
+        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
+        sameAs: ['https://github.com/BaptisteWetterwald'],
+      },
+    });
+  });
+
+  it('emits the exact English ProfilePage and Person structured data', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'en');
+
+    expect(parsedManagedStructuredData()).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      '@id': 'https://bwetterwald.fr/en#profile-page',
+      url: 'https://bwetterwald.fr/en',
+      inLanguage: 'en',
+      mainEntity: {
+        '@type': 'Person',
+        '@id': 'https://bwetterwald.fr/#person',
+        name: 'Baptiste Wetterwald',
+        description:
+          'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+        jobTitle: 'Software Engineer',
+        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
+        sameAs: ['https://github.com/BaptisteWetterwald'],
+      },
+    });
+  });
+
+  it('replaces the localized ProfilePage while retaining the shared Person identity', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'fr');
+    const french = parsedManagedStructuredData();
+    metadata.applyStaticPage('home', 'en');
+    const english = parsedManagedStructuredData();
+
+    expect(managedStructuredDataScripts()).toHaveLength(1);
+    expect(french['@id']).toBe('https://bwetterwald.fr/fr#profile-page');
+    expect(english['@id']).toBe('https://bwetterwald.fr/en#profile-page');
+    expect(personFrom(french)['@id']).toBe('https://bwetterwald.fr/#person');
+    expect(personFrom(english)['@id']).toBe('https://bwetterwald.fr/#person');
+  });
+
+  it('removes ProfilePage structured data for project details and unavailable page states', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'en');
+    metadata.applyProjectDetail('en', {
+      slug: 'portfolio-api',
+      title: 'Portfolio API',
+      shortDescription: 'Public project API.',
+      availableLocales: ['en', 'fr'],
+    });
+    expect(managedStructuredDataScripts()).toHaveLength(0);
+
+    metadata.applyStaticPage('home', 'fr');
+    metadata.applyNotFound('fr', '/fr/inconnu');
+    expect(managedStructuredDataScripts()).toHaveLength(0);
+
+    metadata.applyStaticPage('home', 'en');
+    metadata.applyProjectUnavailable('en', '/en/projects/portfolio-api');
+    expect(managedStructuredDataScripts()).toHaveLength(0);
+  });
+
+  it('serializes JSON-LD without leaving script terminators or markup-significant characters', () => {
+    const hostile = '</script><tag>&\u2028\u2029';
+    const serialized = serializeJsonLd({ value: hostile });
+
+    expect(serialized).toBe(
+      '{"value":"\\u003C/script\\u003E\\u003Ctag\\u003E\\u0026\\u2028\\u2029"}',
+    );
+    expect(serialized).not.toContain('</script>');
+    expect(serialized).not.toContain('<');
+    expect(serialized).not.toContain('>');
+    expect(serialized).not.toContain('&');
+    expect(serialized).not.toContain('\u2028');
+    expect(serialized).not.toContain('\u2029');
+    expect(JSON.parse(serialized)).toEqual({ value: hostile });
   });
 
   it('replaces managed alternate links on route changes', () => {
@@ -178,3 +283,21 @@ describe('PageMetadataService', () => {
     expect(absoluteMediaUrl('//cdn.example.test/logo.svg')).toBeUndefined();
   });
 });
+
+function managedStructuredDataScripts(): NodeListOf<HTMLScriptElement> {
+  return document.querySelectorAll(
+    'script[type="application/ld+json"][data-managed-by="page-metadata-service:structured-data"]',
+  );
+}
+
+function parsedManagedStructuredData(): Record<string, unknown> {
+  const scripts = managedStructuredDataScripts();
+
+  expect(scripts).toHaveLength(1);
+
+  return JSON.parse(scripts[0]!.textContent ?? '') as Record<string, unknown>;
+}
+
+function personFrom(profilePage: Record<string, unknown>): Record<string, unknown> {
+  return profilePage['mainEntity'] as Record<string, unknown>;
+}

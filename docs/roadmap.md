@@ -17,7 +17,7 @@ This roadmap records what the repository currently implements and what remains. 
 | M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
 | M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
 | M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
-| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, 404s, crawl discovery, keyboard/reduced-motion coverage exist; structured data and formal audits remain       |
+| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, keyboard/reduced-motion coverage; project schema/audits remain          |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
 | M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
 | M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
@@ -218,12 +218,13 @@ Already implemented:
 - localized SSR 404/noindex behavior for missing or non-public content and distinct HTTP 503/noindex behavior for bounded project-backend failures;
 - permanent compatibility redirects to section fragments while locale negotiation at `/` remains temporary;
 - dynamic backend-owned localized `sitemap.xml` and a public `robots.txt` crawl policy;
+- localized SSR `ProfilePage`/`Person` JSON-LD for the two healthy main documents, with cleanup on non-profile route states;
 - semantic navigation/content, keyboard states, focus handling, and reduced motion;
 - unit, SSR smoke, and responsive headless-browser checks.
 
 Remaining:
 
-- approved JSON-LD structured data;
+- approved project-specific JSON-LD structured data, if supported by accurate public project facts;
 - approved site-wide OpenGraph imagery;
 - formal keyboard, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits;
 - agreed performance/accessibility thresholds and remediation.

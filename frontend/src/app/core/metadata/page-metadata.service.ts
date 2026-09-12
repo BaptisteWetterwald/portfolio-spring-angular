@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/core';
 import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { portfolioContentFor, portfolioPublicProfile } from '../content/portfolio-content';
 import { LocaleContextService } from '../i18n/locale-context.service';
 import { isSupportedLocale, SupportedLocale, supportedLocales } from '../i18n/locales';
 import { TranslationService } from '../i18n/translation.service';
@@ -19,6 +20,7 @@ const productionOrigin = 'https://bwetterwald.fr';
 const managedAttribute = 'data-managed-by';
 const managedAttributeValue = 'page-metadata-service';
 const xDefaultUrl = `${productionOrigin}/`;
+const jsonLdMediaType = 'application/ld+json';
 
 const metadataKeys = {
   home: {
@@ -56,6 +58,23 @@ export interface ProjectPageMetadata {
   readonly availableLocales?: readonly string[];
 }
 
+interface ProfilePageStructuredData {
+  readonly '@context': 'https://schema.org';
+  readonly '@type': 'ProfilePage';
+  readonly '@id': string;
+  readonly url: string;
+  readonly inLanguage: SupportedLocale;
+  readonly mainEntity: {
+    readonly '@type': 'Person';
+    readonly '@id': string;
+    readonly name: string;
+    readonly description: string;
+    readonly jobTitle: string;
+    readonly image: string;
+    readonly sameAs: readonly string[];
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -87,6 +106,12 @@ export class PageMetadataService {
     });
     this.#setCanonical(canonicalUrl);
     this.#setAlternates(alternates);
+
+    if (pageId === 'home') {
+      this.#setProfilePageStructuredData(locale, description);
+    } else {
+      this.#removeManagedStructuredData();
+    }
   }
 
   applyProjectDetail(locale: SupportedLocale, project: ProjectPageMetadata): void {
@@ -115,6 +140,7 @@ export class PageMetadataService {
     });
     this.#setCanonical(canonicalUrl);
     this.#setAlternates(alternates, false);
+    this.#removeManagedStructuredData();
   }
 
   applyNotFound(locale: SupportedLocale, currentPath: string): void {
@@ -134,6 +160,7 @@ export class PageMetadataService {
       openGraphType: 'website',
     });
     this.#removeManagedLinks();
+    this.#removeManagedStructuredData();
   }
 
   applyProjectUnavailable(locale: SupportedLocale, currentPath: string): void {
@@ -154,6 +181,35 @@ export class PageMetadataService {
       openGraphType: 'website',
     });
     this.#removeManagedLinks();
+    this.#removeManagedStructuredData();
+  }
+
+  #setProfilePageStructuredData(locale: SupportedLocale, description: string): void {
+    const hero = portfolioContentFor(locale).home.hero;
+    const pageUrl = absoluteUrl(localizedPath(locale, 'home'));
+    const structuredData: ProfilePageStructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      '@id': `${pageUrl}#profile-page`,
+      url: pageUrl,
+      inLanguage: locale,
+      mainEntity: {
+        '@type': 'Person',
+        '@id': `${productionOrigin}/#person`,
+        name: hero.name,
+        description,
+        jobTitle: hero.role,
+        image: absoluteUrl(portfolioPublicProfile.portraitPath),
+        sameAs: [...portfolioPublicProfile.sameAs],
+      },
+    };
+    const script = this.#document.createElement('script');
+
+    this.#removeManagedStructuredData();
+    script.setAttribute('type', jsonLdMediaType);
+    script.setAttribute(managedAttribute, `${managedAttributeValue}:structured-data`);
+    script.textContent = serializeJsonLd(structuredData);
+    this.#document.head.appendChild(script);
   }
 
   #applyMetadata(metadata: {
@@ -285,6 +341,14 @@ export class PageMetadataService {
       .forEach((element) => element.remove());
   }
 
+  #removeManagedStructuredData(): void {
+    this.#document
+      .querySelectorAll(
+        `script[type="${jsonLdMediaType}"][${managedAttribute}="${managedAttributeValue}:structured-data"]`,
+      )
+      .forEach((element) => element.remove());
+  }
+
   #setHtmlLang(locale: SupportedLocale): void {
     this.#document.documentElement.setAttribute('lang', locale);
   }
@@ -296,6 +360,19 @@ export function absoluteUrl(path: string): string {
 
 export function absoluteMediaUrl(mediaRef: string | null | undefined): string | undefined {
   return absoluteProjectMediaUrl(mediaRef);
+}
+
+export function serializeJsonLd(value: unknown): string {
+  const serialized = JSON.stringify(value);
+
+  if (serialized === undefined) {
+    throw new TypeError('JSON-LD value must be serializable.');
+  }
+
+  return serialized.replace(
+    /[<>&\u2028\u2029]/gu,
+    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()}`,
+  );
 }
 
 function stripQueryAndFragment(path: string): string {

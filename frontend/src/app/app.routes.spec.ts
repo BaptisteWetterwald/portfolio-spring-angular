@@ -20,6 +20,9 @@ describe('localized app routes', () => {
     }
 
     document.cookie = `${localeCookieName}=; Path=/; Max-Age=0; SameSite=Lax`;
+    document.head
+      .querySelectorAll('[data-managed-by^="page-metadata-service"]')
+      .forEach((element) => element.remove());
   });
 
   it.each([
@@ -38,6 +41,56 @@ describe('localized app routes', () => {
       'projects',
       'contact',
     ]);
+  });
+
+  it('replaces the ProfilePage payload on client locale navigation without changing Person identity', async () => {
+    const harness = await createHarness('/fr');
+    const frenchProfile = managedStructuredData();
+
+    await harness.navigateByUrl('/en');
+    await settleHarness(harness);
+
+    const englishProfile = managedStructuredData();
+
+    expect(managedStructuredDataScripts()).toHaveLength(1);
+    expect(frenchProfile['@id']).toBe('https://bwetterwald.fr/fr#profile-page');
+    expect(frenchProfile['inLanguage']).toBe('fr');
+    expect(englishProfile['@id']).toBe('https://bwetterwald.fr/en#profile-page');
+    expect(englishProfile['inLanguage']).toBe('en');
+    expect(personFrom(frenchProfile)['@id']).toBe('https://bwetterwald.fr/#person');
+    expect(personFrom(englishProfile)['@id']).toBe('https://bwetterwald.fr/#person');
+    expect(personFrom(englishProfile)['sameAs']).toEqual(['https://github.com/BaptisteWetterwald']);
+  });
+
+  it('removes ProfilePage structured data when navigating to a healthy project detail', async () => {
+    const harness = await createHarness('/en', {
+      getProject: () => of(detailProject()),
+    });
+
+    expect(managedStructuredDataScripts()).toHaveLength(1);
+
+    await harness.navigateByUrl('/en/projects/portfolio-api');
+    await settleHarness(harness);
+
+    expect(managedStructuredDataScripts()).toHaveLength(0);
+  });
+
+  it('leaves no stale ProfilePage structured data on project 404 and 503 states', async () => {
+    const notFoundHarness = await createHarness('/en');
+
+    await notFoundHarness.navigateByUrl('/en/projects/missing-translation');
+    await settleHarness(notFoundHarness);
+    expect(managedStructuredDataScripts()).toHaveLength(0);
+
+    TestBed.resetTestingModule();
+    const unavailableHarness = await createHarness('/fr', {
+      getProject: () =>
+        throwError(() => new HttpErrorResponse({ status: 503, statusText: 'Unavailable' })),
+    });
+
+    await unavailableHarness.navigateByUrl('/fr/projets/temporarily-unavailable');
+    await settleHarness(unavailableHarness);
+    expect(managedStructuredDataScripts()).toHaveLength(0);
   });
 
   it.each([
@@ -264,6 +317,24 @@ function portfolioSectionIds(root: HTMLElement | null | undefined): string[] {
   return Array.from(root?.querySelectorAll<HTMLElement>('[data-portfolio-section]') ?? []).map(
     (section) => section.id,
   );
+}
+
+function managedStructuredDataScripts(): NodeListOf<HTMLScriptElement> {
+  return document.querySelectorAll(
+    'script[type="application/ld+json"][data-managed-by="page-metadata-service:structured-data"]',
+  );
+}
+
+function managedStructuredData(): Record<string, unknown> {
+  const scripts = managedStructuredDataScripts();
+
+  expect(scripts).toHaveLength(1);
+
+  return JSON.parse(scripts[0]!.textContent ?? '') as Record<string, unknown>;
+}
+
+function personFrom(profilePage: Record<string, unknown>): Record<string, unknown> {
+  return profilePage['mainEntity'] as Record<string, unknown>;
 }
 
 async function settleHarness(harness: RouterTestingHarness): Promise<void> {

@@ -60,6 +60,7 @@ const checks = [
     name: 'French home SSR',
     path: '/fr',
     expectedStatus: 200,
+    expectedJsonLd: profilePageJsonLd('fr'),
     expectedBody: [
       '<html lang="fr"',
       '<title>Baptiste Wetterwald | Ingénieur logiciel</title>',
@@ -114,6 +115,7 @@ const checks = [
     name: 'English home SSR',
     path: '/en',
     expectedStatus: 200,
+    expectedJsonLd: profilePageJsonLd('en'),
     expectedBody: [
       '<html lang="en"',
       '<title>Baptiste Wetterwald | Software Engineer</title>',
@@ -216,6 +218,7 @@ const checks = [
     name: 'English Blaze4 detail SSR metadata',
     path: '/en/projects/blaze4',
     expectedStatus: 200,
+    expectedManagedJsonLdCount: 0,
     expectedBody: [
       '<title>Blaze4 | Baptiste Wetterwald</title>',
       'name="description" content="Connect Four web application built with C#/.NET using an N-tier architecture, an ASP.NET Core REST API, a Blazor WebAssembly frontend and Entity Framework Core persistence."',
@@ -508,6 +511,7 @@ const checks = [
     name: 'missing public project detail returns localized 404 metadata',
     path: '/en/projects/missing-project',
     expectedStatus: 404,
+    expectedManagedJsonLdCount: 0,
     expectedBody: [
       '<title>Page not found | Baptiste Wetterwald</title>',
       'Page not found',
@@ -630,6 +634,26 @@ for (const check of checks) {
     assert(!body.includes(fragment), `${check.name}: unexpected body fragment ${fragment}`);
   }
 
+  const jsonLdPayloads = managedJsonLdPayloads(body, check.name);
+
+  if (check.expectedJsonLd) {
+    assert(
+      jsonLdPayloads.length === 1,
+      `${check.name}: expected exactly one managed JSON-LD script, received ${jsonLdPayloads.length}`,
+    );
+    assert(
+      JSON.stringify(jsonLdPayloads[0]) === JSON.stringify(check.expectedJsonLd),
+      `${check.name}: managed JSON-LD payload did not match the expected localized ProfilePage`,
+    );
+  }
+
+  if (check.expectedManagedJsonLdCount !== undefined) {
+    assert(
+      jsonLdPayloads.length === check.expectedManagedJsonLdCount,
+      `${check.name}: expected ${check.expectedManagedJsonLdCount} managed JSON-LD scripts, received ${jsonLdPayloads.length}`,
+    );
+  }
+
   console.log(`OK ${check.name}`);
 }
 
@@ -639,6 +663,56 @@ function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function managedJsonLdPayloads(body, checkName) {
+  const scripts = body.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/giu);
+  const payloads = [];
+
+  for (const script of scripts) {
+    const attributes = script[1] ?? '';
+
+    if (
+      !attributes.includes('type="application/ld+json"') ||
+      !attributes.includes('data-managed-by="page-metadata-service:structured-data"')
+    ) {
+      continue;
+    }
+
+    try {
+      payloads.push(JSON.parse(script[2] ?? ''));
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+
+      throw new Error(`${checkName}: managed JSON-LD was not valid JSON. ${detail}`);
+    }
+  }
+
+  return payloads;
+}
+
+function profilePageJsonLd(locale) {
+  const isFrench = locale === 'fr';
+  const pageUrl = `https://bwetterwald.fr/${locale}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    '@id': `${pageUrl}#profile-page`,
+    url: pageUrl,
+    inLanguage: locale,
+    mainEntity: {
+      '@type': 'Person',
+      '@id': 'https://bwetterwald.fr/#person',
+      name: 'Baptiste Wetterwald',
+      description: isFrench
+        ? 'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.'
+        : 'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+      jobTitle: isFrench ? 'Ingénieur logiciel' : 'Software Engineer',
+      image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
+      sameAs: ['https://github.com/BaptisteWetterwald'],
+    },
+  };
 }
 
 async function fetchSmokeTarget(url, check) {

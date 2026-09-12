@@ -20,6 +20,11 @@ import {
   SkillTechnologyId,
 } from './portfolio-content.models';
 
+export const portfolioPublicProfile = {
+  portraitPath: '/assets/portrait/baptiste-wetterwald-portrait.png',
+  sameAs: ['https://github.com/BaptisteWetterwald'],
+} as const;
+
 interface PeriodLabels {
   readonly start?: string;
   readonly end?: string;

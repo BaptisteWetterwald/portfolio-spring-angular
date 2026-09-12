@@ -63,6 +63,8 @@ The main composed document canonicalizes to `/fr` or `/en` and uses one localize
 
 Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to actual API-reported translations of that project: bilingual details advertise reciprocal French and English URLs, while a single-language detail advertises only that locale. Project details do not emit `x-default`, because the portfolio root is not an equivalent version of a project. `og:image` is omitted when no media reference exists.
 
+Healthy `/fr` and `/en` SSR responses contain one managed JSON-LD `ProfilePage` with a locale-specific page `@id`, canonical page URL, and `inLanguage`. Each page identifies the same stable `Person` `@id` and includes only the approved public name, localized profile description and job title, portrait URL, and GitHub `sameAs` identity. The GitHub identity is frontend-static public profile metadata and does not depend on GitHub activity API availability. Project detail, 404, untranslated-project, and temporary 503 states remove the managed JSON-LD script; project-specific structured data is intentionally deferred.
+
 ## Crawl Discovery
 
 The public `robots.txt` allows general site crawling, instructs compliant crawlers not to crawl `/api/`, and advertises the production sitemap URL. This policy is not access control and cannot by itself prevent API URLs from being discovered, indexed from other signals, or requested directly.
@@ -154,7 +156,7 @@ The approved portrait has localized meaningful alt text, explicit intrinsic dime
 
 The following remain part of the SEO/accessibility/performance hardening roadmap and must not be claimed as current features:
 
-- JSON-LD/Schema.org structured data;
+- project-specific JSON-LD/Schema.org structured data;
 - approved site-wide OpenGraph image assets;
 - a recorded full screen-reader audit;
 - published Lighthouse/performance/accessibility thresholds;
