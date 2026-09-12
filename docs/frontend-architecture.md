@@ -91,6 +91,8 @@ Modified clicks and SSR are not intercepted, so the anchors retain normal platfo
 
 `PortfolioPageComponent` initializes fragment navigation after render, rechecks initial deep links after browser restoration, handles back/forward without new history writes, and observes the five section roots for passive scroll-spy. Scroll-spy changes state only; it never replaces the current URL fragment.
 
+`RouteFocusService` provides the separate SPA page-change policy. After the initial render, a change to the routed path focuses the new route's programmatically focusable primary heading, or the requested portfolio section when a full route change returns to a fragment. Fragment-only navigation is excluded so passive scroll-spy and the existing section-anchor policy do not steal focus. The service is browser-guarded and does not alter SSR markup beyond the static focus targets.
+
 ## Header, Sonar, and Footer
 
 `SiteHeaderComponent` contains conventional desktop section navigation, locale switching, and a conventional mobile menu. It contains no sonar and no lighthouse.
@@ -103,7 +105,7 @@ On wide viewports, `PublicLayoutComponent` observes the header and applies a two
 
 Outgoing navigation is inert/hidden from assistive technology unless it already contains focus. This avoids forced focus movement during handoff.
 
-On narrow viewports, the compact sonar is active from initial render. `SonarNavigationComponent` supports pointer dragging for the collapsed bubble, safe-area clamping, left/right edge snapping, a lighthouse avoidance zone, and an inward viewport-constrained expanded panel. It also expands through hover, focus, click, or tap as appropriate and closes on Escape or navigation.
+On narrow viewports, the compact sonar is active from initial render. `SonarNavigationComponent` supports pointer dragging for the collapsed bubble, safe-area clamping, left/right edge snapping, a lighthouse avoidance zone, and an inward viewport-constrained expanded panel. It also expands through hover, focus, click, or tap as appropriate and closes on navigation. Escape collapses a focused panel and returns focus to its disclosure button, so `focus-within` cannot leave the panel reported as expanded.
 
 `SiteFooterComponent` exposes conventional text links to all five fragments.
 
@@ -160,7 +162,7 @@ Resolvers expose loaded/error states for the list and loaded/not-found/error sta
 
 `GitHubActivityApiService` calls only `GET /api/v1/github/activity` with Angular HTTP transfer caching. Its root-route resolver validates repository URLs plus the bounded calendar date/count contract and converts unavailable, empty, malformed, or failed responses into a quiet unavailable state. Home renders nothing for that state, so GitHub never replaces or gates the identity, skills, languages, or later sections.
 
-`GitHubContributionCalendarComponent` is a native, SSR-safe Angular renderer rather than an imperative chart dependency. It groups at most 400 validated days into Sunday-based week columns, derives four cyan intensity levels from positive counts, and renders a localized approximately 53-by-7 grid before the existing repository cards. The calendar scrolls horizontally inside its own bounded region on narrow viewports and uses a guarded after-render adjustment to show the most recent weeks first. Its scroll container is the single keyboard stop; date/count descriptions are exposed on non-focusable cells so the graph does not add hundreds of tab stops. Missing contribution data removes only the calendar while repositories remain useful.
+`GitHubContributionCalendarComponent` is a native, SSR-safe Angular renderer rather than an imperative chart dependency. It groups at most 400 validated days into Sunday-based week columns, derives four cyan intensity levels from positive counts, and renders a localized approximately 53-by-7 grid before the existing repository cards. Every positive level uses a high-contrast maritime-cyan boundary, while an outlined-to-filled progression communicates relative intensity without turning the calendar into a dominant block. The calendar scrolls horizontally inside its own bounded region on narrow viewports and uses a guarded after-render adjustment to show the most recent weeks first. Its scroll container is the single keyboard stop; date/count descriptions are exposed on non-focusable cells so the graph does not add hundreds of tab stops. Missing contribution data removes only the calendar while repositories remain useful.
 
 Project cards render public status/presentation fields from the API. `DETAIL` adds the localized detail action; `CARD_ONLY` does not. Detail pages prefer ordered localized sections and fall back to deprecated `detailedDescription` only when sections are empty.
 
@@ -197,21 +199,23 @@ Do not introduce a frontend project fixture as public content or move static CV/
 ## Accessibility Contracts
 
 - one document `h1` in the Home hero and `h2` headings for major composed sections;
-- semantic header/nav/main/section/article/footer landmarks;
+- semantic header/nav/main/section/article/footer landmarks, without navigation landmarks around individual project action groups or a complementary landmark around the global floating-control wrapper;
 - real anchors for all navigation targets;
 - visible focus and no keyboard traps;
 - mobile menu `aria-expanded`/`aria-controls`, Escape close, and focus restoration;
 - sonar expansion state and active location exposed accessibly;
 - decorative sonar SVG, beam, and dividers hidden from assistive technology;
 - section roots focusable programmatically with `tabindex="-1"`;
+- centralized full-route focus movement to a primary heading or destination section, excluding same-document fragment changes;
 - localized section-permalink labels;
 - Contact labels bound to controls, delayed `aria-invalid`/`aria-describedby` errors, live async status, and non-color-only feedback;
+- Contact field boundaries with at least 3:1 non-text contrast in both themes and distinct hover, focus, and error states;
 - reduced-motion fallbacks for every animated behavior.
 
 ## Validation
 
-Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, Contact validation/submission states, header/sonar handoff, focus retention, mobile drag/snap geometry, theme/beam behavior, and section permalinks/dividers.
+Unit/integration tests cover routing, redirects, fragment preservation, metadata, SSR guards, project resolvers/pages, Contact validation/submission states, full-route focus management, header/sonar handoff, focused Escape collapse, mobile drag/snap geometry, theme/beam behavior, simplified landmark markup, and section permalinks/dividers.
 
-`npm run smoke:ssr` validates built request-time responses and project data. `npm run smoke:browser` uses installed headless Chrome through CDP to validate wide/mobile navigation, fragments, history, viewport safety, reduced motion, and visual structure.
+`npm run smoke:ssr` validates built request-time responses and project data. `npm run smoke:browser` uses installed headless Chrome through CDP to validate wide/mobile navigation, fragments, history, viewport safety, reduced motion, and visual structure. `npm run smoke:a11y` adds focused full-route focus, sonar Escape/Tab, landmark-tree, field/calendar contrast, 320 CSS-pixel reflow, and reduced-motion assertions.
 
 Standard validation is `npm run format:check`, `npm run lint`, `npm test`, and `npm run build`.

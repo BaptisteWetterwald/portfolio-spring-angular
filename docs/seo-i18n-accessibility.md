@@ -112,6 +112,8 @@ The composed document implements:
 - detail content as one article with section headings;
 - buttons only for actions and links for navigation.
 
+Project-card and project-detail action groups are neutral containers around semantic links, not additional named navigation landmarks. The persistent floating-control wrapper is also neutral; the sonar retains its own labelled navigation landmark and the lighthouse retains its button semantics.
+
 DaisyUI supplies presentation primitives without replacing semantic elements.
 
 ## Keyboard and Focus
@@ -124,9 +126,10 @@ Implemented behavior includes:
 - Escape close and focus restoration for the mobile menu;
 - Escape close for expanded sonar;
 - keyboard focus retained inside outgoing header/sonar controls during the visibility handoff;
+- full-route SPA navigation moving focus to the new primary heading, or the destination section when returning to a localized fragment;
 - keyboard section activation moving focus to the destination section;
-- passive scroll-spy never moving focus.
-- one focusable horizontal contribution-calendar region with non-focusable, individually labelled date/count cells instead of hundreds of tab stops.
+- fragment-only navigation and passive scroll-spy never moving focus;
+- one focusable horizontal contribution-calendar region with non-focusable, individually labelled date/count cells instead of hundreds of tab stops;
 - Contact controls with real associated labels, normal tab order, visible focus, and no focus trap.
 
 Contact validation messages appear only after a field has been touched or submission has been attempted. Invalid controls use `aria-invalid` and `aria-describedby`; submitting uses a polite live status and `aria-busy`; success, rate limiting, and failure use assertive text alerts so meaning is not carried by color or animation. The visually clipped anti-bot control is `aria-hidden`, has `tabindex="-1"`, and is absent from normal keyboard/assistive-technology navigation.
@@ -135,9 +138,15 @@ The header-to-sonar handoff does not force focus to a new control. Hidden duplic
 
 ## Sonar Accessibility
 
-The compact sonar is a semantic `<nav>` with real localized anchors. Its disclosure button exposes `aria-expanded` and `aria-controls`. Collapsed links are hidden from the accessibility tree and removed from tab order. Active links use `aria-current="location"`.
+The compact sonar is a semantic `<nav>` with real localized anchors. Its disclosure button exposes `aria-expanded` and `aria-controls`. Collapsed links are hidden from the accessibility tree and removed from tab order. Active links use `aria-current="location"`. Escape from a focused expanded panel collapses it and leaves focus on the disclosure button; normal Tab movement can then continue outside the sonar.
 
 The mobile drag interaction is optional enhancement: tapping and keyboard navigation still operate the control, and no navigation target depends on drag placement.
+
+## Non-text Contrast
+
+Contact inputs and textareas use a restrained one-pixel boundary mixed from the theme's muted-text and border tokens. The measured default boundary exceeds the WCAG 3:1 non-text contrast threshold against the raised field surface in both light and dark themes; hover, focus outline, and error color remain distinct.
+
+The contribution calendar retains zero plus four positive maritime-cyan levels. Positive days share a high-contrast cyan boundary against the calendar surface and progress from outlined to increasingly filled cells. The compact five-step fill scale is not presented as four independently 3:1-adjacent swatches; exact localized date/count labels remain available to assistive technology and pointer tooltips, and the graph still contributes only one keyboard stop.
 
 ## Section Permalinks
 
@@ -163,7 +172,7 @@ The following remain part of the SEO/accessibility/performance hardening roadmap
 
 - project-specific JSON-LD/Schema.org structured data, deliberately deferred pending stronger project semantics;
 - project-specific or localized social-preview imagery, deliberately excluded from M12;
-- a recorded full screen-reader audit;
+- a recorded manual screen-reader audit;
 - published Lighthouse/performance/accessibility thresholds;
 - production analytics or monitoring.
 
@@ -171,6 +180,6 @@ The crawl files complement rather than replace the per-page robots metadata alre
 
 ## Validation Direction
 
-Current automated coverage includes route/metadata tests, SSR 404 tests, crawl-policy and Express sitemap response tests, semantic navigation states, Contact validation and live-region semantics, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts.
+Current automated coverage includes route/metadata tests, SSR 404 tests, crawl-policy and Express sitemap response tests, semantic navigation states, full-route focus and fragment-focus exclusions, focused sonar Escape behavior, Contact validation and live-region semantics, reduced-motion states, fragment/history behavior, mobile viewport geometry, and built SSR/browser smoke scripts. The focused `npm run smoke:a11y` check records real-browser route focus, Escape/Tab continuation, landmark counts, computed contrast, 320 CSS-pixel reflow, and reduced-motion behavior.
 
 Before production deployment, complete keyboard-only, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits against the deployed origin.

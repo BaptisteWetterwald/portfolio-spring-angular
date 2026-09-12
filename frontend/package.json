@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "smoke:browser": "node tools/single-page-browser-smoke.mjs",
+    "smoke:a11y": "node tools/accessibility-browser-smoke.mjs",
     "smoke:ssr": "node tools/ssr-smoke.mjs",
     "serve:ssr": "node dist/frontend/server/server.mjs",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs"

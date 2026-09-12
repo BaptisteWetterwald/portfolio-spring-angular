@@ -50,6 +50,7 @@ type SonarNavigationVariant = 'primary' | 'floating';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SonarNavigationComponent {
+  @ViewChild('compactButton') private compactButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('sonarNav') private sonarNav?: ElementRef<HTMLElement>;
   @ViewChild('sonarFrame') private sonarFrame?: ElementRef<HTMLElement>;
 
@@ -64,6 +65,7 @@ export class SonarNavigationComponent {
   readonly #destroyRef = inject(DestroyRef);
   readonly #injector = inject(Injector);
   readonly #platformId = inject(PLATFORM_ID);
+  readonly #escapeCollapsedWhileFocused = signal(false);
   readonly #isFloatingFocused = signal(false);
   readonly #isFloatingPinned = signal(false);
   readonly #isMobileDragging = signal(false);
@@ -81,7 +83,10 @@ export class SonarNavigationComponent {
   protected readonly listId = computed(() => `sonar-navigation-${this.variant()}-list`);
   protected readonly isFloatingVariant = computed(() => this.variant() === 'floating');
   protected readonly isFloatingExpanded = computed(
-    () => this.isFloatingVariant() && (this.isFloatingFocused() || this.isFloatingPinned()),
+    () =>
+      this.isFloatingVariant() &&
+      (this.isFloatingPinned() ||
+        (this.isFloatingFocused() && !this.#escapeCollapsedWhileFocused())),
   );
   protected readonly navigationClass = computed(() =>
     [
@@ -119,9 +124,21 @@ export class SonarNavigationComponent {
     }
   }
 
-  @HostListener('document:keydown.escape')
-  protected handleEscapeKey(): void {
-    this.closeFloatingNavigation();
+  @HostListener('document:keydown.escape', ['$event'])
+  protected handleEscapeKey(event: Event): void {
+    if (!this.isFloatingExpanded()) {
+      return;
+    }
+
+    event.preventDefault();
+    this.#isFloatingPinned.set(false);
+    this.#escapeCollapsedWhileFocused.set(true);
+
+    const activeElement = this.#documentActiveElement();
+
+    if (activeElement && this.sonarFrame?.nativeElement.contains(activeElement)) {
+      this.compactButton?.nativeElement.focus({ preventScroll: true });
+    }
   }
 
   protected sectionHref(pageId: StaticPageId): string {
@@ -168,6 +185,7 @@ export class SonarNavigationComponent {
     }
 
     this.#isFloatingFocused.set(false);
+    this.#escapeCollapsedWhileFocused.set(false);
   }
 
   protected toggleFloatingNavigation(event: MouseEvent): void {
@@ -185,6 +203,7 @@ export class SonarNavigationComponent {
       return;
     }
 
+    this.#escapeCollapsedWhileFocused.set(false);
     this.#syncMobilePlacement();
     this.#isFloatingPinned.update((isPinned) => !isPinned);
 
@@ -196,6 +215,10 @@ export class SonarNavigationComponent {
 
   protected closeFloatingNavigation(): void {
     this.#isFloatingPinned.set(false);
+  }
+
+  #documentActiveElement(): Element | null {
+    return isPlatformBrowser(this.#platformId) ? globalThis.document.activeElement : null;
   }
 
   protected handleFloatingPointerDown(event: PointerEvent): void {

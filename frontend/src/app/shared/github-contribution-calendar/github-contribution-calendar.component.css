@@ -138,19 +138,22 @@
 }
 
 .github-contribution-calendar__day--level-1 {
-  background: color-mix(in srgb, var(--color-accent-maritime) 24%, var(--color-surface));
+  border-color: var(--color-accent-maritime);
+  background: var(--color-surface);
 }
 
 .github-contribution-calendar__day--level-2 {
-  background: color-mix(in srgb, var(--color-accent-maritime) 46%, var(--color-surface));
+  border-color: var(--color-accent-maritime);
+  background: color-mix(in srgb, var(--color-accent-maritime) 36%, var(--color-surface));
 }
 
 .github-contribution-calendar__day--level-3 {
-  background: color-mix(in srgb, var(--color-accent-maritime) 72%, var(--color-surface));
+  border-color: var(--color-accent-maritime);
+  background: color-mix(in srgb, var(--color-accent-maritime) 70%, var(--color-surface));
 }
 
 .github-contribution-calendar__day--level-4 {
-  border-color: color-mix(in srgb, var(--color-accent-maritime) 80%, var(--color-border));
+  border-color: var(--color-accent-maritime);
   background: var(--color-accent-maritime);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent-maritime) 18%, transparent);
 }

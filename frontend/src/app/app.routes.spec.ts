@@ -9,6 +9,7 @@ import { GitHubActivityApiService } from './core/github/github-activity-api.serv
 import { GitHubActivityDto } from './core/github/github-activity.models';
 import { ProjectApiService } from './core/projects/project-api.service';
 import { ProjectDetailDto, ProjectSummaryDto } from './core/projects/project.models';
+import { RouteFocusService } from './core/routing/route-focus.service';
 import { routes } from './app.routes';
 
 describe('localized app routes', () => {
@@ -41,6 +42,80 @@ describe('localized app routes', () => {
       'projects',
       'contact',
     ]);
+  });
+
+  it('moves focus to a healthy project heading and back to the localized Projects section', async () => {
+    const harness = await createHarness('/en', {
+      getProject: () => of(detailProject()),
+    });
+
+    primaryNavLinks(harness)[0]?.focus();
+    await harness.navigateByUrl('/en/projects/portfolio-api');
+    await settleHarness(harness);
+
+    expect(document.activeElement).toBe(
+      harness.routeNativeElement?.querySelector('#project-title'),
+    );
+
+    await harness.navigateByUrl('/en#projects');
+    await settleHarness(harness);
+
+    expect(document.activeElement).toBe(harness.routeNativeElement?.querySelector('#projects'));
+  });
+
+  it('moves focus to the translated primary heading on a locale route change', async () => {
+    const harness = await createHarness('/fr');
+
+    primaryNavLinks(harness)[0]?.focus();
+    await harness.navigateByUrl('/en');
+    await settleHarness(harness);
+
+    const heading = harness.routeNativeElement?.querySelector<HTMLElement>('#home-title');
+
+    expect(heading?.textContent).toContain('Baptiste Wetterwald');
+    expect(document.activeElement).toBe(heading);
+  });
+
+  it('moves focus to the localized not-found heading after a project 404', async () => {
+    const harness = await createHarness('/en');
+
+    primaryNavLinks(harness)[0]?.focus();
+    await harness.navigateByUrl('/en/projects/missing-project');
+    await settleHarness(harness);
+
+    const heading = harness.routeNativeElement?.querySelector<HTMLElement>(
+      'app-not-found-page [data-route-focus-target]',
+    );
+
+    expect(heading?.textContent).toContain('Page not found');
+    expect(document.activeElement).toBe(heading);
+  });
+
+  it('moves focus to the temporary-unavailable heading after a project 503', async () => {
+    const harness = await createHarness('/fr', {
+      getProject: () =>
+        throwError(() => new HttpErrorResponse({ status: 503, statusText: 'Unavailable' })),
+    });
+
+    primaryNavLinks(harness)[0]?.focus();
+    await harness.navigateByUrl('/fr/projets/temporarily-unavailable');
+    await settleHarness(harness);
+
+    const heading = harness.routeNativeElement?.querySelector<HTMLElement>('#project-error-title');
+
+    expect(heading?.textContent).toContain('Le projet ne peut pas être chargé');
+    expect(document.activeElement).toBe(heading);
+  });
+
+  it('does not move focus for a same-document fragment navigation', async () => {
+    const harness = await createHarness('/en');
+    const retainedControl = primaryNavLinks(harness)[0]!;
+
+    retainedControl.focus();
+    await harness.navigateByUrl('/en#projects');
+    await settleHarness(harness);
+
+    expect(document.activeElement).toBe(retainedControl);
   });
 
   it('replaces the ProfilePage payload on client locale navigation without changing Person identity', async () => {
@@ -275,6 +350,8 @@ async function createHarness(
       },
     ],
   });
+
+  TestBed.inject(RouteFocusService).initialize();
 
   const harness = await RouterTestingHarness.create(initialUrl);
 

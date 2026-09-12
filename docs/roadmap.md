@@ -220,11 +220,12 @@ Already implemented:
 - dynamic backend-owned localized `sitemap.xml` and a public `robots.txt` crawl policy;
 - localized SSR `ProfilePage`/`Person` JSON-LD for the two healthy main documents, with cleanup on non-profile route states;
 - semantic navigation/content, keyboard states, focus handling, and reduced motion;
+- centralized SPA route focus, focused-sonar Escape collapse, reduced landmark noise, stronger Contact field boundaries, and a more distinguishable maritime contribution scale;
 - unit, SSR smoke, and responsive headless-browser checks.
 
 Remaining:
 
-- formal keyboard, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits;
+- manual screen-reader validation and production-oriented Lighthouse follow-up;
 - agreed performance/accessibility thresholds and remediation.
 
 Deliberately deferred beyond M12:

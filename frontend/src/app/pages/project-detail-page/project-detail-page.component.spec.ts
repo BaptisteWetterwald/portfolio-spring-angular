@@ -35,15 +35,22 @@ describe('ProjectDetailPageComponent', () => {
     ).toEqual(['Angular']);
     expect(page.querySelector('.project-detail__status.badge')).toBeNull();
     expect(page.querySelector('.project-detail__technology.badge')).not.toBeNull();
+    expect(page.querySelector('.project-detail__actions')?.tagName).toBe('DIV');
+    expect(page.querySelector('.project-detail__actions')?.getAttribute('role')).toBeNull();
+    expect(page.querySelector('.project-detail__actions nav')).toBeNull();
     expect(
-      Array.from(page.querySelectorAll<HTMLAnchorElement>('nav a')).map((link) => link.href),
+      Array.from(page.querySelectorAll<HTMLAnchorElement>('.project-detail__actions a')).map(
+        (link) => link.href,
+      ),
     ).toEqual([
       'https://example.test/portfolio-api.git',
       'https://demo.example.test/portfolio-api',
     ]);
-    expect(page.querySelector<HTMLAnchorElement>('nav a')?.getAttribute('aria-label')).toBe(
-      'GitHub (opens in a new tab): Portfolio API',
-    );
+    expect(
+      page
+        .querySelector<HTMLAnchorElement>('.project-detail__actions a')
+        ?.getAttribute('aria-label'),
+    ).toBe('GitHub (opens in a new tab): Portfolio API');
   });
 
   it('renders an archived badge when historical context is meaningful', async () => {

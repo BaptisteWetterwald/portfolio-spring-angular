@@ -11,7 +11,9 @@
         <app-section-permalink sectionId="home" />
         <p class="home-page__eyebrow">{{ content.home.hero.role }}</p>
       </div>
-      <h1 id="home-title">{{ content.home.hero.name }}</h1>
+      <h1 id="home-title" data-route-focus-target tabindex="-1">
+        {{ content.home.hero.name }}
+      </h1>
       <p class="home-page__orientation">{{ content.home.hero.orientation }}</p>
       <p class="home-page__stack-line">{{ content.home.hero.stackLine }}</p>
 
