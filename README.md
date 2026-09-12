@@ -2,7 +2,7 @@
 
 Bilingual portfolio for Baptiste Wetterwald, positioned as a Software Engineer focused on backend and full-stack work.
 
-The approved baseline uses the single-page architecture described below. The application and local container stack are implemented and tested locally; production deployment is not yet implemented.
+The approved baseline uses the single-page architecture described below. The application, local container stack, and CI image publication are implemented; production deployment is not yet implemented.
 
 ## Current Architecture
 
@@ -182,7 +182,25 @@ docker compose down
 | `backend`  | Eclipse Temurin Java 21 JRE | `127.0.0.1:8080` | Applies Flyway migrations and validates the schema.                    |
 | `frontend` | Node.js 24.19.0 Angular SSR | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080` and proxies `/api`. |
 
-These containers and their local Compose wiring are implemented. Host Nginx/HTTPS, GHCR publishing, GitHub Actions CI/CD, automated VPS deployment, backups, rollback automation, and production monitoring remain planned work.
+These containers and their local Compose wiring are implemented. Host Nginx/HTTPS, automated VPS deployment, backups, rollback automation, and production monitoring remain planned work.
+
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs for pull requests targeting `main`, pushes to `main`, and manual `workflow_dispatch` runs. Frontend and backend validation run in parallel:
+
+- frontend: Node.js 24.19.0, npm 11.6.2, `npm ci`, formatting, linting, unit tests, and the production SSR build;
+- backend: Java 21 and `./mvnw -B verify` against a PostgreSQL 18 service using CI-only credentials and isolated Flyway-managed test schemas.
+
+Pull-request and manual runs build both production images for `linux/amd64` without logging in to a registry or publishing. After both validation jobs pass on a push to `main`, the workflow publishes:
+
+```text
+ghcr.io/baptistewetterwald/portfolio-spring-angular-frontend:<full-git-sha>
+ghcr.io/baptistewetterwald/portfolio-spring-angular-backend:<full-git-sha>
+```
+
+Both images also receive the mutable `main` convenience tag. Deployment must select the immutable full-SHA tag; `main` is not a deployment identity. Image names are derived from the lowercased GitHub repository owner/name so forks publish only in their own namespace when their own `main` workflow is authorized.
+
+The workflow defaults to `contents: read`. Only the trusted `main` publication job receives `packages: write`; it authenticates to GHCR with GitHub's short-lived `GITHUB_TOKEN`. No manually configured CI secret, GitHub integration token, Contact identity, or SMTP credential is required. M14 stops at image publication: pulling those images onto a VPS, production Compose configuration, Nginx/HTTPS, rollout health checks, and rollback remain M15.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 # Deployment Architecture
 
-This document distinguishes the implemented local/container runtime from the planned production deployment.
+This document distinguishes the implemented local/container runtime and CI publication from the planned production deployment.
 
 ## Status Summary
 
@@ -12,12 +12,12 @@ This document distinguishes the implemented local/container runtime from the pla
 | PostgreSQL named-volume persistence    | Implemented locally |
 | Backend/SSR health checks in Compose   | Implemented         |
 | Host reverse proxy and HTTPS           | Planned             |
-| GHCR image publishing                  | Planned             |
-| GitHub Actions CI/CD                   | Not implemented     |
+| GHCR image publishing                  | Implemented         |
+| GitHub Actions CI                      | Implemented         |
 | Automated VPS deployment               | Not implemented     |
 | Production backups/rollback/monitoring | Not implemented     |
 
-No `.github/workflows` directory exists in the current repository. Nothing in this document should be read as evidence that `bwetterwald.fr` is deployed.
+The implemented workflow validates code and publishes images; it does not deploy them. Nothing in this document should be read as evidence that `bwetterwald.fr` is deployed.
 
 ## Implemented Local Runtime
 
@@ -141,22 +141,33 @@ For Contact rate limiting, the production backend must remain inaccessible from 
 
 Do not add Kubernetes, multi-server orchestration, or another proxy without a concrete requirement.
 
-## Planned CI/CD
+## Implemented CI and Image Publication
 
-GitHub Actions should eventually:
+`.github/workflows/ci.yml` runs for pull requests targeting `main`, pushes to `main`, and manual dispatches. Its two independent validation jobs enforce:
 
-1. install frontend dependencies from the lockfile;
-2. run formatting, linting, tests, and production build;
-3. run backend tests, compilation, and packaging;
-4. build images only after validation succeeds;
-5. publish immutable Git-SHA-tagged images to GHCR;
-6. authenticate the VPS for image pulls;
-7. update selected image versions through Compose;
-8. let the backend apply compatible startup migrations;
-9. verify public frontend/API health;
-10. retain traceability and a reasonable application rollback path.
+1. Node.js 24.19.0 and npm 11.6.2 installation from `frontend/package-lock.json` with `npm ci`;
+2. frontend formatting, linting, unit tests, and the production request-time SSR build;
+3. Java 21 Maven Wrapper `verify`, including compilation, tests, and packaging;
+4. PostgreSQL 18 migration/repository tests against CI-only database credentials and per-test isolated schemas.
 
-No workflow, registry namespace, deployment script, or VPS configuration currently implements this plan.
+The test profile disables the live GitHub identity and uses metadata-only Contact logging. GitHub client tests use a loopback HTTP server and mail tests use mocks, so CI receives no GitHub application token, Contact identity, or SMTP credential. `BACKEND_INTERNAL_ORIGIN` is runtime SSR configuration and is not required by the request-time SSR build.
+
+Both validations must succeed before an image job starts. Pull-request and manual runs build the two existing Dockerfiles for `linux/amd64` without registry authentication or publication. A push to `main` instead publishes these names:
+
+```text
+ghcr.io/baptistewetterwald/portfolio-spring-angular-frontend:<full-git-sha>
+ghcr.io/baptistewetterwald/portfolio-spring-angular-backend:<full-git-sha>
+```
+
+The owner/repository portion is derived from `github.repository` and lowercased. Each successful `main` publication also moves a `main` convenience tag. The full 40-character commit SHA is the immutable deployment contract; M15 must not use the mutable tag as its sole release identity.
+
+Workflow permissions default to `contents: read`. Only the trusted `main` push publication job has `packages: write`, logs in to `ghcr.io`, and uses GitHub's short-lived `GITHUB_TOKEN`; no PAT or manually configured CI secret is required. Pull-request code never runs in a write-capable job. Checkout credentials are not persisted. Official GitHub/Docker Actions are pinned to stable major versions.
+
+BuildKit's GitHub Actions cache is scoped independently to `frontend` and `backend`. Untrusted image builds restore cache entries but do not write them; the trusted publication job updates them. Cache contents include no credentials and never replace lockfile/wrapper-driven dependency resolution.
+
+## Planned Deployment
+
+M15 remains responsible for authenticating the VPS for GHCR pulls, selecting immutable image tags in production Compose configuration, applying controlled updates, coordinating startup migrations, configuring Nginx/HTTPS, verifying public frontend/API health, recording the deployed SHA, and providing a reasonable compatible-image rollback path. No deployment script, production Compose configuration, host proxy, or VPS configuration currently implements those steps.
 
 ## Production Security and Operations Requirements
 
@@ -176,7 +187,6 @@ Database rollback must not assume that reverting an image reverses Flyway migrat
 
 ## Remaining Decisions
 
-- GHCR namespace and image names;
 - VPS user, directory layout, and Compose/environment-file ownership;
 - exact Nginx and certificate automation;
 - production secret provisioning;

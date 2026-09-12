@@ -76,7 +76,7 @@ The production target is a Linux VPS running containerized services.
 
 The frontend and backend must each be independently containerizable. PostgreSQL must use persistent storage. Prefer simple Docker Compose orchestration appropriate for a single-server portfolio deployment. Do not introduce Kubernetes or similar orchestration without an explicit new requirement.
 
-Current local Compose wiring and production-style Dockerfiles exist. Host Nginx/HTTPS, image publishing, GitHub Actions, automated VPS deployment, backup/restore, rollback automation, and production monitoring are still planned; do not describe them as deployed.
+Current local Compose wiring, production-style Dockerfiles, GitHub Actions validation, and GHCR image publishing exist. Host Nginx/HTTPS, automated VPS deployment, backup/restore, rollback automation, and production monitoring are still planned; do not describe them as deployed.
 
 # Docker images
 
@@ -93,13 +93,13 @@ Production Dockerfiles should:
 
 # CI and CD
 
-GitHub Actions is the intended CI/CD platform, but no workflow is currently implemented. Changes to `main` are intended to be automatically deployed only after that work exists.
+`.github/workflows/ci.yml` validates pull requests targeting `main`, pushes to `main`, and manual runs. It publishes frontend/backend GHCR images only for validated pushes to `main`; publication is not deployment.
 
 CI must validate frontend dependency installation, formatting/linting, tests, and production build, plus backend tests, compilation, and packaging. Docker images may be published only after required validation succeeds.
 
-Prefer immutable, Git-SHA-tagged images. Deployment must support authenticated pulls, environment-specific configuration, startup migrations, controlled updates, health verification, traceability, and reasonable rollback. Do not silently deploy a failed build.
+Published images use the full Git SHA as the immutable tag and also receive the mutable `main` convenience tag. Deployment must select immutable SHA tags and support authenticated pulls, environment-specific configuration, startup migrations, controlled updates, health verification, traceability, and reasonable rollback. Do not silently deploy a failed build.
 
-Do not place secrets in workflow files. Use GitHub secrets or another appropriate secure mechanism, and pin important external actions to stable versions.
+Do not place secrets in workflow files. GHCR publication uses the job-scoped `GITHUB_TOKEN`; application and deployment secrets are not CI inputs. Use GitHub secrets or another appropriate secure mechanism for future private values, and pin important external actions to stable versions.
 
 # Configuration and operations
 
