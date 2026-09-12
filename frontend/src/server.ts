@@ -23,6 +23,11 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// Production has exactly one trusted host proxy (Nginx) in front of this loopback-bound server.
+// This makes req.protocol reflect Nginx's overwritten X-Forwarded-Proto value before /api requests
+// are forwarded to the private backend. Direct public access to this port is not supported.
+app.set('trust proxy', 1);
+
 app.get('/robots.txt', (_req, res) => {
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.sendFile(join(browserDistFolder, 'robots.txt'));

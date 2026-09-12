@@ -72,11 +72,13 @@ Preserve unrelated worktree changes. Do not reset, checkout, stash, clean, rever
 
 # Docker and deployment
 
-The production target is a Linux VPS running containerized services.
+The production target is the audited Fedora `home-server-baptiste` homelab. Cloudflare owns public DNS/TLS and reaches host Nginx through the existing Cloudflare Tunnel. Nginx stays on `127.0.0.1:8008`; do not add Certbot or public host listeners. Preserve the existing `/wakommute/api/` route. The legacy portfolio remains `/srv/services/portfolio` on `8080` until the new site is staged, cut over, publicly verified, and retained through an agreed rollback window.
 
 The frontend and backend must each be independently containerizable. PostgreSQL must use persistent storage. Prefer simple Docker Compose orchestration appropriate for a single-server portfolio deployment. Do not introduce Kubernetes or similar orchestration without an explicit new requirement.
 
-Current local Compose wiring, production-style Dockerfiles, GitHub Actions validation, and GHCR image publishing exist. Host Nginx/HTTPS, automated VPS deployment, backup/restore, rollback automation, and production monitoring are still planned; do not describe them as deployed.
+Current local Compose wiring, production-style Dockerfiles, GitHub Actions validation, and GHCR image publishing exist. M15 repository artifacts define homelab production Compose, Cloudflare/Nginx routing, mandatory legacy backup, immutable-SHA staging/finalization, health gates, traceability, compatible-image rollback, and disabled-by-default CI SSH automation. They have not been installed or executed on the homelab; do not describe production as deployed until live verification succeeds. Scheduled PostgreSQL backups/restore drills, monitoring, and broader hardening remain M16.
+
+Production routes portfolio traffic through Cloudflare Tunnel and host Nginx to the loopback-only frontend SSR server. The frontend remains the sole `/api` proxy to the private backend. For portfolio traffic Nginx must overwrite browser forwarding headers with the known public host/HTTPS scheme and Cloudflare-provided client address; the frontend trusts exactly its Nginx hop, and the backend may use native forwarding only inside this chain. First deployment requires `backup-legacy.sh`, `deploy.sh stage`, manual Nginx cutover, and `deploy.sh finalize`. Future automation may use `deploy.sh deploy` only after manual commissioning. Never automatically roll back a backend after Flyway may have changed the schema; confirm compatibility first.
 
 # Docker images
 
@@ -95,7 +97,7 @@ Production Dockerfiles should:
 
 `.github/workflows/ci.yml` validates pull requests targeting `main`, pushes to `main`, and manual runs. It publishes frontend/backend GHCR images only for validated pushes to `main`; publication is not deployment.
 
-CI must validate frontend dependency installation, formatting/linting, tests, and production build, plus backend tests, compilation, and packaging. Docker images may be published only after required validation succeeds.
+CI must validate frontend dependency installation, formatting/linting, tests, and production build, plus backend tests, compilation, packaging, production Compose rendering, fail-closed secret interpolation, and deployment-script SHA validation. Docker images may be published only after required validation succeeds.
 
 Published images use the full Git SHA as the immutable tag and also receive the mutable `main` convenience tag. Deployment must select immutable SHA tags and support authenticated pulls, environment-specific configuration, startup migrations, controlled updates, health verification, traceability, and reasonable rollback. Do not silently deploy a failed build.
 

@@ -1,0 +1,106 @@
+name: portfolio-spring-angular-production
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio}
+      POSTGRES_USER: ${POSTGRES_USER:-portfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    networks:
+      - data
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 30s
+
+  backend:
+    image: ghcr.io/baptistewetterwald/portfolio-spring-angular-backend:${APP_VERSION:?APP_VERSION must be a full Git SHA}
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-portfolio}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-portfolio}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      SPRING_FLYWAY_ENABLED: "true"
+      PORTFOLIO_GITHUB_USERNAME: ${PORTFOLIO_GITHUB_USERNAME:-BaptisteWetterwald}
+      PORTFOLIO_GITHUB_TOKEN: ${PORTFOLIO_GITHUB_TOKEN:-}
+      PORTFOLIO_CONTACT_DELIVERY_MODE: smtp
+      PORTFOLIO_CONTACT_RECIPIENT: ${PORTFOLIO_CONTACT_RECIPIENT:?PORTFOLIO_CONTACT_RECIPIENT is required}
+      PORTFOLIO_CONTACT_SENDER: ${PORTFOLIO_CONTACT_SENDER:?PORTFOLIO_CONTACT_SENDER is required}
+      PORTFOLIO_CONTACT_SUBJECT_PREFIX: ${PORTFOLIO_CONTACT_SUBJECT_PREFIX:-[Contact Portfolio]}
+      PORTFOLIO_CONTACT_RATE_LIMIT_MAX_SUBMISSIONS: ${PORTFOLIO_CONTACT_RATE_LIMIT_MAX_SUBMISSIONS:-5}
+      PORTFOLIO_CONTACT_RATE_LIMIT_WINDOW: ${PORTFOLIO_CONTACT_RATE_LIMIT_WINDOW:-15m}
+      PORTFOLIO_CONTACT_RATE_LIMIT_MAX_CLIENTS: ${PORTFOLIO_CONTACT_RATE_LIMIT_MAX_CLIENTS:-2048}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:?SPRING_MAIL_HOST is required}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:?SPRING_MAIL_USERNAME is required}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:?SPRING_MAIL_PASSWORD is required}
+      SPRING_MAIL_TEST_CONNECTION: ${SPRING_MAIL_TEST_CONNECTION:-false}
+      MANAGEMENT_HEALTH_MAIL_ENABLED: ${MANAGEMENT_HEALTH_MAIL_ENABLED:-false}
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+      APP_VERSION: ${APP_VERSION}
+    labels:
+      org.opencontainers.image.revision: ${APP_VERSION}
+      fr.bwetterwald.deployed-revision: ${APP_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'wget -qO- http://127.0.0.1:8080/api/health | grep -q ''"status":"UP"''',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    stop_grace_period: 30s
+
+  frontend:
+    image: ghcr.io/baptistewetterwald/portfolio-spring-angular-frontend:${APP_VERSION:?APP_VERSION must be a full Git SHA}
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+      BACKEND_INTERNAL_ORIGIN: http://backend:8080
+      APP_VERSION: ${APP_VERSION}
+    labels:
+      org.opencontainers.image.revision: ${APP_VERSION}
+      fr.bwetterwald.deployed-revision: ${APP_VERSION}
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'wget -qO- http://127.0.0.1:4000/en >/dev/null && wget -qO- http://127.0.0.1:4000/api/health | grep -q ''"status":"UP"''',
+        ]
+      interval: 10s
+      timeout: 8s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 30s
+
+networks:
+  app:
+    driver: bridge
+  data:
+    internal: true
+
+volumes:
+  postgres-data:
