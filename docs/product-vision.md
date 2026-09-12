@@ -24,14 +24,14 @@ The intended first impression is modern, precise, personal, and professional. Th
 
 ## Current Product Shape
 
-The current candidate architecture on `experiment/single-page-navigation` uses two main localized documents:
+The current architecture on `main` uses two localized documents:
 
 - `/fr` for French;
 - `/en` for English.
 
 Each document composes Home, Education, Experience, Projects, and Contact in that order. Stable fragments make every major section directly linkable. Project case studies remain separate localized pages when a project is configured as `DETAIL`.
 
-This branch state is implemented and validated locally but is not yet the architecture deployed from `main`.
+This architecture is implemented and validated locally but is not yet production deployed.
 
 ## Current Content
 
