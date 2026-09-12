@@ -23,6 +23,12 @@ import {
 export const portfolioPublicProfile = {
   portraitPath: '/assets/portrait/baptiste-wetterwald-portrait.png',
   sameAs: ['https://github.com/BaptisteWetterwald'],
+  socialCard: {
+    path: '/assets/social/baptiste-wetterwald-social-card-v1.png',
+    width: 1200,
+    height: 630,
+    mimeType: 'image/png',
+  },
 } as const;
 
 interface PeriodLabels {

@@ -1,11 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
-import {
-  PageMetadataService,
-  absoluteMediaUrl,
-  absoluteUrl,
-  serializeJsonLd,
-} from './page-metadata.service';
+import { PageMetadataService, absoluteUrl, serializeJsonLd } from './page-metadata.service';
+
+const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png';
+const managedSocialMetadataSelector =
+  'meta[data-managed-by="page-metadata-service:social-sharing"]';
 
 describe('PageMetadataService', () => {
   afterEach(() => {
@@ -71,6 +70,19 @@ describe('PageMetadataService', () => {
     });
   });
 
+  it('emits the exact French shared-card Open Graph and Twitter metadata', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'fr');
+
+    expectSocialSharingMetadata({
+      title: 'Baptiste Wetterwald | Ingénieur logiciel',
+      description:
+        'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
+      imageAlt: 'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+    });
+  });
+
   it('emits the exact English ProfilePage and Person structured data', () => {
     const metadata = TestBed.inject(PageMetadataService);
 
@@ -92,6 +104,19 @@ describe('PageMetadataService', () => {
         image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
         sameAs: ['https://github.com/BaptisteWetterwald'],
       },
+    });
+  });
+
+  it('emits the exact English shared-card Open Graph and Twitter metadata', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'en');
+
+    expectSocialSharingMetadata({
+      title: 'Baptiste Wetterwald | Software Engineer',
+      description:
+        'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+      imageAlt: 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
     });
   });
 
@@ -168,7 +193,6 @@ describe('PageMetadataService', () => {
       slug: 'portfolio-api',
       title: 'Portfolio API',
       shortDescription: 'Public project API.',
-      logoMediaRef: '/assets/projects/portfolio-api.png',
       availableLocales: ['en', 'fr'],
     });
     metadata.applyNotFound('fr', '/fr/inconnu?x=1');
@@ -182,6 +206,8 @@ describe('PageMetadataService', () => {
     expect(document.querySelector('link[rel="alternate"]')).toBeNull();
     expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
     expect(document.querySelector('meta[property="og:image"]')).toBeNull();
+    expect(document.querySelector('meta[name="twitter:card"]')).toBeNull();
+    expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(0);
     expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
       'website',
     );
@@ -189,14 +215,15 @@ describe('PageMetadataService', () => {
 
   it('applies localized project detail metadata and available hreflang alternates', () => {
     const metadata = TestBed.inject(PageMetadataService);
-
-    metadata.applyProjectDetail('en', {
+    const projectWithLogo = {
       slug: 'portfolio-api',
       title: 'Portfolio API',
       shortDescription: 'Public project API.',
       logoMediaRef: '/assets/projects/portfolio-api.png',
       availableLocales: ['en', 'fr'],
-    });
+    };
+
+    metadata.applyProjectDetail('en', projectWithLogo);
 
     expect(document.documentElement.getAttribute('lang')).toBe('en');
     expect(document.title).toBe('Portfolio API | Baptiste Wetterwald');
@@ -216,9 +243,12 @@ describe('PageMetadataService', () => {
     expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
       'article',
     );
-    expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
-      'https://bwetterwald.fr/assets/projects/portfolio-api.png',
-    );
+    expectSocialSharingMetadata({
+      title: 'Portfolio API | Baptiste Wetterwald',
+      description: 'Public project API.',
+      imageAlt: 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+    });
+    expect(document.head.innerHTML).not.toContain('/assets/projects/portfolio-api.png');
     expect(
       document.querySelector('meta[property="og:locale:alternate"]')?.getAttribute('content'),
     ).toBe('fr_FR');
@@ -249,7 +279,6 @@ describe('PageMetadataService', () => {
       slug: 'portfolio-api',
       title: 'Portfolio API',
       shortDescription: 'API publique.',
-      logoMediaRef: '/assets/projects/portfolio-api.png',
       availableLocales: ['fr', 'en'],
     });
     metadata.applyProjectUnavailable('en', '/en/projects/portfolio-api?retry=1');
@@ -266,6 +295,8 @@ describe('PageMetadataService', () => {
     expect(document.querySelector('link[rel="alternate"]')).toBeNull();
     expect(document.querySelector('meta[property="og:locale:alternate"]')).toBeNull();
     expect(document.querySelector('meta[property="og:image"]')).toBeNull();
+    expect(document.querySelector('meta[name="twitter:card"]')).toBeNull();
+    expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(0);
     expect(document.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
       'website',
     );
@@ -274,15 +305,90 @@ describe('PageMetadataService', () => {
     );
   });
 
+  it('replaces, removes, and restores one complete managed social-sharing group', () => {
+    const metadata = TestBed.inject(PageMetadataService);
+
+    metadata.applyStaticPage('home', 'fr');
+    expectSocialSharingMetadata({
+      title: 'Baptiste Wetterwald | Ingénieur logiciel',
+      description:
+        'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
+      imageAlt: 'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+    });
+
+    metadata.applyStaticPage('home', 'en');
+    expectSocialSharingMetadata({
+      title: 'Baptiste Wetterwald | Software Engineer',
+      description:
+        'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+      imageAlt: 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+    });
+
+    metadata.applyProjectDetail('en', {
+      slug: 'portfolio-api',
+      title: 'Portfolio API',
+      shortDescription: 'Public project API.',
+      availableLocales: ['en', 'fr'],
+    });
+    expectSocialSharingMetadata({
+      title: 'Portfolio API | Baptiste Wetterwald',
+      description: 'Public project API.',
+      imageAlt: 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+    });
+
+    metadata.applyNotFound('en', '/en/projects/missing');
+    expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(0);
+
+    metadata.applyStaticPage('home', 'fr');
+    expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(11);
+
+    metadata.applyProjectUnavailable('fr', '/fr/projets/portfolio-api');
+    expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(0);
+
+    metadata.applyStaticPage('home', 'en');
+    expectSocialSharingMetadata({
+      title: 'Baptiste Wetterwald | Software Engineer',
+      description:
+        'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+      imageAlt: 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+    });
+  });
+
   it('builds production absolute URLs', () => {
     expect(absoluteUrl('/en/projects')).toBe('https://bwetterwald.fr/en/projects');
-    expect(absoluteMediaUrl('/assets/projects/logo.svg')).toBe(
-      'https://bwetterwald.fr/assets/projects/logo.svg',
-    );
-    expect(absoluteMediaUrl('http://cdn.example.test/logo.svg')).toBeUndefined();
-    expect(absoluteMediaUrl('//cdn.example.test/logo.svg')).toBeUndefined();
   });
 });
+
+function expectSocialSharingMetadata(expected: {
+  readonly title: string;
+  readonly description: string;
+  readonly imageAlt: string;
+}): void {
+  const expectedTags = [
+    ['property', 'og:image', socialCardUrl],
+    ['property', 'og:image:alt', expected.imageAlt],
+    ['property', 'og:image:width', '1200'],
+    ['property', 'og:image:height', '630'],
+    ['property', 'og:image:type', 'image/png'],
+    ['property', 'og:site_name', 'Baptiste Wetterwald'],
+    ['name', 'twitter:card', 'summary_large_image'],
+    ['name', 'twitter:title', expected.title],
+    ['name', 'twitter:description', expected.description],
+    ['name', 'twitter:image', socialCardUrl],
+    ['name', 'twitter:image:alt', expected.imageAlt],
+  ] as const;
+
+  expect(document.querySelectorAll(managedSocialMetadataSelector)).toHaveLength(
+    expectedTags.length,
+  );
+  for (const [attribute, key, content] of expectedTags) {
+    const tags = document.querySelectorAll(`meta[${attribute}="${key}"]`);
+
+    expect(tags).toHaveLength(1);
+    expect(tags[0]?.getAttribute('content')).toBe(content);
+    expect(tags[0]?.getAttribute('data-managed-by')).toBe('page-metadata-service:social-sharing');
+  }
+}
 
 function managedStructuredDataScripts(): NodeListOf<HTMLScriptElement> {
   return document.querySelectorAll(

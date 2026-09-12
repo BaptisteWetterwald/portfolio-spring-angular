@@ -1,7 +1,14 @@
 const origin = process.env['SSR_SMOKE_ORIGIN'] ?? 'http://127.0.0.1:4000';
 const runControlledDetailSmoke = process.env['SSR_SMOKE_CONTROLLED_DETAIL'] === 'true';
+const runUnavailableDetailSmoke = process.env['SSR_SMOKE_PROJECT_UNAVAILABLE'] === 'true';
 const unexpectedIndexingLinks = ['rel="canonical"', 'rel="alternate"'];
+const unexpectedSocialSharingMetadata = [
+  'property="og:image"',
+  'name="twitter:card"',
+  'page-metadata-service:social-sharing',
+];
 const projectXDefault = 'hreflang="x-default"';
+const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png';
 
 const checks = [
   {
@@ -14,6 +21,13 @@ const checks = [
       'Disallow: /api/',
       'Sitemap: https://bwetterwald.fr/sitemap.xml',
     ],
+  },
+  {
+    name: 'shared social card static asset',
+    path: '/assets/social/baptiste-wetterwald-social-card-v1.png',
+    expectedStatus: 200,
+    expectedContentType: 'image/png',
+    binaryBody: true,
   },
   {
     name: 'localized sitemap discovery',
@@ -76,6 +90,11 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/fr"',
       'property="og:locale" content="fr_FR"',
       'property="og:locale:alternate" content="en_US"',
+      ...socialSharingMetadata(
+        'Baptiste Wetterwald | Ingénieur logiciel',
+        'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
+        'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+      ),
       'Baptiste Wetterwald</h1>',
       'Ingénieur logiciel',
       'Java / Spring',
@@ -131,6 +150,11 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/en"',
       'property="og:locale" content="en_US"',
       'property="og:locale:alternate" content="fr_FR"',
+      ...socialSharingMetadata(
+        'Baptiste Wetterwald | Software Engineer',
+        'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+        'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+      ),
       'Baptiste Wetterwald</h1>',
       'Software Engineer',
       'Java / Spring',
@@ -251,10 +275,15 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/en/projects/blaze4"',
       'property="og:locale" content="en_US"',
       'property="og:locale:alternate" content="fr_FR"',
+      ...socialSharingMetadata(
+        'Blaze4 | Baptiste Wetterwald',
+        'Connect Four web application built with C#/.NET using an N-tier architecture, an ASP.NET Core REST API, a Blazor WebAssembly frontend and Entity Framework Core persistence.',
+        'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+      ),
       'href="/fr/projets/blaze4"',
       'href="/en/projects/blaze4"',
     ],
-    unexpectedBody: [projectXDefault, 'property="og:image"', 'SignalR', 'WebSockets'],
+    unexpectedBody: [projectXDefault, 'SignalR', 'WebSockets'],
   },
   {
     name: 'French Blaze4 detail SSR metadata',
@@ -292,10 +321,15 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/fr/projets/blaze4"',
       'property="og:locale" content="fr_FR"',
       'property="og:locale:alternate" content="en_US"',
+      ...socialSharingMetadata(
+        'Blaze4 | Baptiste Wetterwald',
+        "Application web de Puissance 4 en C#/.NET, construite autour d'une architecture N-tiers avec API REST ASP.NET Core, frontend Blazor WebAssembly et persistance via Entity Framework Core.",
+        'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+      ),
       'href="/fr/projets/blaze4"',
       'href="/en/projects/blaze4"',
     ],
-    unexpectedBody: [projectXDefault, 'property="og:image"', 'SignalR', 'WebSockets'],
+    unexpectedBody: [projectXDefault, 'SignalR', 'WebSockets'],
   },
   {
     name: 'English Portfolio detail SSR metadata',
@@ -337,10 +371,15 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/en/projects/portfolio-spring-angular"',
       'property="og:locale" content="en_US"',
       'property="og:locale:alternate" content="fr_FR"',
+      ...socialSharingMetadata(
+        'Portfolio Spring Angular | Baptiste Wetterwald',
+        'Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies.',
+        'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+      ),
       'href="/fr/projets/portfolio-spring-angular"',
       'href="/en/projects/portfolio-spring-angular"',
     ],
-    unexpectedBody: [projectXDefault, 'property="og:image"', 'CI/CD', 'production deployment'],
+    unexpectedBody: [projectXDefault, 'CI/CD', 'production deployment'],
   },
   {
     name: 'French Portfolio detail SSR metadata',
@@ -382,10 +421,15 @@ const checks = [
       'property="og:url" content="https://bwetterwald.fr/fr/projets/portfolio-spring-angular"',
       'property="og:locale" content="fr_FR"',
       'property="og:locale:alternate" content="en_US"',
+      ...socialSharingMetadata(
+        'Portfolio Spring Angular | Baptiste Wetterwald',
+        'Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées.',
+        'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+      ),
       'href="/fr/projets/portfolio-spring-angular"',
       'href="/en/projects/portfolio-spring-angular"',
     ],
-    unexpectedBody: [projectXDefault, 'property="og:image"', 'CI/CD', 'déploiement production'],
+    unexpectedBody: [projectXDefault, 'CI/CD', 'déploiement production'],
   },
   {
     name: 'English BeamNG card-only detail URL is unavailable',
@@ -398,6 +442,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'network/socket programming',
     ],
@@ -413,6 +458,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'programmation réseau/sockets',
     ],
@@ -428,6 +474,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'AVPlayer',
     ],
@@ -443,6 +490,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'AVPlayer',
     ],
@@ -458,6 +506,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'Jetpack Compose',
     ],
@@ -473,6 +522,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'Jetpack Compose',
     ],
@@ -488,6 +538,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'Discord bot built with Node.js',
     ],
@@ -503,6 +554,7 @@ const checks = [
     ],
     unexpectedBody: [
       ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
       'property="og:type" content="article"',
       'Bot Discord',
     ],
@@ -517,7 +569,11 @@ const checks = [
       'Page not found',
       'name="robots" content="noindex,follow"',
     ],
-    unexpectedBody: [...unexpectedIndexingLinks, 'property="og:type" content="article"'],
+    unexpectedBody: [
+      ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
+      'property="og:type" content="article"',
+    ],
   },
   {
     name: 'invalid public project slug returns localized 404 metadata',
@@ -528,24 +584,43 @@ const checks = [
       'Page not found',
       'name="robots" content="noindex,follow"',
     ],
-    unexpectedBody: [...unexpectedIndexingLinks, 'property="og:type" content="article"'],
+    unexpectedBody: [
+      ...unexpectedIndexingLinks,
+      ...unexpectedSocialSharingMetadata,
+      'property="og:type" content="article"',
+    ],
   },
   {
     name: 'unsupported locale returns 404',
     path: '/de',
     expectedStatus: 404,
     expectedBody: ['Page not found'],
+    unexpectedBody: unexpectedSocialSharingMetadata,
   },
   {
     name: 'localized unknown route returns 404',
     path: '/fr/inconnu',
     expectedStatus: 404,
     expectedBody: ['Page introuvable', 'noindex,follow', 'data-primary-nav', 'theme-toggle'],
-    unexpectedBody: unexpectedIndexingLinks,
+    unexpectedBody: [...unexpectedIndexingLinks, ...unexpectedSocialSharingMetadata],
   },
 ];
 
-if (runControlledDetailSmoke) {
+if (runUnavailableDetailSmoke) {
+  checks.splice(0, checks.length, {
+    name: 'temporarily unavailable project detail omits social sharing metadata',
+    path: '/en/projects/temporarily-unavailable',
+    expectedStatus: 503,
+    expectedManagedJsonLdCount: 0,
+    expectedBody: [
+      '<title>Project could not be loaded | Baptiste Wetterwald</title>',
+      'name="robots" content="noindex,follow"',
+    ],
+    unexpectedBody: [...unexpectedIndexingLinks, ...unexpectedSocialSharingMetadata],
+  });
+}
+
+if (runControlledDetailSmoke && !runUnavailableDetailSmoke) {
   checks.push(
     {
       name: 'English controlled detail SSR metadata',
@@ -559,8 +634,13 @@ if (runControlledDetailSmoke) {
         'href="https://bwetterwald.fr/en/projects/ssr-detail-fixture"',
         'hreflang="fr" href="https://bwetterwald.fr/fr/projets/ssr-detail-fixture"',
         'property="og:type" content="article"',
+        ...socialSharingMetadata(
+          'SSR Detail Fixture | Baptiste Wetterwald',
+          'SSR detail fixture short description.',
+          'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+        ),
       ],
-      unexpectedBody: ['property="og:image"'],
+      unexpectedBody: [projectXDefault],
     },
     {
       name: 'French controlled detail SSR metadata',
@@ -574,8 +654,13 @@ if (runControlledDetailSmoke) {
         'href="https://bwetterwald.fr/fr/projets/ssr-detail-fixture"',
         'hreflang="en" href="https://bwetterwald.fr/en/projects/ssr-detail-fixture"',
         'property="og:locale" content="fr_FR"',
+        ...socialSharingMetadata(
+          'Fixture de detail SSR | Baptiste Wetterwald',
+          'Description courte de fixture detail SSR.',
+          'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+        ),
       ],
-      unexpectedBody: ['property="og:image"'],
+      unexpectedBody: [projectXDefault],
     },
   );
 }
@@ -583,7 +668,13 @@ if (runControlledDetailSmoke) {
 for (const check of checks) {
   const url = `${origin}${check.path}`;
   const response = await fetchSmokeTarget(url, check);
-  const body = await response.text();
+  let body = '';
+
+  if (check.binaryBody) {
+    await response.arrayBuffer();
+  } else {
+    body = await response.text();
+  }
 
   assert(
     response.status === check.expectedStatus,
@@ -713,6 +804,22 @@ function profilePageJsonLd(locale) {
       sameAs: ['https://github.com/BaptisteWetterwald'],
     },
   };
+}
+
+function socialSharingMetadata(title, description, imageAlt) {
+  return [
+    `property="og:image" content="${socialCardUrl}"`,
+    `property="og:image:alt" content="${imageAlt}"`,
+    'property="og:image:width" content="1200"',
+    'property="og:image:height" content="630"',
+    'property="og:image:type" content="image/png"',
+    'property="og:site_name" content="Baptiste Wetterwald"',
+    'name="twitter:card" content="summary_large_image"',
+    `name="twitter:title" content="${title}"`,
+    `name="twitter:description" content="${description}"`,
+    `name="twitter:image" content="${socialCardUrl}"`,
+    `name="twitter:image:alt" content="${imageAlt}"`,
+  ];
 }
 
 async function fetchSmokeTarget(url, check) {

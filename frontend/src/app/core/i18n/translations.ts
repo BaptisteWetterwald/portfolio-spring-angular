@@ -117,6 +117,7 @@ const englishTranslations = {
   'metadata.home.title': 'Baptiste Wetterwald | Software Engineer',
   'metadata.home.description':
     'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
+  'metadata.socialImageAlt': 'Baptiste Wetterwald profile card with portrait and maritime visuals.',
   'metadata.education.title': 'Education | Baptiste Wetterwald',
   'metadata.education.description':
     'Education for Baptiste Wetterwald: Engineering Degree in Computer Science and Networks, UQAC semester, DUT Computer Science, INSA Lyon, and Baccalauréat STI2D.',
@@ -253,6 +254,8 @@ export const translations: Record<SupportedLocale, Record<TranslationKey, string
     'metadata.home.title': 'Baptiste Wetterwald | Ingénieur logiciel',
     'metadata.home.description':
       'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
+    'metadata.socialImageAlt':
+      'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
     'metadata.education.title': 'Formation | Baptiste Wetterwald',
     'metadata.education.description':
       "Formation de Baptiste Wetterwald : diplôme d'ingénieur en informatique et réseaux, semestre UQAC, DUT informatique, INSA Lyon et baccalauréat STI2D.",

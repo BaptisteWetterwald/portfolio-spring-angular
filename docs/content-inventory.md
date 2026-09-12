@@ -26,6 +26,7 @@ Do not move CV/profile content into PostgreSQL, create profile CMS tables, or ad
 | Primary stack     | Java / Spring, C# / .NET, TypeScript / Node.js, Angular                                                                                                                                                               |
 | Home copy         | Concise engineering-graduate positioning with backend systems, API-oriented architectures, full-stack applications, Angular, system integration, SAP, Microsoft Power Platform, and industrial software environments. |
 | Portrait          | Approved original portrait asset rendered from `frontend/public/assets/portrait/baptiste-wetterwald-portrait.png` with CSS object cropping inside the porthole frame.                                                 |
+| Social preview    | Approved language-neutral `1200 × 630` PNG at `frontend/public/assets/social/baptiste-wetterwald-social-card-v1.png`; shared by healthy localized main and project-detail pages.                                      |
 | Social/contact/CV | Not published until real URLs, contact method, or CV files are supplied.                                                                                                                                              |
 
 The approved global GitHub identity is `BaptisteWetterwald`, now used as the backend default for the M11 activity block and profile URL. Project-specific repository owners remain non-authoritative. Recent public repositories work anonymously; contribution-calendar data remains absent until a backend-only GitHub token is configured.
@@ -160,5 +161,5 @@ Current public display order uses `projects.display_order` ascending: Portfolio 
 - public contact method or contact form policy;
 - downloadable CV file(s);
 - additional project records, final bilingual copy, GitHub/demo URLs, and project-owned media;
-- approved OpenGraph images beyond the existing portrait where applicable;
+- project-specific or localized social-preview images, deliberately deferred beyond M12;
 - INSA Lyon logo or official link, if a local asset/URL is supplied later.

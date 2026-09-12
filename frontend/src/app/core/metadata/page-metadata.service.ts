@@ -7,7 +7,6 @@ import { LocaleContextService } from '../i18n/locale-context.service';
 import { isSupportedLocale, SupportedLocale, supportedLocales } from '../i18n/locales';
 import { TranslationService } from '../i18n/translation.service';
 import { TranslationKey } from '../i18n/translations';
-import { absoluteProjectMediaUrl } from '../projects/project-media';
 import {
   localizedAlternates,
   localizedPath,
@@ -21,6 +20,7 @@ const managedAttribute = 'data-managed-by';
 const managedAttributeValue = 'page-metadata-service';
 const xDefaultUrl = `${productionOrigin}/`;
 const jsonLdMediaType = 'application/ld+json';
+const socialMetadataAttributeValue = `${managedAttributeValue}:social-sharing`;
 
 const metadataKeys = {
   home: {
@@ -54,7 +54,6 @@ export interface ProjectPageMetadata {
   readonly slug: string;
   readonly title: string;
   readonly shortDescription: string;
-  readonly logoMediaRef?: string | null;
   readonly availableLocales?: readonly string[];
 }
 
@@ -103,6 +102,7 @@ export class PageMetadataService {
       locale,
       robots: 'index,follow',
       includeOpenGraphAlternateLocales: true,
+      includeSocialSharing: true,
     });
     this.#setCanonical(canonicalUrl);
     this.#setAlternates(alternates);
@@ -136,7 +136,7 @@ export class PageMetadataService {
         (availableLocale) => availableLocale !== locale,
       ),
       openGraphType: 'article',
-      imageUrl: absoluteProjectMediaUrl(project.logoMediaRef),
+      includeSocialSharing: true,
     });
     this.#setCanonical(canonicalUrl);
     this.#setAlternates(alternates, false);
@@ -221,7 +221,7 @@ export class PageMetadataService {
     readonly includeOpenGraphAlternateLocales: boolean;
     readonly openGraphAlternateLocales?: readonly SupportedLocale[];
     readonly openGraphType?: 'website' | 'article';
-    readonly imageUrl?: string;
+    readonly includeSocialSharing?: boolean;
   }): void {
     this.#title.setTitle(metadata.title);
     this.#meta.updateTag(
@@ -251,16 +251,44 @@ export class PageMetadataService {
     } else {
       this.#removeManagedOpenGraphAlternateLocales();
     }
-    if (metadata.imageUrl) {
-      const imageMeta = this.#meta.updateTag(
-        { property: 'og:image', content: metadata.imageUrl },
-        'property="og:image"',
-      );
-
-      imageMeta?.setAttribute(managedAttribute, `${managedAttributeValue}:og-image`);
+    if (metadata.includeSocialSharing) {
+      this.#setSocialSharingMetadata(metadata);
     } else {
-      this.#removeManagedImage();
+      this.#removeManagedSocialSharingMetadata();
     }
+  }
+
+  #setSocialSharingMetadata(metadata: {
+    readonly title: string;
+    readonly description: string;
+    readonly locale: SupportedLocale;
+  }): void {
+    const socialCard = portfolioPublicProfile.socialCard;
+    const imageUrl = absoluteUrl(socialCard.path);
+    const imageAlt = this.#translations.translateFor(metadata.locale, 'metadata.socialImageAlt');
+    const siteName = this.#translations.translateFor(metadata.locale, 'site.name');
+
+    this.#removeManagedSocialSharingMetadata();
+    this.#appendManagedMeta('property', 'og:image', imageUrl);
+    this.#appendManagedMeta('property', 'og:image:alt', imageAlt);
+    this.#appendManagedMeta('property', 'og:image:width', String(socialCard.width));
+    this.#appendManagedMeta('property', 'og:image:height', String(socialCard.height));
+    this.#appendManagedMeta('property', 'og:image:type', socialCard.mimeType);
+    this.#appendManagedMeta('property', 'og:site_name', siteName);
+    this.#appendManagedMeta('name', 'twitter:card', 'summary_large_image');
+    this.#appendManagedMeta('name', 'twitter:title', metadata.title);
+    this.#appendManagedMeta('name', 'twitter:description', metadata.description);
+    this.#appendManagedMeta('name', 'twitter:image', imageUrl);
+    this.#appendManagedMeta('name', 'twitter:image:alt', imageAlt);
+  }
+
+  #appendManagedMeta(attribute: 'name' | 'property', key: string, content: string): void {
+    const meta = this.#document.createElement('meta');
+
+    meta.setAttribute(attribute, key);
+    meta.setAttribute('content', content);
+    meta.setAttribute(managedAttribute, socialMetadataAttributeValue);
+    this.#document.head.appendChild(meta);
   }
 
   #setCanonical(url: string): void {
@@ -335,9 +363,9 @@ export class PageMetadataService {
       .forEach((element) => element.remove());
   }
 
-  #removeManagedImage(): void {
+  #removeManagedSocialSharingMetadata(): void {
     this.#document
-      .querySelectorAll(`meta[${managedAttribute}="${managedAttributeValue}:og-image"]`)
+      .querySelectorAll(`meta[${managedAttribute}="${socialMetadataAttributeValue}"]`)
       .forEach((element) => element.remove());
   }
 
@@ -356,10 +384,6 @@ export class PageMetadataService {
 
 export function absoluteUrl(path: string): string {
   return `${productionOrigin}${path.startsWith('/') ? path : `/${path}`}`;
-}
-
-export function absoluteMediaUrl(mediaRef: string | null | undefined): string | undefined {
-  return absoluteProjectMediaUrl(mediaRef);
 }
 
 export function serializeJsonLd(value: unknown): string {

@@ -47,6 +47,13 @@ describe('localized app routes', () => {
     const harness = await createHarness('/fr');
     const frenchProfile = managedStructuredData();
 
+    expect(socialMetadataContent('property', 'og:image:alt')).toBe(
+      'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
+    );
+    expect(socialMetadataContent('name', 'twitter:title')).toBe(
+      'Baptiste Wetterwald | Ingénieur logiciel',
+    );
+
     await harness.navigateByUrl('/en');
     await settleHarness(harness);
 
@@ -60,9 +67,16 @@ describe('localized app routes', () => {
     expect(personFrom(frenchProfile)['@id']).toBe('https://bwetterwald.fr/#person');
     expect(personFrom(englishProfile)['@id']).toBe('https://bwetterwald.fr/#person');
     expect(personFrom(englishProfile)['sameAs']).toEqual(['https://github.com/BaptisteWetterwald']);
+    expect(managedSocialMetadata()).toHaveLength(11);
+    expect(socialMetadataContent('property', 'og:image:alt')).toBe(
+      'Baptiste Wetterwald profile card with portrait and maritime visuals.',
+    );
+    expect(socialMetadataContent('name', 'twitter:title')).toBe(
+      'Baptiste Wetterwald | Software Engineer',
+    );
   });
 
-  it('removes ProfilePage structured data when navigating to a healthy project detail', async () => {
+  it('replaces main-page social metadata on a healthy project detail', async () => {
     const harness = await createHarness('/en', {
       getProject: () => of(detailProject()),
     });
@@ -73,14 +87,23 @@ describe('localized app routes', () => {
     await settleHarness(harness);
 
     expect(managedStructuredDataScripts()).toHaveLength(0);
+    expect(managedSocialMetadata()).toHaveLength(11);
+    expect(socialMetadataContent('property', 'og:image')).toBe(
+      'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png',
+    );
+    expect(socialMetadataContent('name', 'twitter:title')).toBe(
+      'Portfolio API | Baptiste Wetterwald',
+    );
+    expect(socialMetadataContent('name', 'twitter:description')).toBe('Public API fixture.');
   });
 
-  it('leaves no stale ProfilePage structured data on project 404 and 503 states', async () => {
+  it('leaves no stale ProfilePage or social metadata on project 404 and 503 states', async () => {
     const notFoundHarness = await createHarness('/en');
 
     await notFoundHarness.navigateByUrl('/en/projects/missing-translation');
     await settleHarness(notFoundHarness);
     expect(managedStructuredDataScripts()).toHaveLength(0);
+    expect(managedSocialMetadata()).toHaveLength(0);
 
     TestBed.resetTestingModule();
     const unavailableHarness = await createHarness('/fr', {
@@ -91,6 +114,7 @@ describe('localized app routes', () => {
     await unavailableHarness.navigateByUrl('/fr/projets/temporarily-unavailable');
     await settleHarness(unavailableHarness);
     expect(managedStructuredDataScripts()).toHaveLength(0);
+    expect(managedSocialMetadata()).toHaveLength(0);
   });
 
   it.each([
@@ -322,6 +346,20 @@ function portfolioSectionIds(root: HTMLElement | null | undefined): string[] {
 function managedStructuredDataScripts(): NodeListOf<HTMLScriptElement> {
   return document.querySelectorAll(
     'script[type="application/ld+json"][data-managed-by="page-metadata-service:structured-data"]',
+  );
+}
+
+function managedSocialMetadata(): NodeListOf<HTMLMetaElement> {
+  return document.querySelectorAll('meta[data-managed-by="page-metadata-service:social-sharing"]');
+}
+
+function socialMetadataContent(attribute: 'name' | 'property', key: string): string | null {
+  return (
+    document
+      .querySelector<HTMLMetaElement>(
+        `meta[${attribute}="${key}"][data-managed-by="page-metadata-service:social-sharing"]`,
+      )
+      ?.getAttribute('content') ?? null
   );
 }
 

@@ -57,13 +57,18 @@ Direct fragment loads are positioned immediately after hydration and checked aga
 - canonical link;
 - localized `hreflang` alternates and, for the main documents, `x-default`;
 - OpenGraph title, description, type, URL, locale, and alternate locale;
-- optional project `og:image` from a validated media reference.
+- a shared OpenGraph social image with localized alt text, intrinsic dimensions, MIME type, and site name;
+- a matching `summary_large_image` Twitter/X card with localized page title, description, and image alt text.
 
 The main composed document canonicalizes to `/fr` or `/en` and uses one localized document metadata set. It does not create separate canonical/alternate entries for fragments.
 
-Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to actual API-reported translations of that project: bilingual details advertise reciprocal French and English URLs, while a single-language detail advertises only that locale. Project details do not emit `x-default`, because the portfolio root is not an equivalent version of a project. `og:image` is omitted when no media reference exists.
+Project detail metadata comes from localized `title` and `shortDescription`. Its `hreflang` and OpenGraph alternate locales are limited to actual API-reported translations of that project: bilingual details advertise reciprocal French and English URLs, while a single-language detail advertises only that locale. Project details do not emit `x-default`, because the portfolio root is not an equivalent version of a project.
 
-Healthy `/fr` and `/en` SSR responses contain one managed JSON-LD `ProfilePage` with a locale-specific page `@id`, canonical page URL, and `inLanguage`. Each page identifies the same stable `Person` `@id` and includes only the approved public name, localized profile description and job title, portrait URL, and GitHub `sameAs` identity. The GitHub identity is frontend-static public profile metadata and does not depend on GitHub activity API availability. Project detail, 404, untranslated-project, and temporary 503 states remove the managed JSON-LD script; project-specific structured data is intentionally deferred.
+Healthy main documents and healthy localized project details share the approved language-neutral `1200 × 630` PNG at `/assets/social/baptiste-wetterwald-social-card-v1.png`, emitted as the absolute production URL. The versioned filename supports safe replacement under the long-lived static-asset cache policy. Project `logoMediaRef` values are not social-card sources, and M12 does not provide project-specific or localized social images. The full managed image/Twitter group is rendered during SSR, replaced on successful client navigation, and removed on 404, untranslated-detail, and temporary 503 states so stale preview metadata cannot survive navigation.
+
+Healthy `/fr` and `/en` SSR responses contain one managed JSON-LD `ProfilePage` with a locale-specific page `@id`, canonical page URL, and `inLanguage`. Each page identifies the same stable `Person` `@id` and includes only the approved public name, localized profile description and job title, portrait URL, and GitHub `sameAs` identity. The GitHub identity is frontend-static public profile metadata and does not depend on GitHub activity API availability. Project detail, 404, untranslated-project, and temporary 503 states remove the managed JSON-LD script.
+
+M12 structured data deliberately stops at `ProfilePage` plus `Person`. `SoftwareSourceCode` is deferred until project data formally guarantees that `githubUrl` is a public source repository, explicitly classifies programming languages, and has verified/corrected repository data. No `CreativeWork` or other project schema is used as a fallback.
 
 ## Crawl Discovery
 
@@ -156,8 +161,8 @@ The approved portrait has localized meaningful alt text, explicit intrinsic dime
 
 The following remain part of the SEO/accessibility/performance hardening roadmap and must not be claimed as current features:
 
-- project-specific JSON-LD/Schema.org structured data;
-- approved site-wide OpenGraph image assets;
+- project-specific JSON-LD/Schema.org structured data, deliberately deferred pending stronger project semantics;
+- project-specific or localized social-preview imagery, deliberately excluded from M12;
 - a recorded full screen-reader audit;
 - published Lighthouse/performance/accessibility thresholds;
 - production analytics or monitoring.

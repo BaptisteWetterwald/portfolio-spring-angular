@@ -17,7 +17,7 @@ This roadmap records what the repository currently implements and what remains. 
 | M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
 | M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
 | M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
-| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, keyboard/reduced-motion coverage; project schema/audits remain          |
+| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, shared social card, keyboard/reduced-motion coverage; audits remain     |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
 | M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
 | M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
@@ -214,7 +214,7 @@ Status: in progress.
 Already implemented:
 
 - request-time localized SSR;
-- localized metadata, canonical and translation-accurate `hreflang` links, OpenGraph metadata;
+- localized metadata, canonical and translation-accurate `hreflang` links, OpenGraph metadata, and shared OpenGraph/Twitter social cards;
 - localized SSR 404/noindex behavior for missing or non-public content and distinct HTTP 503/noindex behavior for bounded project-backend failures;
 - permanent compatibility redirects to section fragments while locale negotiation at `/` remains temporary;
 - dynamic backend-owned localized `sitemap.xml` and a public `robots.txt` crawl policy;
@@ -224,10 +224,14 @@ Already implemented:
 
 Remaining:
 
-- approved project-specific JSON-LD structured data, if supported by accurate public project facts;
-- approved site-wide OpenGraph imagery;
 - formal keyboard, screen-reader, contrast, zoom/reflow, and Lighthouse-style audits;
 - agreed performance/accessibility thresholds and remediation.
+
+Deliberately deferred beyond M12:
+
+- project `SoftwareSourceCode` until repository-publication semantics, programming-language classification, and repository data are stronger;
+- any `CreativeWork` or other project-schema fallback;
+- project-specific or localized social-preview imagery.
 
 ## M13 — Production Docker Images
 
