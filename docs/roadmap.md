@@ -19,7 +19,7 @@ This roadmap records what the repository currently implements and what remains. 
 | M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
 | M12 SEO/accessibility/performance hardening | Complete                           | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, accessibility remediation, responsive portrait, transfer-cache mapping  |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
-| M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
+| M14 CI                                      | Complete                           | Parallel frontend/backend validation, PostgreSQL CI, gated Docker builds, and GHCR SHA-tag publication                      |
 | M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
 | M16 Production hardening                    | Not started                        | No deployed backup/restore, rollback automation, monitoring, or production security verification                             |
 
@@ -257,14 +257,19 @@ Remaining outside M13: immutable registry publishing, production deployment conf
 
 ## M14 — CI
 
-Status: not started.
+Status: complete in code; the first hosted GitHub Actions run remains the external verification point.
 
-Required:
+Implemented:
 
-- GitHub Actions frontend install/format/lint/test/build validation;
-- backend test/compile/package validation with PostgreSQL;
-- image builds and GHCR publishing only after validation;
-- immutable Git-SHA tags and secure credentials.
+- GitHub Actions frontend install/format/lint/test/production-SSR-build validation;
+- Java 21 Maven Wrapper verification with PostgreSQL 18 and isolated Flyway test schemas;
+- read-only pull-request/manual image builds after validation;
+- trusted `main`-push GHCR publication only after both validation jobs pass;
+- repository-derived frontend/backend image names with immutable full-Git-SHA tags and a mutable `main` convenience tag;
+- least-privilege workflow permissions and GitHub-provided short-lived registry credentials;
+- component-scoped BuildKit cache with no untrusted cache writes.
+
+Remaining outside M14: VPS registry authentication, production Compose image selection, deployment orchestration, Nginx/HTTPS, post-rollout health verification, and rollback automation.
 
 ## M15 — Automated VPS Deployment
 
