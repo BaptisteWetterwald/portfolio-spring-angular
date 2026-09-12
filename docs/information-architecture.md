@@ -1,10 +1,12 @@
 # Information Architecture
 
-This document describes the routing, document hierarchy, and navigation behavior implemented on the single-page candidate branch.
+This document describes the routing, document hierarchy, and navigation behavior of the
+implemented single-page architecture.
 
 ## Status
 
-`experiment/single-page-navigation` is the implemented candidate architecture before merge into `main`. The former multi-page routes are retained only as compatibility redirects and historical context.
+The single-page architecture is implemented on `main`. Former multi-page routes remain only as
+compatibility redirects and historical context.
 
 ## Canonical Localized Documents
 
