@@ -17,7 +17,7 @@ This roadmap records what the repository currently implements and what remains. 
 | M9 Visual/page polish                       | Complete                           | daisyUI/custom maritime system, porthole, timelines, card/detail styling                                                     |
 | M10 Motion                                  | Complete                           | Native-CSS lighthouse beam, sonar feedback, reduced-motion behavior                                                          |
 | M11 GitHub/contact integrations             | Complete                           | GitHub REST/GraphQL activity plus localized Contact form, validated API, bounded abuse protection, and SMTP sender boundary  |
-| M12 SEO/accessibility/performance hardening | In progress                        | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, shared social card, keyboard/reduced-motion coverage; audits remain     |
+| M12 SEO/accessibility/performance hardening | Complete                           | Metadata, SSR, crawl discovery, ProfilePage JSON-LD, accessibility remediation, responsive portrait, transfer-cache mapping  |
 | M13 Production images                       | Complete as a local image baseline | Separate multi-stage non-root Dockerfiles and `.dockerignore` files; registry publishing is M14                              |
 | M14 CI                                      | Not started                        | No `.github/workflows` directory                                                                                             |
 | M15 VPS deployment                          | Not started                        | No Nginx/HTTPS, GHCR pull, deployment script, or automated rollout                                                           |
@@ -209,7 +209,7 @@ Project-specific GitHub links stored in seeded data remain static content and ar
 
 ## M12 — SEO, Accessibility, and Performance Hardening
 
-Status: in progress.
+Status: complete.
 
 Already implemented:
 
@@ -221,15 +221,19 @@ Already implemented:
 - localized SSR `ProfilePage`/`Person` JSON-LD for the two healthy main documents, with cleanup on non-profile route states;
 - semantic navigation/content, keyboard states, focus handling, and reduced motion;
 - centralized SPA route focus, focused-sonar Escape collapse, reduced landmark noise, stronger Contact field boundaries, and a more distinguishable maritime contribution scale;
+- responsive 240w/480w AVIF/WebP portrait delivery with the approved source master retained unchanged and excluded from normal visitor-facing markup and metadata;
+- server-only transfer-cache origin equivalence for internal SSR API calls, eliminating immediate duplicate project/GitHub hydration GETs without creating an application cache;
 - unit, SSR smoke, and responsive headless-browser checks.
 
-Remaining:
+Post-M12 operational follow-up:
 
 - manual screen-reader validation and production-oriented Lighthouse follow-up;
-- agreed performance/accessibility thresholds and remediation.
+- production measurement can inform future performance/accessibility thresholds.
 
 Deliberately deferred beyond M12:
 
+- bundle splitting until user-facing scripting measurements justify a targeted boundary;
+- HTTP compression to the planned host-Nginx deployment layer rather than Express;
 - project `SoftwareSourceCode` until repository-publication semantics, programming-language classification, and repository data are stronger;
 - any `CreativeWork` or other project-schema fallback;
 - project-specific or localized social-preview imagery.

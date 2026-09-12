@@ -21,7 +21,7 @@ import {
 } from './portfolio-content.models';
 
 export const portfolioPublicProfile = {
-  portraitPath: '/assets/portrait/baptiste-wetterwald-portrait.png',
+  portraitPath: '/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
   sameAs: ['https://github.com/BaptisteWetterwald'],
   socialCard: {
     path: '/assets/social/baptiste-wetterwald-social-card-v1.png',

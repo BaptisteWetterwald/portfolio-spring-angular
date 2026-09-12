@@ -64,7 +64,7 @@ describe('PageMetadataService', () => {
         description:
           'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
         jobTitle: 'Ingénieur logiciel',
-        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
+        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
         sameAs: ['https://github.com/BaptisteWetterwald'],
       },
     });
@@ -101,7 +101,7 @@ describe('PageMetadataService', () => {
         description:
           'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
         jobTitle: 'Software Engineer',
-        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait.png',
+        image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
         sameAs: ['https://github.com/BaptisteWetterwald'],
       },
     });

@@ -156,9 +156,9 @@ GET /api/v1/projects/featured?locale=fr|en
 GET /api/v1/projects/{slug}?locale=fr|en
 ```
 
-`BackendApiUrlService` keeps browser URLs same-origin under `/api`. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
+`BackendApiUrlService` keeps browser URLs under `/api` and canonicalizes them to an absolute current-origin URL when a usable browser origin exists, retaining a relative fallback for non-browser or origin-less contexts. During SSR it uses `BACKEND_INTERNAL_ORIGIN` when configured, otherwise the incoming origin. The Express SSR server also proxies browser `/api/*` to that internal origin in Compose.
 
-Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. The detail resolver rejects syntactically invalid public slugs locally and bounds backend resolution to five seconds; backend 404 maps to not-found, while network, upstream, and timeout failures remain temporary error states. During SSR, `BackendApiUrlService` resolves the configured `BACKEND_INTERNAL_ORIGIN`. Angular HTTP transfer cache avoids an unnecessary duplicate fetch after hydration when possible.
+Resolvers expose loaded/error states for the list and loaded/not-found/error states for details. The detail resolver rejects syntactically invalid public slugs locally and bounds backend resolution to five seconds; backend 404 maps to not-found, while network, upstream, and timeout failures remain temporary error states. During SSR, `BackendApiUrlService` resolves the configured `BACKEND_INTERNAL_ORIGIN`. A server-only Angular `HTTP_TRANSFER_CACHE_ORIGIN_MAP` provider maps that normalized internal origin to the incoming public request origin, so successful project and GitHub responses use the same absolute cache identity during SSR and hydration. The internal origin is absent from transferred state, hydration performs no immediate duplicate GET, and Angular stops serving the transfer cache after application stability so later locale navigation performs normal browser requests.
 
 `GitHubActivityApiService` calls only `GET /api/v1/github/activity` with Angular HTTP transfer caching. Its root-route resolver validates repository URLs plus the bounded calendar date/count contract and converts unavailable, empty, malformed, or failed responses into a quiet unavailable state. Home renders nothing for that state, so GitHub never replaces or gates the identity, skills, languages, or later sections.
 
@@ -195,6 +195,14 @@ Backend/PostgreSQL content:
 - localized detail sections.
 
 Do not introduce a frontend project fixture as public content or move static CV/profile facts into persistence without a new requirement.
+
+## Performance Contracts
+
+The Home portrait retains the approved high-resolution source master unchanged at `public/assets/portrait/baptiste-wetterwald-portrait.png`, but ordinary page markup and `ProfilePage` structured data do not reference it. The visible portrait uses a versioned `<picture>` contract with 240w and 480w AVIF candidates followed by equivalent WebP fallbacks. Its measured responsive `sizes` values are 88px up to 360 CSS pixels, 108px up to 640 CSS pixels, and 203px otherwise. Because it is above the fold and a likely LCP candidate, it remains explicitly eager, asynchronously decoded, and high fetch priority; the existing porthole crop and composition are unchanged.
+
+The production build remains intentionally unsplit for M12. The localized portfolio is one composed document, and bundle splitting is deferred until user-facing scripting or main-thread measurements justify a targeted boundary rather than merely silencing the current initial-bundle warning. The SSR contribution calendar remains server-rendered; its repeated HTML compresses effectively and does not justify a separate rendering model.
+
+HTTP compression remains a future host-Nginx deployment responsibility. Express compression is not installed because the intended production reverse proxy should compress HTML, JavaScript, CSS, JSON, SVG, and XML once at the public edge.
 
 ## Accessibility Contracts
 

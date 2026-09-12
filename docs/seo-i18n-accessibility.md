@@ -41,7 +41,7 @@ FR/EN switching preserves a recognized current section. On project details it pr
 
 ## SSR and Hydration
 
-All public routes use request-time SSR. The localized root resolvers load project summaries and controlled GitHub activity before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent. Angular HTTP transfer caching prevents immediate duplicate API requests after hydration.
+All public routes use request-time SSR. The localized root resolvers load project summaries and controlled GitHub activity before the composed page renders, and detail resolvers load the selected project before detail HTML/metadata is sent. Angular HTTP transfer caching prevents immediate duplicate API requests after hydration. Browser API URLs use their absolute same-origin form, while the server-only `HTTP_TRANSFER_CACHE_ORIGIN_MAP` maps the normalized `BACKEND_INTERNAL_ORIGIN` origin to the incoming public request origin. Successful transferred responses therefore share cache keys without exposing the internal backend origin; Angular disables this one-shot transfer cache after application stability so later client requests remain authoritative.
 
 Angular hydration uses event replay. Browser-only fragment scrolling, scroll-spy, header visibility, lighthouse measurement, media-query handling, animation frames, and mobile drag geometry are platform-guarded and initialized after render.
 

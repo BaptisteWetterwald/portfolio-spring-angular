@@ -24,7 +24,7 @@ describe('GitHubActivityApiService', () => {
   it('requests the fixed portfolio-owned GitHub activity endpoint with transfer caching', () => {
     service.getActivity().subscribe();
 
-    const request = http.expectOne('/api/v1/github/activity');
+    const request = http.expectOne('http://localhost:3000/api/v1/github/activity');
 
     expect(request.request.method).toBe('GET');
     expect(request.request.transferCache).toBe(true);
