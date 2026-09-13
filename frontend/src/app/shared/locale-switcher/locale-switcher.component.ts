@@ -67,8 +67,8 @@ export class LocaleSwitcherComponent {
   }
 }
 
-function capitalizeLocale(locale: SupportedLocale): 'Fr' | 'En' {
-  return locale === 'fr' ? 'Fr' : 'En';
+function capitalizeLocale(locale: SupportedLocale): 'Fr' | 'En' | 'Hu' {
+  return ({ fr: 'Fr', en: 'En', hu: 'Hu' } as const)[locale];
 }
 
 function projectDetailAvailableLocales(

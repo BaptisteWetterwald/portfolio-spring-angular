@@ -22,6 +22,7 @@ import {
 import { ContactPageComponent } from '../contact-page/contact-page.component';
 import { EducationPageComponent } from '../education-page/education-page.component';
 import { ExperiencePageComponent } from '../experience-page/experience-page.component';
+import { GitHubActivityComponent } from '../home-page/github-activity.component';
 import { HomePageComponent } from '../home-page/home-page.component';
 import { ProjectsPageComponent } from '../projects-page/projects-page.component';
 
@@ -34,6 +35,7 @@ export const portfolioScrollSpyRootMargin = '-42% 0px -42% 0px';
     EducationPageComponent,
     ExperiencePageComponent,
     HomePageComponent,
+    GitHubActivityComponent,
     ProjectsPageComponent,
   ],
   templateUrl: './portfolio-page.component.html',

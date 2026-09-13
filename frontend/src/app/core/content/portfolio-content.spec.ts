@@ -64,7 +64,7 @@ describe('portfolioContent', () => {
     );
   });
 
-  it('renders the full education inventory without fabricating missing INSA assets', () => {
+  it('renders the full education inventory with official school assets', () => {
     expect(portfolioContent.en.education).toEqual([
       expect.objectContaining({
         id: 'ensisa',
@@ -72,7 +72,7 @@ describe('portfolioContent', () => {
         location: 'Mulhouse, France',
         degree: 'Engineering Degree',
         field: 'Computer Science and Networks',
-        status: 'Graduated',
+        status: undefined,
         logo: expect.objectContaining({ src: '/assets/logos/logo_ensisa.svg' }),
       }),
       expect.objectContaining({
@@ -86,7 +86,7 @@ describe('portfolioContent', () => {
         id: 'iut-robert-schuman',
         institution: 'IUT Robert Schuman',
         location: 'Illkirch, France',
-        degree: 'DUT Computer Science',
+        degree: 'University Diploma in Technology in Computer Science (DUT)',
         logo: expect.objectContaining({ src: '/assets/logos/logo_iut_robert_schuman.png' }),
       }),
       expect.objectContaining({
@@ -95,20 +95,20 @@ describe('portfolioContent', () => {
         location: 'Lyon, France',
         degree: 'First year of the integrated engineering preparatory cycle',
         field: 'Engineering Sciences',
-        logo: undefined,
-        officialWebsiteUrl: undefined,
+        logo: expect.objectContaining({ src: '/assets/logos/logo_insa_lyon.png' }),
+        officialWebsiteUrl: 'https://www.insa-lyon.fr/',
       }),
       expect.objectContaining({
         id: 'lycee-louis-armand',
         institution: 'Lycée Louis Armand',
         location: 'Mulhouse, France',
         degree: 'Baccalauréat STI2D',
-        field: 'Specialization: SIN',
-        status: 'Mention Très Bien',
+        field: 'Information and digital systems (SIN)',
+        status: 'Highest honours (Mention Très Bien)',
         logo: expect.objectContaining({
           src: '/assets/logos/logo_lycée_louis_armand.jpeg',
         }),
-        officialWebsiteUrl: undefined,
+        officialWebsiteUrl: 'https://www.louis-armand-mulhouse.fr/',
       }),
     ]);
   });
@@ -183,7 +183,7 @@ describe('portfolioContent', () => {
       role: '.NET Full-stack Developer Intern',
       location: 'Colmar, France',
       duration: '2 months',
-      technologies: ['C#', '.NET', 'ASP.NET Blazor', 'VB.NET', 'REST'],
+      technologies: ['C#', '.NET', 'ASP.NET Core Blazor', 'VB.NET', 'REST'],
     });
     expect(groupeIes?.period.start?.datetime).toBe('2023-07');
     expect(groupeIes?.period.end?.datetime).toBe('2023-08');
@@ -192,10 +192,10 @@ describe('portfolioContent', () => {
       organization: 'Laboratoire d’Informatique Formelle (LIF), UQAC',
       role: 'Software Developer Intern',
       location: 'Chicoutimi, Canada',
-      duration: 'approximately 3 months',
+      duration: undefined,
       technologies: ['Java', 'Python', 'Sockets', 'BeamNG.drive', 'BeepBeep 3'],
       logo: expect.objectContaining({ src: '/assets/logos/logo_lif.png' }),
-      officialWebsiteUrl: undefined,
+      officialWebsiteUrl: 'https://liflab.github.io/beepbeep-3/index.html',
     });
     expect(lif?.period.start?.datetime).toBe('2022-04');
     expect(lif?.period.end?.datetime).toBe('2022-07');

@@ -3,17 +3,13 @@
 }
 
 .maritime-floating-controls {
-  --floating-control-y: clamp(210px, 56vh, 470px);
+  --floating-control-y: calc(50dvh - var(--floating-lighthouse-size) / 2);
   --floating-edge-offset: max(var(--space-4), env(safe-area-inset-left));
   --floating-right-offset: max(var(--space-5), env(safe-area-inset-right));
   --floating-sonar-size: 68px;
   --floating-sonar-expanded-size: min(326px, calc(100vw - 7rem), calc(100vh - 4rem));
   --floating-sonar-surface-scale: 0.21;
-  --floating-sonar-top: clamp(
-    var(--space-5),
-    34vh,
-    calc(100vh - var(--floating-sonar-expanded-size) - var(--space-5))
-  );
+  --floating-sonar-top: calc(50dvh - var(--floating-sonar-expanded-size) / 2);
   --floating-lighthouse-size: 46px;
 
   position: fixed;
@@ -75,7 +71,6 @@
   .maritime-floating-controls {
     --floating-edge-offset: max(var(--space-3), env(safe-area-inset-left));
     --floating-right-offset: max(var(--space-3), env(safe-area-inset-right));
-    --floating-control-y: auto;
     --floating-sonar-size: 58px;
     --floating-sonar-expanded-size: min(292px, calc(100vw - 104px), calc(100vh - 96px));
     --floating-sonar-surface-scale: 0.22;
@@ -83,12 +78,6 @@
     --floating-sonar-link-x: var(--space-2);
     --floating-sonar-link-font: 0.78rem;
     --floating-lighthouse-size: 42px;
-  }
-
-  .maritime-floating-controls__sonar,
-  .maritime-floating-controls__lighthouse {
-    top: auto;
-    bottom: max(var(--space-4), env(safe-area-inset-bottom));
   }
 }
 

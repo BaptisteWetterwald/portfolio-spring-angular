@@ -105,11 +105,11 @@
   --sonar-y: var(--sonar-middle-y);
 }
 
-.sonar-nav--floating .sonar-nav__item--education {
+.sonar-nav--floating .sonar-nav__item--experience {
   --sonar-y: var(--sonar-formation-y);
 }
 
-.sonar-nav--floating .sonar-nav__item--experience {
+.sonar-nav--floating .sonar-nav__item--education {
   --sonar-x: var(--sonar-middle-x);
   --sonar-y: var(--sonar-middle-y);
 }

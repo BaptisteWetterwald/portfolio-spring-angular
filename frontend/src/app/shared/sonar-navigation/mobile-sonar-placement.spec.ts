@@ -13,15 +13,37 @@ import {
 } from './mobile-sonar-placement';
 
 describe('mobile sonar placement', () => {
-  it('defaults the collapsed sonar to a safe bottom-left dock', () => {
+  it('keeps the expanded right-docked panel clear of a vertically centered lighthouse', () => {
+    const bounds = {
+      ...bounds390,
+      lighthouseSafeZone: { left: 336, right: 378, top: 401, bottom: 443 },
+    };
+    const placement = mobileSonarPlacementForBubble(
+      snapMobileSonarBubble({ x: 350, y: 422 }, bounds),
+      bounds,
+    );
+    expectPanelInside(placement, bounds);
+    expect(
+      mobileSonarRectsOverlap(
+        {
+          left: placement.panelLeft,
+          right: placement.panelLeft + bounds.expandedSize,
+          top: placement.panelTop,
+          bottom: placement.panelTop + bounds.expandedSize,
+        },
+        bounds.lighthouseSafeZone,
+      ),
+    ).toBe(false);
+  });
+  it('defaults the collapsed sonar to a vertically centered left dock', () => {
     const bubble = defaultMobileSonarBubble(bounds390);
     const placement = mobileSonarPlacementForBubble(bubble, bounds390);
 
     expect(bubble.dockSide).toBe('left');
     expect(bubble.x).toBeCloseTo(43.46);
-    expect(bubble.y).toBeCloseTo(796.54);
+    expect(bubble.y).toBeCloseTo(422);
     expect(placement.panelLeft).toBe(12);
-    expect(placement.panelTop).toBe(542);
+    expect(placement.panelTop).toBe(279);
     expectPanelInside(placement, bounds390);
   });
 
@@ -106,7 +128,7 @@ describe('mobile sonar placement', () => {
     );
 
     expect(leftPlacement.panelLeft).toBe(12);
-    expect(leftPlacement.panelTop).toBe(528);
+    expect(leftPlacement.panelTop).toBe(272);
     expect(rightPlacement.panelLeft).toBe(92);
     expect(rightPlacement.bubble.y).toBeCloseTo(703.84);
     expectPanelInside(leftPlacement, bounds360);

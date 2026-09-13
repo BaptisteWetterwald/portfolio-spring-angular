@@ -48,6 +48,7 @@ const metadataKeys = {
 const ogLocales: Record<SupportedLocale, string> = {
   fr: 'fr_FR',
   en: 'en_US',
+  hu: 'hu_HU',
 };
 
 export interface ProjectPageMetadata {

@@ -58,8 +58,13 @@
   transform: translate(-42%, -50%);
 }
 
-.lighthouse-beam--ready[data-lighthouse-beam-state='active'][data-lighthouse-beam-motion='standard'] {
+.lighthouse-beam[data-lighthouse-beam-motion='standard'] {
   animation: lighthouse-beam-sweep var(--lighthouse-beam-duration) linear infinite;
+  animation-play-state: paused;
+}
+
+.lighthouse-beam--ready[data-lighthouse-beam-state='active'][data-lighthouse-beam-motion='standard'] {
+  animation-play-state: running;
   opacity: var(--lighthouse-beam-opacity);
 }
 

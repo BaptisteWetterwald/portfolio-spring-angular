@@ -169,8 +169,8 @@ describe('PublicLayoutComponent integration', () => {
     expect(floatingSonar(harness).getAttribute('aria-label')).toBe('Navigation compas compacte');
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/fr#home',
-      '/fr#education',
       '/fr#experience',
+      '/fr#education',
       '/fr#projects',
       '/fr#contact',
     ]);

@@ -20,7 +20,9 @@ describe('EducationPageComponent', () => {
     expect(page.textContent).toContain('Engineering Degree');
     expect(page.textContent).toContain('Computer Science and Networks');
     expect(page.textContent).toContain('Study semester abroad');
-    expect(page.textContent).toContain('DUT Computer Science');
+    expect(page.textContent).toContain(
+      'University Diploma in Technology in Computer Science (DUT)',
+    );
     expect(page.textContent).toContain(
       'First year of the integrated engineering preparatory cycle',
     );
@@ -61,6 +63,7 @@ describe('EducationPageComponent', () => {
       '2022',
       '2019',
       '2020',
+      '2017',
       '2019',
     ]);
   });
@@ -117,6 +120,8 @@ describe('EducationPageComponent', () => {
       'https://www.ensisa.uha.fr/',
       'https://www.uqac.ca/',
       'https://iutrs.unistra.fr/',
+      'https://www.insa-lyon.fr/',
+      'https://www.louis-armand-mulhouse.fr/',
     ]);
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
@@ -127,6 +132,8 @@ describe('EducationPageComponent', () => {
       'https://www.ensisa.uha.fr/',
       'https://www.uqac.ca/',
       'https://iutrs.unistra.fr/',
+      'https://www.insa-lyon.fr/',
+      'https://www.louis-armand-mulhouse.fr/',
     ]);
     expect(logoLinks.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(logoLinks.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(
@@ -138,17 +145,19 @@ describe('EducationPageComponent', () => {
       '/assets/logos/logo_ensisa.svg',
       '/assets/logos/logo_uqac.png',
       '/assets/logos/logo_iut_robert_schuman.png',
+      '/assets/logos/logo_insa_lyon.png',
+      '/assets/logos/logo_lycée_louis_armand.jpeg',
     ]);
     expect(
       Array.from(page.querySelectorAll<HTMLImageElement>('.timeline-page__logo')).every(
         (logo) => logo.getAttribute('alt') === '',
       ),
     ).toBe(true);
-    expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(4);
-    expect(entryArticle(page, 'INSA Lyon')?.querySelector('.timeline-page__logo')).toBeNull();
+    expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(5);
+    expect(entryArticle(page, 'INSA Lyon')?.querySelector('.timeline-page__logo')).not.toBeNull();
     expect(
       entryArticle(page, 'Lycée Louis Armand')?.querySelector('a.timeline-page__identity-link'),
-    ).toBeNull();
+    ).not.toBeNull();
     expect(
       entryArticle(page, 'Lycée Louis Armand')
         ?.querySelector<HTMLImageElement>('.timeline-page__meta img.timeline-page__logo')

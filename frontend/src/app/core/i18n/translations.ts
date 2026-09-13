@@ -1,10 +1,13 @@
+import { hungarianTranslations } from './translations.hu';
 import { SupportedLocale } from './locales';
 
 const englishTranslations = {
+  'home.availability': 'Luxembourg or Budapest · Available from December 2026',
+  'home.cv': 'Download CV (English)',
   'site.name': 'Baptiste Wetterwald',
   'nav.primary': 'Primary navigation',
-  'nav.visual': 'Compass navigation',
-  'nav.floatingVisual': 'Compact compass navigation',
+  'nav.visual': 'Sonar navigation',
+  'nav.floatingVisual': 'Compact sonar navigation',
   'nav.footer': 'Footer navigation',
   'nav.skipToContent': 'Skip to content',
   'nav.home': 'Home',
@@ -29,8 +32,10 @@ const englishTranslations = {
   'localeSwitcher.ariaLabel': 'Language selection',
   'localeSwitcher.fr': 'Français',
   'localeSwitcher.en': 'English',
+  'localeSwitcher.hu': 'Magyar',
   'localeSwitcher.toFr': 'Open the French version',
   'localeSwitcher.toEn': 'Open the English version',
+  'localeSwitcher.toHu': 'Open the Hungarian version',
   'rootRedirect.message': 'Redirecting to the selected language version.',
   'pages.placeholderLabel': 'Portfolio section',
   'pages.home.heading': 'Home',
@@ -45,7 +50,7 @@ const englishTranslations = {
     'A selection of personal and academic projects showcasing the technologies and software architectures I have worked with.',
   'pages.contact.heading': 'Contact',
   'contact.introduction':
-    'Have a role, project, or collaboration in mind? Send me a concise message.',
+    'Have a role, project, or collaboration in mind? Feel free to get in touch using the form below.',
   'contact.form.name': 'Name',
   'contact.form.email': 'Email',
   'contact.form.subject': 'Subject',
@@ -136,7 +141,10 @@ export type TranslationKey = keyof typeof englishTranslations;
 
 export const translations: Record<SupportedLocale, Record<TranslationKey, string>> = {
   en: englishTranslations,
+  hu: hungarianTranslations,
   fr: {
+    'home.availability': 'Luxembourg ou Budapest · Disponible à partir de décembre 2026',
+    'home.cv': 'Télécharger le CV',
     'site.name': 'Baptiste Wetterwald',
     'nav.primary': 'Navigation principale',
     'nav.visual': 'Navigation compas',
@@ -165,8 +173,10 @@ export const translations: Record<SupportedLocale, Record<TranslationKey, string
     'localeSwitcher.ariaLabel': 'Choix de la langue',
     'localeSwitcher.fr': 'Français',
     'localeSwitcher.en': 'English',
+    'localeSwitcher.hu': 'Magyar',
     'localeSwitcher.toFr': 'Ouvrir la version française',
     'localeSwitcher.toEn': 'Ouvrir la version anglaise',
+    'localeSwitcher.toHu': 'Ouvrir la version hongroise',
     'rootRedirect.message': 'Redirection vers la version linguistique choisie.',
     'pages.placeholderLabel': 'Section du portfolio',
     'pages.home.heading': 'Accueil',
@@ -181,7 +191,7 @@ export const translations: Record<SupportedLocale, Record<TranslationKey, string
       "Une sélection de projets personnels et académiques illustrant les technologies et architectures avec lesquelles j'ai travaillé.",
     'pages.contact.heading': 'Contact',
     'contact.introduction':
-      "Vous souhaitez échanger au sujet d'un poste, d'un projet ou d'une collaboration ? Envoyez-moi un message concis.",
+      "Vous souhaitez échanger au sujet d'un poste, d'un projet ou d'une collaboration ? N'hésitez pas à me contacter via le formulaire ci-dessous.",
     'contact.form.name': 'Nom',
     'contact.form.email': 'E-mail',
     'contact.form.subject': 'Sujet',

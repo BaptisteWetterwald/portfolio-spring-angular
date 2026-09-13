@@ -4,22 +4,27 @@ export const localizedStaticRouteSegments = {
   home: {
     fr: '',
     en: '',
+    hu: '',
   },
   education: {
     fr: 'formation',
     en: 'education',
+    hu: 'tanulmanyok',
   },
   experience: {
     fr: 'experience',
     en: 'experience',
+    hu: 'tapasztalat',
   },
   projects: {
     fr: 'projets',
     en: 'projects',
+    hu: 'projektek',
   },
   contact: {
     fr: 'contact',
     en: 'contact',
+    hu: 'kapcsolat',
   },
 } as const satisfies Record<string, Record<SupportedLocale, string>>;
 
@@ -32,7 +37,13 @@ export interface LocalizedRouteMatch {
   readonly slug?: string;
 }
 
-export const staticPageIds = Object.keys(localizedStaticRouteSegments) as StaticPageId[];
+export const staticPageIds: StaticPageId[] = [
+  'home',
+  'experience',
+  'education',
+  'projects',
+  'contact',
+];
 
 export const portfolioSectionIds = staticPageIds;
 

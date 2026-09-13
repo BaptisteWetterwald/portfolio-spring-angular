@@ -1,13 +1,13 @@
 @media (max-width: 640px) {
   .sonar-nav--floating {
     position: fixed;
-    top: var(--sonar-mobile-panel-top, auto);
-    bottom: var(--sonar-mobile-panel-bottom, max(var(--space-4), env(safe-area-inset-bottom)));
+    top: var(--sonar-mobile-panel-top, calc(50dvh - var(--sonar-size) / 2));
+    bottom: auto;
     left: var(--sonar-mobile-panel-left, max(var(--space-3), env(safe-area-inset-left)));
   }
 
   .sonar-nav--floating .sonar-nav__frame {
-    transform-origin: var(--sonar-mobile-origin-x, 0) var(--sonar-mobile-origin-y, 100%);
+    transform-origin: var(--sonar-mobile-origin-x, 0) var(--sonar-mobile-origin-y, 50%);
   }
 
   .sonar-nav--floating .sonar-nav__compact-button {

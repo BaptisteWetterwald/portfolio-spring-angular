@@ -23,8 +23,8 @@ class ProjectSchemaMigrationTests {
 		try {
 			var result = flyway.migrate();
 
-			assertThat(result.migrationsExecuted).isEqualTo(8);
-			assertThat(flyway.info().current().getVersion().toString()).isEqualTo("8");
+			assertThat(result.migrationsExecuted).isEqualTo(10);
+			assertThat(flyway.info().current().getVersion().toString()).isEqualTo("10");
 			assertThat(tableExists(schema, "projects")).isTrue();
 			assertThat(tableExists(schema, "project_translations")).isTrue();
 			assertThat(tableExists(schema, "technologies")).isTrue();
@@ -107,8 +107,8 @@ class ProjectSchemaMigrationTests {
 
 			var upgradeResult = latestFlyway.migrate();
 
-			assertThat(upgradeResult.migrationsExecuted).isEqualTo(4);
-			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("8");
+			assertThat(upgradeResult.migrationsExecuted).isEqualTo(6);
+			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("10");
 			assertThat(countPublicSeededProjects(schema)).isEqualTo(6);
 			assertThat(seededPublicProjectSlugs(schema)).containsExactly("portfolio-spring-angular", "blaze4",
 					"frequensisa", "summercamp", "bot-discord-ir", "beamng-drive-beepbeep-3");
@@ -176,8 +176,8 @@ class ProjectSchemaMigrationTests {
 
 			var upgradeResult = latestFlyway.migrate();
 
-			assertThat(upgradeResult.migrationsExecuted).isEqualTo(3);
-			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("8");
+			assertThat(upgradeResult.migrationsExecuted).isEqualTo(5);
+			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("10");
 			assertThat(tableExists(schema, "project_sections")).isTrue();
 			assertThat(countPublicSeededProjects(schema)).isEqualTo(6);
 			assertThat(seededPublicProjectSlugs(schema)).containsExactly("portfolio-spring-angular", "blaze4",
@@ -192,7 +192,7 @@ class ProjectSchemaMigrationTests {
 					"Portfolio Spring Angular is the source-backed portfolio application for Baptiste Wetterwald. It presents localized professional content and real project records from a Spring Boot and PostgreSQL backend.",
 					"The application is split into an Angular 22 SSR frontend and a Spring Boot backend. PostgreSQL stores project data, Flyway owns schema migrations and Docker Compose wires the local full-stack runtime.",
 					"Projects are backend-managed entities with publication status, presentation mode, localized translations, ordered technologies and structured detail sections. The Angular frontend consumes compact list DTOs and richer detail DTOs through route resolvers.",
-					"Localized /fr and /en routes are rendered at request time. The frontend applies localized metadata, canonical URLs, hreflang alternates and noindex handling for unavailable project detail pages while keeping semantic navigation and keyboard-accessible actions.");
+					"Localized /fr, /en and /hu routes are rendered at request time. The frontend applies localized metadata, canonical URLs, hreflang alternates and noindex handling for unavailable project detail pages while keeping semantic navigation and keyboard-accessible actions.");
 			assertThat(countSeededCardOnlyProjectRows(schema, "frequensisa",
 					"https://github.com/BaptisteWetterwald/ecole-ios-frequensisa")).isEqualTo(1);
 			assertThat(countSeededCardOnlyProjectRows(schema, "summercamp",
@@ -225,8 +225,8 @@ class ProjectSchemaMigrationTests {
 
 			var upgradeResult = latestFlyway.migrate();
 
-			assertThat(upgradeResult.migrationsExecuted).isEqualTo(1);
-			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("8");
+			assertThat(upgradeResult.migrationsExecuted).isEqualTo(3);
+			assertThat(latestFlyway.info().current().getVersion().toString()).isEqualTo("10");
 			assertThat(countPublicSeededProjects(schema)).isEqualTo(6);
 			assertThat(seededPublicProjectSlugs(schema)).containsExactly("portfolio-spring-angular", "blaze4",
 					"frequensisa", "summercamp", "bot-discord-ir", "beamng-drive-beepbeep-3");

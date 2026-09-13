@@ -95,7 +95,7 @@
   --motion-duration-fast: 120ms;
   --motion-duration-standard: 180ms;
   --motion-duration-theme: 240ms;
-  --lighthouse-beam-duration: 24s;
+  --lighthouse-beam-duration: 48s;
   --lighthouse-beam-opacity: 0;
   --lighthouse-beam-static-opacity: 0;
   --lighthouse-beam-start-angle: -18deg;
@@ -179,7 +179,7 @@ textarea {
   font: inherit;
 }
 
-a {
+a:not(.btn) {
   color: inherit;
 }
 
@@ -187,7 +187,7 @@ a {
   text-underline-offset: 4px;
 }
 
-button {
+button:not(.btn) {
   color: inherit;
 }
 

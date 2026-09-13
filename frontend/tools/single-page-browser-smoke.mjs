@@ -62,6 +62,7 @@ async function runBrowserSmoke() {
       await verifyDesktop(cdp);
       await verifyMobile(cdp, 390, 844, true);
       await verifyMobile(cdp, 360, 800, false);
+      await verifyRecruitment(cdp);
     }
 
     const relevantErrors = browserErrors.filter(
@@ -132,6 +133,53 @@ async function verifyGitHubCalendarOnly(client) {
       (reducedMotionTooltip.property === 'none' || reducedMotionTooltip.duration === '0s'),
     `GitHub calendar tooltip transition ignored reduced-motion preference: ${JSON.stringify(reducedMotionTooltip)}`,
   );
+}
+
+async function verifyRecruitment(client) {
+  for (const locale of ['fr', 'en', 'hu']) {
+    for (const width of [320, 390, 1024, 1440]) {
+      await setViewport(client, width, 900);
+      await goto(client, '/' + locale);
+      await waitFor(client, `document.querySelector('a[download]') !== null`);
+      const layout = await value(
+        client,
+        `(() => {
+        const button = document.querySelector('a[download]').getBoundingClientRect();
+        const intro = document.querySelector('.home-page__intro').getBoundingClientRect();
+        return {width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth, bottom: button.bottom, intro: intro.bottom};
+      })()`,
+      );
+      assert(
+        layout.scroll <= layout.width,
+        'Recruitment page overflows at ' + locale + ' ' + width,
+      );
+      assert(
+        layout.bottom > layout.intro,
+        'CV action must follow the introduction: ' + JSON.stringify(layout),
+      );
+      for (const theme of ['light', 'dark']) {
+        await evaluate(client, `document.documentElement.dataset.theme = '${theme}'`);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        const ratio = await value(
+          client,
+          `(() => {
+          const style = getComputedStyle(document.querySelector('.contact-page__submit'));
+          const luminance = (color) => {
+            const channels = color.match(/[\\d.]+/g).slice(0, 3).map((channel) => {
+              const value = Number(channel) / 255;
+              return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+            });
+            return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+          };
+          const foreground = luminance(style.color), background = luminance(style.backgroundColor);
+          return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+        })()`,
+        );
+        assert(ratio >= 4.5, 'Submit text contrast below 4.5:1 for ' + theme + ': ' + ratio);
+      }
+    }
+  }
+  console.log('OK recruitment links, Hungarian reflow and submit contrast');
 }
 
 async function verifyDesktop(client) {
@@ -218,7 +266,7 @@ async function verifyDesktop(client) {
         return beam.dataset.lighthouseBeamSource === 'floating' &&
           Math.abs(originX - (lanternBounds.left + lanternBounds.width / 2)) < 2 &&
           Math.abs(originY - (lanternBounds.top + lanternBounds.height / 2)) < 2 &&
-          duration === 24 && width >= 400 && width <= 430;
+          duration === 48 && width >= 400 && width <= 430;
       })()`,
     ),
     'beam did not use the single floating lantern with the tuned duration and width',
@@ -349,7 +397,7 @@ async function verifyDesktop(client) {
 
   const startingHistoryLength = await value(client, 'history.length');
 
-  for (const sectionId of ['home', 'education', 'experience', 'projects', 'contact']) {
+  for (const sectionId of ['home', 'experience', 'education', 'projects', 'contact']) {
     await ensureFloatingSonarActive(client);
     if (
       (await value(
@@ -917,6 +965,11 @@ async function clickAnchor(client, selector) {
 }
 
 async function clickElement(client, selector) {
+  // Hover can expand the sonar or move a link while the header hands off navigation.
+  // Resolve the click point after those transitions, as a user would see it.
+  const initialRect = await rect(client, selector);
+  await moveMouse(client, ...center(initialRect));
+  await delay(450);
   const elementRect = await rect(client, selector);
   const [x, y] = center(elementRect);
 
@@ -1056,7 +1109,7 @@ async function captureBeamAcrossSections(client) {
     })()`,
   );
 
-  for (const sectionId of ['home', 'education', 'experience', 'projects', 'contact']) {
+  for (const sectionId of ['home', 'experience', 'education', 'projects', 'contact']) {
     await evaluate(
       client,
       `document.querySelector('#${sectionId}').scrollIntoView({ behavior: 'instant', block: 'start' })`,
@@ -1083,7 +1136,7 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
 
   await evaluate(
     client,
-    `document.querySelector('[data-github-contribution-calendar]').scrollIntoView({ behavior: 'instant', block: 'center' })`,
+    `document.querySelector('[data-github-contribution-calendar]').scrollIntoView({ behavior: 'instant', block: 'start' })`,
   );
   await delay(100);
 
@@ -1092,6 +1145,7 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
     `(() => {
       const calendar = document.querySelector('[data-github-contribution-calendar]');
       const region = calendar.querySelector('[role="region"]');
+      calendar.querySelectorAll('[data-browser-smoke-tooltip-target]').forEach((day) => day.removeAttribute('data-browser-smoke-tooltip-target'));
       const visibleDays = [...calendar.querySelectorAll('[data-contribution-count]')]
         .filter((day) => {
           const bounds = day.getBoundingClientRect();
@@ -1104,6 +1158,10 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
   );
   const tooltipTargetBounds = await rect(client, '[data-browser-smoke-tooltip-target]');
   await moveMouse(client, ...center(tooltipTargetBounds));
+  await delay(240);
+  const settledTooltipBounds = await rect(client, '[data-browser-smoke-tooltip-target]');
+  await moveMouse(client, 0, 0);
+  await moveMouse(client, ...center(settledTooltipBounds));
   await delay(240);
 
   const presentation = await value(
@@ -1119,8 +1177,9 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
       );
       const cells = days.map((day) => day.getBoundingClientRect());
       const github = document.querySelector('[data-github-activity]');
-      const languages = document.querySelector('#home-languages-title')?.closest('section');
-      const education = document.querySelector('#education');
+      const projects = document.querySelector('#projects');
+      const contact = document.querySelector('#contact');
+      const repositories = github?.querySelector('.home-page__github-grid');
       const calendarBounds = calendar.getBoundingClientRect();
       const calendarDataBounds = calendar.querySelector('.github-contribution-calendar__weeks').getBoundingClientRect();
       const regionBounds = region.getBoundingClientRect();
@@ -1157,7 +1216,7 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
         first.left < second.right && first.right > second.left &&
         first.top < second.bottom && first.bottom > second.top;
 
-      region.focus();
+      region.focus({ preventScroll: true });
 
       return {
         theme: document.documentElement.dataset.theme,
@@ -1183,14 +1242,15 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
           leftEdgeDay.classList.contains(expectedAlignment(leftEdgeDay)) &&
           rightEdgeDay.classList.contains(expectedAlignment(rightEdgeDay)),
         hoveredTooltipVisible: Number(getComputedStyle(tooltipTarget, '::before').opacity) > .9,
+        hoverSupported: matchMedia('(hover: hover)').matches,
         hoveredTooltipAlignedForViewport: tooltipTarget?.classList.contains(expectedTooltipAlignment),
         calendarScrolls: region.scrollWidth > region.clientWidth,
         recentWeeksInitiallyVisible: region.scrollWidth <= region.clientWidth ||
           Math.abs(region.scrollWidth - region.clientWidth - region.scrollLeft) < 2,
         documentOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-        insideHome: github?.closest('#home') !== null,
-        followsLanguages: languages?.compareDocumentPosition(github) === Node.DOCUMENT_POSITION_FOLLOWING,
-        precedesEducation: github?.compareDocumentPosition(education) === Node.DOCUMENT_POSITION_FOLLOWING,
+        followsProjects: projects?.compareDocumentPosition(github) === Node.DOCUMENT_POSITION_FOLLOWING,
+        precedesContact: github?.compareDocumentPosition(contact) === Node.DOCUMENT_POSITION_FOLLOWING,
+        followsRepositories: Boolean(repositories?.compareDocumentPosition(document.querySelector('app-github-contribution-calendar')) & Node.DOCUMENT_POSITION_FOLLOWING),
         githubNavigationLinks: document.querySelectorAll('nav a[href*="#github"], footer a[href*="#github"]').length,
         calendarBounds: calendarBounds.toJSON(),
         calendarDataBounds: calendarDataBounds.toJSON(),
@@ -1223,16 +1283,16 @@ async function assertGitHubCalendarPresentation(client, width, height, locale, t
       presentation.edgePlacements &&
       presentation.verticalEdgePlacements &&
       presentation.horizontalEdgeAlignments &&
-      presentation.hoveredTooltipVisible &&
+      (!presentation.hoverSupported || presentation.hoveredTooltipVisible) &&
       presentation.hoveredTooltipAlignedForViewport,
     `${locale} GitHub calendar accessibility was invalid: ${JSON.stringify(presentation)}`,
   );
   assert(
-    presentation.insideHome &&
-      presentation.followsLanguages &&
-      presentation.precedesEducation &&
+    presentation.followsProjects &&
+      presentation.precedesContact &&
+      presentation.followsRepositories &&
       presentation.githubNavigationLinks === 0,
-    `${locale} GitHub calendar escaped the Home content hierarchy: ${JSON.stringify(presentation)}`,
+    `${locale} GitHub calendar must follow public repositories between Projects and Contact: ${JSON.stringify(presentation)}`,
   );
   assert(
     !presentation.documentOverflows &&
@@ -1274,15 +1334,15 @@ async function assertMajorSectionPresentation(client, locale) {
   const presentation = await value(
     client,
     `(() => {
-      const ids = ['home', 'education', 'experience', 'projects', 'contact'];
+      const ids = ['home', 'experience', 'education', 'projects', 'contact'];
       const labels = ${JSON.stringify(labels)};
       const portfolio = document.querySelector('.portfolio-page');
       const sections = [...document.querySelectorAll('[data-portfolio-section]')];
       const links = [...document.querySelectorAll('[data-section-permalink]')];
       const directDividers = portfolio ? [...portfolio.querySelectorAll(':scope > .divider[data-portfolio-divider]')] : [];
       const expectedSequence = [
-        'APP-HOME-PAGE', 'DIV', 'APP-EDUCATION-PAGE', 'DIV', 'APP-EXPERIENCE-PAGE',
-        'DIV', 'APP-PROJECTS-PAGE', 'DIV', 'APP-CONTACT-PAGE',
+        'APP-HOME-PAGE', 'DIV', 'APP-EXPERIENCE-PAGE', 'DIV', 'APP-EDUCATION-PAGE',
+        'DIV', 'APP-PROJECTS-PAGE', 'DIV', 'APP-GITHUB-ACTIVITY', 'APP-CONTACT-PAGE',
       ];
       return {
         sectionIds: sections.map((section) => section.id),
@@ -1331,7 +1391,7 @@ async function assertMajorSectionPresentation(client, locale) {
 
   assert(
     JSON.stringify(presentation.sectionIds) ===
-      JSON.stringify(['home', 'education', 'experience', 'projects', 'contact']) &&
+      JSON.stringify(['home', 'experience', 'education', 'projects', 'contact']) &&
       presentation.uniqueSectionIds === 5,
     `${locale} major section IDs were missing, duplicated, or reordered: ${JSON.stringify(presentation.sectionIds)}`,
   );

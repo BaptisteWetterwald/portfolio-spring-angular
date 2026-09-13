@@ -22,12 +22,16 @@ import {
 
 export const portfolioPublicProfile = {
   portraitPath: '/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
-  sameAs: ['https://github.com/BaptisteWetterwald'],
+  sameAs: [
+    'https://github.com/BaptisteWetterwald',
+    'https://www.linkedin.com/in/baptiste-wetterwald/',
+  ],
+  email: 'baptiste.wetterwald@gmail.com',
   socialCard: {
-    path: '/assets/social/baptiste-wetterwald-social-card-v1.png',
+    path: '/assets/social/baptiste-wetterwald-social-card-v2.jpg',
     width: 1200,
     height: 630,
-    mimeType: 'image/png',
+    mimeType: 'image/jpeg',
   },
 } as const;
 
@@ -121,6 +125,10 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
   },
   {
     id: 'insa-lyon',
+    affiliation: {
+      officialWebsiteUrl: 'https://www.insa-lyon.fr/',
+      logo: { src: '/assets/logos/logo_insa_lyon.png', alt: 'INSA Lyon logo' },
+    },
     location: 'Lyon, France',
     period: {
       startDatetime: '2019',
@@ -131,9 +139,11 @@ export const educationEntryFacts: readonly EducationEntryFact[] = [
     id: 'lycee-louis-armand',
     location: 'Mulhouse, France',
     period: {
-      singleDatetime: '2019',
+      startDatetime: '2017',
+      endDatetime: '2019',
     },
     affiliation: {
+      officialWebsiteUrl: 'https://www.louis-armand-mulhouse.fr/',
       logo: {
         src: '/assets/logos/logo_lycée_louis_armand.jpeg',
         alt: 'Lycée Louis Armand logo',
@@ -152,6 +162,7 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     },
     duration: {
       en: 'Planned end: end of November 2026',
+      hu: 'Tervezett befejezés: 2026. november vége',
       fr: 'Fin prévue : fin novembre 2026',
     },
     technologies: [
@@ -184,6 +195,7 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     },
     duration: {
       en: '11 weeks',
+      hu: '11 hét',
       fr: '11 semaines',
     },
     technologies: ['Angular', 'TypeScript'],
@@ -200,6 +212,7 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     organization: {
       en: 'Bureau Veritas Laboratories',
       fr: 'Bureau Veritas Laboratoires',
+      hu: 'Bureau Veritas laboratóriumok',
     },
     location: 'Sausheim, France',
     period: {
@@ -230,10 +243,12 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
     },
     duration: {
       en: '2 months',
+      hu: '2 hónap',
       fr: '2 mois',
     },
-    technologies: ['C#', '.NET', 'ASP.NET Blazor', 'VB.NET', 'REST'],
+    technologies: ['C#', '.NET', 'ASP.NET Core Blazor', 'VB.NET', 'REST'],
     affiliation: {
+      officialWebsiteUrl: 'https://www.caresofts.com/',
       logo: {
         src: '/assets/logos/logo_groupe_ies.jpeg',
         alt: 'Groupe IES logo',
@@ -248,12 +263,9 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
       startDatetime: '2022-04',
       endDatetime: '2022-07',
     },
-    duration: {
-      en: 'approximately 3 months',
-      fr: 'environ 3 mois',
-    },
     technologies: ['Java', 'Python', 'Sockets', 'BeamNG.drive', 'BeepBeep 3'],
     affiliation: {
+      officialWebsiteUrl: 'https://liflab.github.io/beepbeep-3/index.html',
       logo: {
         src: '/assets/logos/logo_lif.png',
         alt: 'LIF logo',
@@ -365,7 +377,7 @@ export const skillGroupFacts: readonly SkillGroupFact[] = [
         id: 'dotnet-ecosystem',
         importance: 'secondary',
         technologies: [
-          { id: 'aspnet-blazor', defaultName: 'ASP.NET Blazor' },
+          { id: 'aspnet-blazor', defaultName: 'ASP.NET Core Blazor' },
           { id: 'vbnet', defaultName: 'VB.NET' },
         ],
       },
@@ -439,7 +451,7 @@ export const skillGroupFacts: readonly SkillGroupFact[] = [
           { id: 'flowcode', defaultName: 'Flowcode' },
           { id: 'latex', defaultName: 'LaTeX' },
           { id: 'uml', defaultName: 'UML' },
-          { id: 'solidworks', defaultName: 'SolidWorks' },
+          { id: 'solidworks', defaultName: 'SOLIDWORKS' },
           { id: 'solid-edge', defaultName: 'Solid Edge' },
         ],
       },
@@ -466,25 +478,73 @@ export const skillGroupFacts: readonly SkillGroupFact[] = [
 ];
 
 const educationCopy: Record<SupportedLocale, Record<EducationEntryId, LocalizedEducationCopy>> = {
+  hu: {
+    ensisa: {
+      institution: 'ENSISA',
+      degree: 'Mérnöki diploma',
+      field: 'Informatika és hálózatok',
+      periodLabels: {
+        start: '2022',
+        end: '2025',
+      },
+      summary: 'Informatikai és hálózati mérnöki végzettség.',
+    },
+    'uqac-semester': {
+      institution: 'Université du Québec à Chicoutimi',
+      degree: 'Külföldi tanulmányi félév',
+      field: 'Az informatikai DUT-képzés negyedik féléve',
+      periodLabels: {
+        single: '2022',
+      },
+      summary: 'Kanadában, az UQAC egyetemen teljesített nemzetközi félév.',
+    },
+    'iut-robert-schuman': {
+      institution: 'IUT Robert Schuman',
+      degree: 'Informatikai DUT-diploma',
+      periodLabels: {
+        start: '2020',
+        end: '2022',
+      },
+      summary: 'A negyedik félévet Kanadában, az UQAC egyetemen végeztem.',
+    },
+    'insa-lyon': {
+      institution: 'INSA Lyon',
+      degree: 'Az integrált mérnöki előkészítő képzés első éve',
+      field: 'Mérnöki tudományok',
+      periodLabels: {
+        start: '2019',
+        end: '2020',
+      },
+    },
+    'lycee-louis-armand': {
+      institution: 'Lycée Louis Armand',
+      degree: 'STI2D érettségi',
+      field: 'SIN szakirány (informatikai és digitális rendszerek)',
+      status: 'Kiváló minősítéssel (Mention Très Bien)',
+      periodLabels: {
+        start: '2017',
+        end: '2019',
+      },
+    },
+  },
   en: {
     ensisa: {
       institution: 'ENSISA',
       degree: 'Engineering Degree',
       field: 'Computer Science and Networks',
-      status: 'Graduated',
       periodLabels: { start: '2022', end: '2025' },
       summary: 'Engineering graduate in Computer Science and Networks.',
     },
     'uqac-semester': {
       institution: 'Université du Québec à Chicoutimi',
       degree: 'Study semester abroad',
-      field: 'Fourth semester of the DUT Computer Science',
+      field: 'Fourth semester of the two-year Computer Science diploma (DUT)',
       periodLabels: { single: '2022' },
       summary: 'International semester completed at UQAC in Canada.',
     },
     'iut-robert-schuman': {
       institution: 'IUT Robert Schuman',
-      degree: 'DUT Computer Science',
+      degree: 'University Diploma in Technology in Computer Science (DUT)',
       periodLabels: { start: '2020', end: '2022' },
       summary: 'The fourth semester was completed abroad at UQAC in Canada.',
     },
@@ -497,9 +557,9 @@ const educationCopy: Record<SupportedLocale, Record<EducationEntryId, LocalizedE
     'lycee-louis-armand': {
       institution: 'Lycée Louis Armand',
       degree: 'Baccalauréat STI2D',
-      field: 'Specialization: SIN',
-      status: 'Mention Très Bien',
-      periodLabels: { single: '2019' },
+      field: 'Information and digital systems (SIN)',
+      status: 'Highest honours (Mention Très Bien)',
+      periodLabels: { start: '2017', end: '2019' },
     },
   },
   fr: {
@@ -507,7 +567,6 @@ const educationCopy: Record<SupportedLocale, Record<EducationEntryId, LocalizedE
       institution: 'ENSISA',
       degree: "Diplôme d'Ingénieur",
       field: 'Informatique et Réseaux',
-      status: 'Diplômé',
       periodLabels: { start: '2022', end: '2025' },
       summary: 'Ingénieur diplômé en Informatique et Réseaux.',
     },
@@ -535,7 +594,7 @@ const educationCopy: Record<SupportedLocale, Record<EducationEntryId, LocalizedE
       degree: 'Baccalauréat STI2D',
       field: 'Spécialité : SIN',
       status: 'Mention Très Bien',
-      periodLabels: { single: '2019' },
+      periodLabels: { start: '2017', end: '2019' },
     },
   },
 };
@@ -544,6 +603,74 @@ const experienceCopy: Record<
   SupportedLocale,
   Record<ExperienceEntryId, LocalizedExperienceCopy>
 > = {
+  hu: {
+    'plansee-group-functions': {
+      role: 'Szoftverfejlesztő',
+      periodLabels: {
+        label: '2025. december 1. óta',
+      },
+      context:
+        'Szoftverfejlesztői munkakör ipari szoftverkörnyezetben, a Plansee-nél töltött 11 hetes szakmai gyakorlat folytatásaként.',
+      responsibilities: [
+        'A szakmai gyakorlat során újraírt Angular-alkalmazás továbbfejlesztése.',
+        'SAP S/4HANA- és ABAP-fejlesztés: tranzakciók és HTTP/API-integrációk, köztük egy SAP-tranzakció összekapcsolása az MI-csapat porkeverék-receptek számításához használt API-jával.',
+        'Egy meglévő C#/.NET-alapú ipari mérőalkalmazás módosítása egy gép Németországból Luxemburgba költöztetése után.',
+        'Node.js/Express köztes réteg fejlesztése a Minew elektronikus címkék API-ja köré, SAP PI-integrációhoz, átláthatóbb REST-réteggel és OAuth 2.0-val.',
+      ],
+    },
+    'plansee-internship': {
+      role: 'Szoftverfejlesztő gyakornok',
+      periodLabels: {
+        start: '2025. július 1.',
+        end: '2025. szeptember közepe',
+      },
+      context:
+        'A vállalati részlegek által használt belső rendelési weboldal teljes újraírására összpontosító szakmai gyakorlat.',
+      responsibilities: [
+        'A belső alkalmazás korszerűsítése Angular és TypeScript használatával.',
+        'A munkát SAP-részlegen végeztem, a gyakorlat alatt ABAP-fejlesztés nélkül.',
+      ],
+    },
+    'bureau-veritas-laboratories': {
+      role: 'Power Platform-fejlesztő duális képzésben',
+      periodLabels: {
+        start: '2023. szeptember',
+        end: '2025. szeptember 30.',
+      },
+      context:
+        'Duális mérnökképzés, nagyjából két-három hetente váltakozó egyetemi és vállalati időszakokkal.',
+      responsibilities: [
+        'Alkalmazás fejlesztése a laboratórium korábbi járműflotta-kezelő rendszerének kiváltására.',
+        'A járművek követése az átvételtől a visszaadásig, a laboratóriumi munkafolyamaton, az áztatókamrán és a próbapadon keresztül.',
+        'A Microsoft Power Platform önálló elsajátítása és nagyrészt önálló megvalósítás, belső Power Platform szakmai mentorálás nélkül.',
+      ],
+    },
+    'groupe-ies': {
+      role: '.NET full-stack fejlesztő gyakornok',
+      periodLabels: {
+        start: '2023. július',
+        end: '2023. augusztus',
+      },
+      responsibilities: [
+        'Webes funkciók fejlesztése C# és ASP.NET Core Blazor használatával.',
+        'REST API-k fejlesztése és használata.',
+        'Együttműködés a meglévő VB.NET/.NET adatbázis- és szolgáltatásrétegekkel.',
+      ],
+    },
+    'lif-uqac-internship': {
+      role: 'Szoftverfejlesztő gyakornok',
+      periodLabels: {
+        start: '2022. április',
+        end: '2022. július',
+      },
+      context:
+        'Kutatási jellegű egyetemi szakmai gyakorlat egy kétszemélyes projekten: a BeamNG.drive összekapcsolása a LIF által fejlesztett BeepBeep 3 eseményfolyam-feldolgozó motorral.',
+      responsibilities: [
+        'Kommunikáció kialakítása a BeamNG.drive járműszimulátor és a BeepBeep 3 között.',
+        'Hálózati és socketprogramozás Java és Python használatával.',
+      ],
+    },
+  },
   en: {
     'plansee-group-functions': {
       role: 'Software Developer',
@@ -582,14 +709,14 @@ const experienceCopy: Record<
       role: '.NET Full-stack Developer Intern',
       periodLabels: { start: 'July 2023', end: 'August 2023' },
       responsibilities: [
-        'Developed web features in C# with ASP.NET Blazor.',
+        'Developed web features in C# with ASP.NET Core Blazor.',
         'Built and consumed REST APIs.',
         'Worked with existing database and service layers implemented in VB.NET/.NET.',
       ],
     },
     'lif-uqac-internship': {
       role: 'Software Developer Intern',
-      periodLabels: { start: 'approximately April 2022', end: 'July 2022' },
+      periodLabels: { start: 'April 2022', end: 'July 2022' },
       context:
         'Academic research-oriented internship on a two-person project connecting BeamNG.drive with BeepBeep 3, an Event Stream Processing engine developed at LIF.',
       responsibilities: [
@@ -601,7 +728,7 @@ const experienceCopy: Record<
   fr: {
     'plansee-group-functions': {
       role: 'Software Developer',
-      periodLabels: { label: 'Depuis le 1 décembre 2025' },
+      periodLabels: { label: 'Depuis le 1er décembre 2025' },
       context:
         "Poste de développeur logiciel dans la continuité d'un stage de 11 semaines chez Plansee, dans un environnement logiciel industriel.",
       responsibilities: [
@@ -613,7 +740,7 @@ const experienceCopy: Record<
     },
     'plansee-internship': {
       role: 'Stagiaire développeur logiciel',
-      periodLabels: { start: '1 juillet 2025', end: 'mi-septembre 2025' },
+      periodLabels: { start: '1er juillet 2025', end: 'Mi-septembre 2025' },
       context:
         "Stage centré sur la refonte complète d'un site interne de commande utilisé par les départements de l'entreprise.",
       responsibilities: [
@@ -623,7 +750,7 @@ const experienceCopy: Record<
     },
     'bureau-veritas-laboratories': {
       role: 'Alternant Développeur Power Platform',
-      periodLabels: { start: 'septembre 2023', end: '30 septembre 2025' },
+      periodLabels: { start: 'Septembre 2023', end: '30 septembre 2025' },
       context:
         "Alternance avec des périodes d'environ deux à trois semaines entre l'école d'ingénieurs et l'entreprise.",
       responsibilities: [
@@ -634,16 +761,16 @@ const experienceCopy: Record<
     },
     'groupe-ies': {
       role: 'Stagiaire développeur full-stack .NET',
-      periodLabels: { start: 'juillet 2023', end: 'août 2023' },
+      periodLabels: { start: 'Juillet 2023', end: 'Août 2023' },
       responsibilities: [
-        'Développement web en C# avec ASP.NET Blazor.',
+        'Développement web en C# avec ASP.NET Core Blazor.',
         "Développement et consommation d'API REST.",
         'Interaction avec des couches de base de données et de services existantes en VB.NET/.NET.',
       ],
     },
     'lif-uqac-internship': {
       role: 'Stagiaire développeur logiciel',
-      periodLabels: { start: 'environ avril 2022', end: 'juillet 2022' },
+      periodLabels: { start: 'Avril 2022', end: 'Juillet 2022' },
       context:
         "Stage académique orienté recherche sur un projet en binôme reliant BeamNG.drive à BeepBeep 3, un moteur de traitement de flux d'événements développé au LIF.",
       responsibilities: [
@@ -655,6 +782,33 @@ const experienceCopy: Record<
 };
 
 const skillGroupCopy: Record<SupportedLocale, Record<SkillGroupId, LocalizedSkillGroupCopy>> = {
+  hu: {
+    'software-engineering': {
+      title: 'Szoftverfejlesztés',
+      summary: 'Backend és full-stack fejlesztés.',
+    },
+    'data-databases': {
+      title: 'Adatok és adatbázisok',
+      summary: 'Relációs adatbázisok és PostgreSQL használata ebben a portfólióban.',
+    },
+    'enterprise-industrial': {
+      title: 'Vállalati és ipari szoftverek',
+      summary:
+        'Szakmai tapasztalat SAP, Microsoft Power Platform és ipari .NET-alkalmazások terén.',
+    },
+    'ai-assisted-engineering': {
+      title: 'MI-vel támogatott fejlesztés',
+      summary: 'Nagy nyelvi modellekre épülő eszközök használata fejlesztési asszisztensként.',
+    },
+    'broader-software-experience': {
+      title: 'További fejlesztési tapasztalat',
+      summary: 'Egyetemi és személyes projektekben használt technológiák.',
+    },
+    'exploratory-historical': {
+      title: 'Korábbi és kísérleti eszközök',
+      summary: 'Modellezés, mérnöki eszközök és operációs rendszerek.',
+    },
+  },
   en: {
     'software-engineering': {
       title: 'Software Engineering',
@@ -674,12 +828,11 @@ const skillGroupCopy: Record<SupportedLocale, Record<SkillGroupId, LocalizedSkil
     },
     'broader-software-experience': {
       title: 'Broader Software Experience',
-      summary:
-        'Academic, personal, and earlier technologies kept visible with proportional weight.',
+      summary: 'Technologies used in academic and personal projects.',
     },
     'exploratory-historical': {
       title: 'Exploratory & Historical',
-      summary: 'Older, niche, and supporting engineering tools kept discoverable.',
+      summary: 'Engineering, modelling, and supporting tools.',
     },
   },
   fr: {
@@ -702,17 +855,57 @@ const skillGroupCopy: Record<SupportedLocale, Record<SkillGroupId, LocalizedSkil
     },
     'broader-software-experience': {
       title: 'Expérience logicielle élargie',
-      summary:
-        'Technologies académiques, personnelles et plus anciennes gardées avec une importance mesurée.',
+      summary: 'Technologies utilisées dans des projets académiques et personnels.',
     },
     'exploratory-historical': {
       title: 'Exploratoire et historique',
-      summary: "Outils d'ingénierie plus anciens, de niche ou de soutien, gardés accessibles.",
+      summary: 'Outils de modélisation et de soutien à l’ingénierie.',
     },
   },
 };
 
 const skillDomainCopy: Record<SupportedLocale, Record<SkillDomainId, LocalizedSkillDomainCopy>> = {
+  hu: {
+    'backend-application-development': {
+      title: 'Backend és alkalmazásfejlesztés',
+    },
+    'frontend-full-stack': {
+      title: 'Frontend és full-stack',
+    },
+    'apis-integration': {
+      title: 'API-k és integráció',
+    },
+    'data-platforms': {
+      title: 'Relációs adatbázisok és adatplatformok',
+    },
+    'sap-industrial': {
+      title: 'SAP és ipari környezetek',
+    },
+    'microsoft-power-platform': {
+      title: 'Microsoft Power Platform',
+    },
+    'dotnet-ecosystem': {
+      title: '.NET-ökoszisztéma',
+    },
+    'developer-tooling-llms': {
+      title: 'Fejlesztői eszközök és nyelvi modellek',
+    },
+    'broader-programming-frameworks': {
+      title: 'Nyelvek és webes keretrendszerek',
+    },
+    'game-mobile-academic': {
+      title: 'Játékok, asztali és mobilalkalmazások',
+    },
+    'engineering-tools': {
+      title: 'Mérnöki és modellezési eszközök',
+    },
+    'version-control': {
+      title: 'Verziókezelés és szoftverszállítás',
+    },
+    'operating-systems': {
+      title: 'Operációs rendszerek',
+    },
+  },
   en: {
     'backend-application-development': { title: 'Backend & application development' },
     'frontend-full-stack': { title: 'Frontend & full-stack' },
@@ -749,6 +942,29 @@ const skillTechnologyCopy: Record<
   SupportedLocale,
   Partial<Record<SkillTechnologyId, LocalizedSkillTechnologyCopy>>
 > = {
+  hu: {
+    chatgpt: {
+      note: 'Fejlesztési és problémamegoldási asszisztensként használom.',
+    },
+    'codex-coding-agents': {
+      name: 'Codex / kódoló ágensek',
+      note: 'Kódoló ágensekkel támogatott munka a forráskódtárolókban.',
+    },
+    'mcp-concepts': {
+      name: 'MCP-alapismeretek',
+      note: 'Fogalmi ismeretek eszközök és ágensek integrációjáról.',
+    },
+    'agentic-workflows': {
+      name: 'Ágensalapú munkafolyamatok',
+      note: 'Kezdeti gyakorlati kísérletek szoftverfejlesztési munkafolyamatokban.',
+    },
+    postgresql: {
+      note: 'Ebben a Spring Boot / PostgreSQL portfólióban használom.',
+    },
+    kotlin: {
+      note: 'Kísérletezés a modern Android-fejlesztéssel.',
+    },
+  },
   en: {
     chatgpt: {
       note: 'Used as a development assistant for software engineering and problem-solving workflows.',
@@ -796,6 +1012,18 @@ const skillTechnologyCopy: Record<
 };
 
 const languageCopy: Record<SupportedLocale, Record<LanguageId, LocalizedLanguageCopy>> = {
+  hu: {
+    french: {
+      name: 'Francia',
+      level: 'Anyanyelv',
+    },
+    english: {
+      name: 'Angol',
+    },
+    german: {
+      name: 'Német',
+    },
+  },
   en: {
     french: { name: 'French', level: 'Native language' },
     english: { name: 'English' },
@@ -809,6 +1037,64 @@ const languageCopy: Record<SupportedLocale, Record<LanguageId, LocalizedLanguage
 };
 
 export const portfolioContent: PortfolioContentByLocale = {
+  hu: {
+    home: {
+      hero: {
+        name: 'Baptiste Wetterwald',
+        role: 'Szoftvermérnök',
+        orientation: 'Backend és full-stack',
+        stackLine: 'Java / Spring · C# / .NET · TypeScript / Node.js · Angular',
+        portraitAlt: 'Baptiste Wetterwald portréja',
+      },
+      introduction: [
+        'Informatikai és hálózati mérnök vagyok, szakmai tapasztalattal Angular, .NET és Node.js fejlesztésben, valamint rendszerintegrációban. A Java/Spring Boot technológiát személyes projektjeimben használom, például ebben a portfólióban.',
+      ],
+      primaryStackHeading: 'Fő technológiák',
+      primaryStack: ['Java / Spring', 'C# / .NET', 'TypeScript / Node.js', 'Angular'],
+      exploreHeading: 'További információk',
+      exploreLinks: [
+        {
+          pageId: 'experience',
+          label: 'Szakmai tapasztalat',
+          description: 'Fejlesztői munkakörök, feladatok és technológiák.',
+        },
+        {
+          pageId: 'education',
+          label: 'Tanulmányok',
+          description: 'Mérnöki diploma, informatikai DUT és nemzetközi félév.',
+        },
+        {
+          pageId: 'projects',
+          label: 'Projektek',
+          description: 'Szoftverprojektek és technikai megoldások.',
+        },
+      ],
+      skillsHeading: 'Készségek és szakterületek',
+      skillsIntroduction: '',
+      languagesHeading: 'Nyelvtudás',
+      languagesIntroduction: '',
+    },
+    educationPage: {
+      heading: 'Tanulmányok',
+      introduction: 'Informatikai és hálózati tanulmányok a középiskolától a mérnöki diplomáig.',
+      periodToLabel: '–',
+      officialWebsiteLabel: 'Hivatalos weboldal',
+      opensInNewTabLabel: 'új lapon nyílik meg',
+    },
+    education: educationEntriesFor('hu'),
+    experiencePage: {
+      heading: 'Szakmai tapasztalat',
+      introduction:
+        'Szoftverfejlesztés szakmai gyakorlatok, duális képzés és munkaviszony keretében.',
+      periodToLabel: '–',
+      officialWebsiteLabel: 'Hivatalos weboldal',
+      opensInNewTabLabel: 'új lapon nyílik meg',
+    },
+    experience: experienceEntriesFor('hu'),
+    skills: skillGroupsFor('hu'),
+    languages: languagesFor('hu'),
+  },
+
   en: {
     home: {
       hero: {
@@ -819,10 +1105,9 @@ export const portfolioContent: PortfolioContentByLocale = {
         portraitAlt: 'Portrait of Baptiste Wetterwald',
       },
       introduction: [
-        'Computer Science and Networks engineering graduate focused on software development, with a particular interest in backend systems, API-oriented architectures and full-stack applications.',
-        'I work primarily with Java/Spring, C#/.NET and TypeScript/Node.js, while using Angular for frontend and full-stack applications. My experience also spans system integration, SAP, Microsoft Power Platform and industrial software environments.',
+        'Computer Science and Networks engineering graduate with professional experience in Angular, .NET, Node.js and system integration. I use Java/Spring Boot in personal projects, including this portfolio.',
       ],
-      primaryStackHeading: 'Primary technical directions',
+      primaryStackHeading: 'Core technologies',
       primaryStack: ['Java / Spring', 'C# / .NET', 'TypeScript / Node.js', 'Angular'],
       exploreHeading: 'Continue through the portfolio',
       exploreLinks: [
@@ -844,11 +1129,9 @@ export const portfolioContent: PortfolioContentByLocale = {
         },
       ],
       skillsHeading: 'Skills and technical domains',
-      skillsIntroduction:
-        'Technical domains are weighted around the current backend and full-stack direction, with broader knowledge kept in context.',
+      skillsIntroduction: '',
       languagesHeading: 'Languages',
-      languagesIntroduction:
-        'Language levels are shown as factual descriptors without artificial scores or progress bars.',
+      languagesIntroduction: '',
     },
     educationPage: {
       heading: 'Education',
@@ -881,10 +1164,9 @@ export const portfolioContent: PortfolioContentByLocale = {
         portraitAlt: 'Portrait de Baptiste Wetterwald',
       },
       introduction: [
-        'Ingénieur diplômé en Informatique et Réseaux, orienté développement logiciel, avec un intérêt particulier pour les systèmes backend, les architectures orientées API et les applications full-stack.',
-        "Je travaille principalement avec Java/Spring, C#/.NET et TypeScript/Node.js, tout en utilisant Angular pour les applications frontend et full-stack. Mon expérience couvre aussi l'intégration de systèmes, SAP, Microsoft Power Platform et les environnements logiciels industriels.",
+        'Ingénieur diplômé en informatique et réseaux, avec une expérience professionnelle en Angular, .NET, Node.js et intégration de systèmes. Je pratique Java/Spring Boot dans mes projets personnels, dont ce portfolio.',
       ],
-      primaryStackHeading: 'Directions techniques principales',
+      primaryStackHeading: 'Technologies principales',
       primaryStack: ['Java / Spring', 'C# / .NET', 'TypeScript / Node.js', 'Angular'],
       exploreHeading: 'Parcourir le portfolio',
       exploreLinks: [
@@ -909,8 +1191,7 @@ export const portfolioContent: PortfolioContentByLocale = {
       skillsIntroduction:
         "Les domaines techniques sont hiérarchisés autour de l'orientation backend et full-stack actuelle, avec un socle plus large remis en contexte.",
       languagesHeading: 'Langues',
-      languagesIntroduction:
-        'Les niveaux de langue sont présentés comme des faits, sans jauges ni scores artificiels.',
+      languagesIntroduction: '',
     },
     educationPage: {
       heading: 'Formation',
@@ -946,7 +1227,7 @@ function educationEntriesFor(locale: SupportedLocale): readonly EducationEntry[]
     return {
       id: fact.id,
       institution: copy.institution,
-      location: fact.location,
+      location: localizedLocation(fact.location, locale),
       degree: copy.degree,
       field: copy.field,
       status: copy.status,
@@ -965,7 +1246,7 @@ function experienceEntriesFor(locale: SupportedLocale): readonly ExperienceEntry
     return {
       id: fact.id,
       organization: localizedOrganization(fact.organization, locale),
-      location: fact.location,
+      location: localizedLocation(fact.location, locale),
       role: copy.role,
       period: periodFromFact(fact.period, copy.periodLabels) ?? {},
       duration: fact.duration?.[locale],
@@ -1058,4 +1339,15 @@ function localizedOrganization(
   return typeof organization === 'string'
     ? organization
     : (organization[locale] ?? organization.en ?? '');
+}
+
+function localizedLocation(
+  location: string | undefined,
+  locale: SupportedLocale,
+): string | undefined {
+  if (!location || locale !== 'hu') return location;
+  return location
+    .replace(', France', ', Franciaország')
+    .replace(', Luxembourg', ', Luxemburg')
+    .replace(', Canada', ', Kanada');
 }

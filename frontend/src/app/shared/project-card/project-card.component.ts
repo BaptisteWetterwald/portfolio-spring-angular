@@ -1,3 +1,4 @@
+import { BrandIconComponent } from '../brand-icon/brand-icon.component';
 import { ChangeDetectionStrategy, Component, computed, input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -9,7 +10,7 @@ import { ProjectSummaryDto } from '../../core/projects/project.models';
 
 @Component({
   selector: 'app-project-card',
-  imports: [RouterLink],
+  imports: [BrandIconComponent, RouterLink],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
