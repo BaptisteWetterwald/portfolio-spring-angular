@@ -41,13 +41,6 @@
   font-weight: 650;
 }
 
-.home-page__stack-line {
-  margin: var(--space-3) 0 0;
-  color: var(--color-text-muted);
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
-
 .home-page__intro {
   display: grid;
   gap: var(--space-3);
@@ -56,6 +49,16 @@
   color: var(--color-text-muted);
   font-size: 1rem;
   line-height: 1.75;
+}
+
+.home-page__actions {
+  margin-top: var(--space-4);
+}
+
+.home-page__availability {
+  margin-top: var(--space-5);
+  line-height: 1.6;
+  font-weight: 600;
 }
 
 .home-page__section {
@@ -169,9 +172,12 @@
       'title portrait'
       'orientation orientation'
       'stack stack'
-      'intro intro';
+      'intro intro'
+      'availability availability'
+      'actions actions'
+      'languages languages';
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-2) var(--space-3);
+    gap: var(--space-3) var(--space-3);
     padding-block: var(--space-4);
   }
 
@@ -192,13 +198,19 @@
 
   .home-page__orientation {
     grid-area: orientation;
-    margin-top: calc(var(--space-2) * -1);
+    margin-top: 0;
     font-size: 1.28rem;
   }
 
-  .home-page__stack-line {
+  .home-page__primary-stack {
     grid-area: stack;
+    gap: var(--space-2);
     margin-top: 0;
+  }
+
+  .home-page__languages {
+    grid-area: languages;
+    margin-top: var(--space-4);
   }
 
   .home-page__intro {
@@ -207,12 +219,27 @@
     margin-top: var(--space-2);
   }
 
+  .home-page__availability {
+    grid-area: availability;
+    margin-top: 0;
+  }
+
+  .home-page__actions {
+    grid-area: actions;
+    margin-block: var(--space-2);
+  }
+
   .home-page__hero + .home-page__section {
     margin-top: var(--space-4);
   }
 }
 
 @media (max-width: 360px) {
+  .home-page__stack-badge {
+    padding-inline: var(--space-3);
+    font-size: 0.9rem;
+  }
+
   .home-page__hero {
     grid-template-areas:
       'eyebrow'
@@ -220,7 +247,10 @@
       'portrait'
       'orientation'
       'stack'
-      'intro';
+      'intro'
+      'availability'
+      'actions'
+      'languages';
     grid-template-columns: 1fr;
   }
 

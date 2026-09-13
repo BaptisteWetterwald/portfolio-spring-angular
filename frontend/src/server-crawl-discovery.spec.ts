@@ -26,6 +26,7 @@ describe('server crawl discovery', () => {
     expect(sitemapLocations(xml)).toEqual([
       'https://bwetterwald.fr/fr',
       'https://bwetterwald.fr/en',
+      'https://bwetterwald.fr/hu',
       'https://bwetterwald.fr/fr/projets/published-detail',
       'https://bwetterwald.fr/fr/projets/archived-detail',
     ]);
@@ -101,6 +102,7 @@ describe('server crawl discovery', () => {
     expect(locations).toEqual([
       'https://bwetterwald.fr/fr',
       'https://bwetterwald.fr/en',
+      'https://bwetterwald.fr/hu',
       'https://bwetterwald.fr/fr/projets/repeated-project',
       'https://bwetterwald.fr/en/projects/repeated-project',
     ]);
@@ -123,6 +125,7 @@ describe('server crawl discovery', () => {
     expect(requestedUrls).toEqual([
       'http://backend:8080/api/v1/projects?locale=fr',
       'http://backend:8080/api/v1/projects?locale=en',
+      'http://backend:8080/api/v1/projects?locale=hu',
     ]);
     expect(xml).toContain('<loc>https://bwetterwald.fr/fr/projets/blaze4</loc>');
     expect(xml).toContain('<loc>https://bwetterwald.fr/en/projects/blaze4</loc>');

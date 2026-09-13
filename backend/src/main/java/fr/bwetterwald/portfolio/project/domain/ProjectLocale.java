@@ -6,7 +6,9 @@ public enum ProjectLocale {
 
 	FR("fr"),
 
-	EN("en");
+	EN("en"),
+
+	HU("hu");
 
 	private final String code;
 

@@ -6,6 +6,9 @@ import {
 } from './locale-resolution';
 
 describe('locale resolution', () => {
+  it('selects Hungarian from regional browser preferences', () => {
+    expect(selectLocaleFromAcceptLanguage('hu-HU,hu;q=0.9,en;q=0.8')).toBe('hu');
+  });
   it('uses a stored supported locale before Accept-Language', () => {
     expect(
       resolvePreferredLocale({

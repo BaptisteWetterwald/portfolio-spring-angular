@@ -4,11 +4,11 @@ This repository contains an Angular SSR frontend, a Spring Boot backend, and Pos
 
 The current single-page candidate architecture is:
 
-- `/fr` and `/en` are the localized portfolio documents.
-- Home, Education, Experience, Projects, and Contact are sections with stable IDs `home`, `education`, `experience`, `projects`, and `contact`.
-- The GitHub activity block is supporting content inside Home, after the existing skills/languages content. Its optional contribution calendar precedes the repository cards. It is not a sixth section or navigation target.
+- `/fr`, `/en`, and `/hu` are the localized portfolio documents.
+- Home, Experience, Education, Projects, and Contact are sections with stable IDs `home`, `education`, `experience`, `projects`, and `contact`.
+- The GitHub activity block is supporting content after Projects and before Contact. Its optional contribution calendar follows the repository cards. It is not a sixth section or navigation target. Home contains a concise introduction, core technologies, availability, and approved CV/contact/profile links; detailed technology context belongs with experience and projects.
 - Former localized section paths redirect to the corresponding fragment.
-- Project `DETAIL` routes remain `/fr/projets/:slug` and `/en/projects/:slug`.
+- Project `DETAIL` routes remain `/fr/projets/:slug`, `/en/projects/:slug`, and `/hu/projektek/:slug`.
 - `CARD_ONLY` projects never receive a public detail affordance or route response.
 
 Do not recreate the former five-primary-page route architecture.
@@ -39,7 +39,7 @@ Angular uses request-time SSR (`outputMode: server`, `RenderMode.Server`) and hy
 
 The root `/` redirect priority is explicit locale cookie, `Accept-Language`, then English. Browser locale and theme choices are mirrored from local storage into non-sensitive cookies for SSR.
 
-Main-document metadata canonicalizes to `/fr` or `/en`. Project detail metadata is API-derived. Unknown/private/card-only/untranslated project details return localized 404 behavior.
+Main-document metadata canonicalizes to `/fr`, `/en`, or `/hu`. Project detail metadata is API-derived. Unknown/private/card-only/untranslated project details return localized 404 behavior.
 
 # Backend and persistence
 

@@ -5,6 +5,19 @@ import { TranslationService } from './translation.service';
 import { translations } from './translations';
 
 describe('TranslationService', () => {
+  it('keeps all three dictionaries complete with matching interpolation placeholders', () => {
+    const keys = Object.keys(translations.en).sort();
+    for (const locale of ['fr', 'en', 'hu'] as const) {
+      expect(Object.keys(translations[locale]).sort()).toEqual(keys);
+      for (const key of keys as (keyof typeof translations.en)[]) {
+        const value = translations[locale][key];
+        expect(value.trim()).not.toBe('');
+        expect(value.match(/\{\w+\}/g)?.sort() ?? []).toEqual(
+          translations.en[key].match(/\{\w+\}/g)?.sort() ?? [],
+        );
+      }
+    }
+  });
   it('looks up text for the current locale', () => {
     const localeContext = TestBed.inject(LocaleContextService);
 

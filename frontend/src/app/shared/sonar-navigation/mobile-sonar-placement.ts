@@ -48,7 +48,7 @@ export function defaultMobileSonarBubble(bounds: MobileSonarBounds): MobileSonar
 
   return {
     x: bounds.safeLeft + radius,
-    y: bounds.height - bounds.safeBottom - radius,
+    y: bounds.height / 2,
     dockSide: 'left',
   };
 }
@@ -102,11 +102,29 @@ export function mobileSonarPlacementForBubble(
     bounds.safeLeft,
     bounds.width - bounds.safeRight - bounds.expandedSize,
   );
-  const panelTop = clamp(
+  let panelTop = clamp(
     bubble.y - bounds.expandedSize / 2,
     bounds.safeTop,
     bounds.height - bounds.safeBottom - bounds.expandedSize,
   );
+
+  if (bounds.lighthouseSafeZone) {
+    const zone = inflateRect(bounds.lighthouseSafeZone, bounds.controlGap);
+    const panel = {
+      left: panelLeft,
+      right: panelLeft + bounds.expandedSize,
+      top: panelTop,
+      bottom: panelTop + bounds.expandedSize,
+    };
+    if (mobileSonarRectsOverlap(panel, zone)) {
+      const candidates = [zone.top - bounds.expandedSize, zone.bottom].filter(
+        (top) =>
+          top >= bounds.safeTop && top + bounds.expandedSize <= bounds.height - bounds.safeBottom,
+      );
+      candidates.sort((first, second) => Math.abs(first - panelTop) - Math.abs(second - panelTop));
+      panelTop = candidates[0] ?? panelTop;
+    }
+  }
 
   return {
     bubble,

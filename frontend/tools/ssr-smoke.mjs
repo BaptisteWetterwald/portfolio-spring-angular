@@ -8,9 +8,53 @@ const unexpectedSocialSharingMetadata = [
   'page-metadata-service:social-sharing',
 ];
 const projectXDefault = 'hreflang="x-default"';
-const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png';
+const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v2.jpg';
 
 const checks = [
+  {
+    name: 'Hungarian root negotiation',
+    path: '/',
+    headers: { 'accept-language': 'hu-HU,hu;q=0.9' },
+    expectedStatus: 302,
+    expectedLocation: '/hu',
+  },
+  {
+    name: 'Hungarian home SSR',
+    path: '/hu',
+    expectedStatus: 200,
+    expectedBody: [
+      'lang="hu"',
+      'Szoftvermérnök',
+      'Munkakezdés 2026 decemberétől',
+      'href="https://bwetterwald.fr/hu"',
+      '/assets/cv/cv-baptiste-wetterwald-EN.pdf',
+    ],
+  },
+  {
+    name: 'Hungarian portfolio detail',
+    path: '/hu/projektek/portfolio-spring-angular',
+    expectedStatus: 200,
+    expectedBody: ['Többnyelvű', 'Háttér', 'hu_HU'],
+  },
+  {
+    name: 'Hungarian Blaze4 detail',
+    path: '/hu/projektek/blaze4',
+    expectedStatus: 200,
+    expectedBody: ['Háttér', 'Üzleti logika és API'],
+  },
+  {
+    name: 'Hungarian card-only remains unavailable',
+    path: '/hu/projektek/frequensisa',
+    expectedStatus: 404,
+    expectedBody: ['Az oldal nem található', 'noindex'],
+  },
+  {
+    name: 'Favicon',
+    path: '/favicon.svg',
+    expectedStatus: 200,
+    expectedContentType: 'image/svg+xml',
+  },
+
   {
     name: 'robots crawl policy',
     path: '/robots.txt',
@@ -24,9 +68,9 @@ const checks = [
   },
   {
     name: 'shared social card static asset',
-    path: '/assets/social/baptiste-wetterwald-social-card-v1.png',
+    path: '/assets/social/baptiste-wetterwald-social-card-v2.jpg',
     expectedStatus: 200,
-    expectedContentType: 'image/png',
+    expectedContentType: 'image/jpeg',
     binaryBody: true,
   },
   {
@@ -341,10 +385,10 @@ const checks = [
     expectedStatus: 200,
     expectedBody: [
       '<title>Portfolio Spring Angular | Baptiste Wetterwald</title>',
-      'name="description" content="Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."',
+      'name="description" content="Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."',
       'name="robots" content="index,follow"',
       'rel="canonical" href="https://bwetterwald.fr/en/projects/portfolio-spring-angular"',
-      'Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway',
+      'Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway',
       'Technical overview',
       'Case study',
       'Context',
@@ -354,7 +398,7 @@ const checks = [
       'Projects and content',
       'Projects are backend-managed entities with publication status, presentation mode, localized translations',
       'SSR, SEO and accessibility',
-      'Localized /fr and /en routes are rendered at request time.',
+      'Localized /fr, /en and /hu routes are rendered at request time.',
       'Angular',
       'TypeScript',
       'Java',
@@ -371,13 +415,13 @@ const checks = [
       'hreflang="en" href="https://bwetterwald.fr/en/projects/portfolio-spring-angular"',
       'property="og:type" content="article"',
       'property="og:title" content="Portfolio Spring Angular | Baptiste Wetterwald"',
-      'property="og:description" content="Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."',
+      'property="og:description" content="Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."',
       'property="og:url" content="https://bwetterwald.fr/en/projects/portfolio-spring-angular"',
       'property="og:locale" content="en_US"',
       'property="og:locale:alternate" content="fr_FR"',
       ...socialSharingMetadata(
         'Portfolio Spring Angular | Baptiste Wetterwald',
-        'Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies.',
+        'Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies.',
         'Baptiste Wetterwald profile card with portrait and maritime visuals.',
       ),
       'href="/fr/projets/portfolio-spring-angular"',
@@ -391,10 +435,10 @@ const checks = [
     expectedStatus: 200,
     expectedBody: [
       '<title>Portfolio Spring Angular | Baptiste Wetterwald</title>',
-      'name="description" content="Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."',
+      'name="description" content="Application portfolio multilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."',
       'name="robots" content="index,follow"',
       'rel="canonical" href="https://bwetterwald.fr/fr/projets/portfolio-spring-angular"',
-      'Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway',
+      'Application portfolio multilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway',
       'Vue technique',
       'Étude de projet',
       'Contexte',
@@ -404,7 +448,7 @@ const checks = [
       'Projets et contenu',
       'Les projets sont des entités gérées côté backend avec statut de publication',
       'SSR, SEO et accessibilité',
-      'Les routes localisées /fr et /en sont rendues à la requête.',
+      'Les routes localisées /fr, /en et /hu sont rendues à la requête.',
       'Angular',
       'TypeScript',
       'Java',
@@ -421,13 +465,13 @@ const checks = [
       'hreflang="en" href="https://bwetterwald.fr/en/projects/portfolio-spring-angular"',
       'property="og:type" content="article"',
       'property="og:title" content="Portfolio Spring Angular | Baptiste Wetterwald"',
-      'property="og:description" content="Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."',
+      'property="og:description" content="Application portfolio multilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."',
       'property="og:url" content="https://bwetterwald.fr/fr/projets/portfolio-spring-angular"',
       'property="og:locale" content="fr_FR"',
       'property="og:locale:alternate" content="en_US"',
       ...socialSharingMetadata(
         'Portfolio Spring Angular | Baptiste Wetterwald',
-        'Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées.',
+        'Application portfolio multilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées.',
         'Carte de présentation de Baptiste Wetterwald avec portrait et univers maritime.',
       ),
       'href="/fr/projets/portfolio-spring-angular"',
@@ -805,7 +849,10 @@ function profilePageJsonLd(locale) {
         : 'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
       jobTitle: isFrench ? 'Ingénieur logiciel' : 'Software Engineer',
       image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
-      sameAs: ['https://github.com/BaptisteWetterwald'],
+      sameAs: [
+        'https://github.com/BaptisteWetterwald',
+        'https://www.linkedin.com/in/baptiste-wetterwald/',
+      ],
     },
   };
 }
@@ -816,7 +863,7 @@ function socialSharingMetadata(title, description, imageAlt) {
     `property="og:image:alt" content="${imageAlt}"`,
     'property="og:image:width" content="1200"',
     'property="og:image:height" content="630"',
-    'property="og:image:type" content="image/png"',
+    'property="og:image:type" content="image/jpeg"',
     'property="og:site_name" content="Baptiste Wetterwald"',
     'name="twitter:card" content="summary_large_image"',
     `name="twitter:title" content="${title}"`,

@@ -28,7 +28,7 @@ describe('Express sitemap endpoint', () => {
     }
   });
 
-  it('returns a cacheable XML sitemap when both localized indexes are available', async () => {
+  it('returns a cacheable XML sitemap when all localized indexes are available', async () => {
     const fetchBackend = vi.fn(async () =>
       Response.json([
         {
@@ -42,7 +42,7 @@ describe('Express sitemap endpoint', () => {
       loadSitemapXml(backendOrigin, fetchBackend),
     );
 
-    expect(fetchBackend).toHaveBeenCalledTimes(2);
+    expect(fetchBackend).toHaveBeenCalledTimes(3);
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toContain('application/xml');
     expect(response.headers['cache-control']).toBe(

@@ -61,12 +61,12 @@ describe('PortfolioPageComponent integration', () => {
     );
     const children = Array.from(page?.children ?? []);
 
-    expect(sectionIds).toEqual(['home', 'education', 'experience', 'projects', 'contact']);
+    expect(sectionIds).toEqual(['home', 'experience', 'education', 'projects', 'contact']);
     expect(new Set(sectionIds).size).toBe(5);
     expect(permalinks.map((link) => link.getAttribute('href'))).toEqual([
       '/en#home',
-      '/en#education',
       '/en#experience',
+      '/en#education',
       '/en#projects',
       '/en#contact',
     ]);
@@ -79,12 +79,13 @@ describe('PortfolioPageComponent integration', () => {
     ).toEqual([
       'app-home-page',
       'divider',
-      'app-education-page',
-      'divider',
       'app-experience-page',
+      'divider',
+      'app-education-page',
       'divider',
       'app-projects-page',
       'divider',
+      'app-github-activity',
       'app-contact-page',
     ]);
   });

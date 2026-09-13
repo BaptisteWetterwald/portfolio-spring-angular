@@ -13,6 +13,14 @@ import {
 } from './localized-routes';
 
 describe('localized route model', () => {
+  it('preserves fragments and translated project routes in Hungarian', () => {
+    expect(equivalentLocalizedPath('/en#experience', 'hu')).toBe('/hu#experience');
+    expect(equivalentLocalizedPath('/en/projects/blaze4', 'hu', ['en', 'hu'])).toBe(
+      '/hu/projektek/blaze4',
+    );
+    expect(equivalentLocalizedPath('/en/projects/private', 'hu', ['en'])).toBe('/hu#projects');
+  });
+
   it('creates canonical localized static paths', () => {
     expect(localizedPath('fr', 'education')).toBe('/fr/formation');
     expect(localizedPath('en', 'projects')).toBe('/en/projects');
@@ -20,7 +28,7 @@ describe('localized route model', () => {
 
   it('derives localized paths from the route segment model', () => {
     for (const pageId of staticPageIds) {
-      for (const locale of ['fr', 'en'] as const) {
+      for (const locale of ['fr', 'en', 'hu'] as const) {
         const segment = localizedStaticRouteSegments[pageId][locale];
         const expectedPath = segment ? `/${locale}/${segment}` : `/${locale}`;
 
@@ -83,6 +91,7 @@ describe('localized route model', () => {
     expect(localizedAlternates('projects')).toEqual({
       fr: '/fr/projets',
       en: '/en/projects',
+      hu: '/hu/projektek',
     });
     expect(localizedProjectDetailAlternates('portfolio-spring-angular', ['fr'])).toEqual({
       fr: '/fr/projets/portfolio-spring-angular',

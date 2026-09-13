@@ -37,8 +37,8 @@ describe('localized app routes', () => {
     expect(root?.textContent).toContain(positioning);
     expect(portfolioSectionIds(root)).toEqual([
       'home',
-      'education',
       'experience',
+      'education',
       'projects',
       'contact',
     ]);
@@ -141,7 +141,10 @@ describe('localized app routes', () => {
     expect(englishProfile['inLanguage']).toBe('en');
     expect(personFrom(frenchProfile)['@id']).toBe('https://bwetterwald.fr/#person');
     expect(personFrom(englishProfile)['@id']).toBe('https://bwetterwald.fr/#person');
-    expect(personFrom(englishProfile)['sameAs']).toEqual(['https://github.com/BaptisteWetterwald']);
+    expect(personFrom(englishProfile)['sameAs']).toEqual([
+      'https://github.com/BaptisteWetterwald',
+      'https://www.linkedin.com/in/baptiste-wetterwald/',
+    ]);
     expect(managedSocialMetadata()).toHaveLength(11);
     expect(socialMetadataContent('property', 'og:image:alt')).toBe(
       'Baptiste Wetterwald profile card with portrait and maritime visuals.',
@@ -164,7 +167,7 @@ describe('localized app routes', () => {
     expect(managedStructuredDataScripts()).toHaveLength(0);
     expect(managedSocialMetadata()).toHaveLength(11);
     expect(socialMetadataContent('property', 'og:image')).toBe(
-      'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png',
+      'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v2.jpg',
     );
     expect(socialMetadataContent('name', 'twitter:title')).toBe(
       'Portfolio API | Baptiste Wetterwald',
@@ -220,27 +223,26 @@ describe('localized app routes', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Portfolio API');
   });
 
-  it('renders GitHub activity only inside Home after profile content and before Education', async () => {
+  it('renders GitHub activity after projects without adding a navigation section', async () => {
     const harness = await createHarness('/en', {}, { getActivity: () => of(githubActivity()) });
     const root = harness.routeNativeElement;
-    const home = root?.querySelector('#home');
     const github = root?.querySelector('[data-github-activity]');
-    const languages = root?.querySelector('#home-languages-title')?.closest('section');
-    const education = root?.querySelector('#education');
+    const projects = root?.querySelector('#projects');
+    const contact = root?.querySelector('#contact');
 
-    expect(github?.closest('#home')).toBe(home);
-    expect((languages as Element).compareDocumentPosition(github as Node)).toBe(
+    expect(github?.closest('#home')).toBeNull();
+    expect((projects as Element).compareDocumentPosition(github as Node)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
-    expect((github as Element).compareDocumentPosition(education as Node)).toBe(
+    expect((github as Element).compareDocumentPosition(contact as Node)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
     expect(root?.querySelector('#github')).toBeNull();
     expect(root?.querySelector('nav a[href*="#github"], footer a[href*="#github"]')).toBeNull();
     expect(portfolioSectionIds(root)).toEqual([
       'home',
-      'education',
       'experience',
+      'education',
       'projects',
       'contact',
     ]);
@@ -295,15 +297,15 @@ describe('localized app routes', () => {
 
     expect(links.map((link) => link.textContent?.trim())).toEqual([
       'Accueil',
-      'Formation',
       'Expérience',
+      'Formation',
       'Projets',
       'Contact',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/fr#home',
-      '/fr#education',
       '/fr#experience',
+      '/fr#education',
       '/fr#projects',
       '/fr#contact',
     ]);

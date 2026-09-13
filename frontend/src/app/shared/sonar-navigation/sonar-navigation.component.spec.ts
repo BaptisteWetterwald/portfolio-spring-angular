@@ -39,15 +39,15 @@ describe('SonarNavigationComponent integration', () => {
 
     expect(links.map((link) => link.textContent?.trim())).toEqual([
       'Home',
-      'Education',
       'Experience',
+      'Education',
       'Projects',
       'Contact',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/en#home',
-      '/en#education',
       '/en#experience',
+      '/en#education',
       '/en#projects',
       '/en#contact',
     ]);
@@ -55,7 +55,7 @@ describe('SonarNavigationComponent integration', () => {
       harness.routeNativeElement
         ?.querySelector('nav[data-sonar-nav][data-sonar-nav-variant="floating"]')
         ?.getAttribute('aria-label'),
-    ).toBe('Compact compass navigation');
+    ).toBe('Compact sonar navigation');
   });
 
   it('exposes the active section as the current location', async () => {

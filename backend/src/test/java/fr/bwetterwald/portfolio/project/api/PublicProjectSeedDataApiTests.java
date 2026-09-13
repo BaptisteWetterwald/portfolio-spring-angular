@@ -31,6 +31,21 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 	private JdbcTemplate jdbcTemplate;
 
 	@Test
+	void hungarianProjectsAndStructuredDetailsAreAvailable() throws Exception {
+		this.mockMvc.perform(get("/api/v1/projects").queryParam("locale", "hu"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(6))
+			.andExpect(jsonPath("$[0].shortDescription").value(containsString("Többnyelvű")));
+		for (String slug : new String[] { "portfolio-spring-angular", "blaze4" }) {
+			this.mockMvc.perform(get("/api/v1/projects/{slug}", slug).queryParam("locale", "hu"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.sections.length()").value(4))
+				.andExpect(jsonPath("$.sections[0].title").value("Háttér"))
+				.andExpect(jsonPath("$.availableLocales[2]").value("hu"));
+		}
+	}
+
+	@Test
 	void productionSeedContainsSixOrderedProjectsExactlyOnce() {
 		String schema = isolatedPostgresSchema();
 
@@ -169,7 +184,7 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 			.andExpect(jsonPath("$[0].slug").value("portfolio-spring-angular"))
 			.andExpect(jsonPath("$[0].title").value("Portfolio Spring Angular"))
 			.andExpect(jsonPath("$[0].shortDescription")
-				.value("Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."))
+				.value("Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."))
 			.andExpect(jsonPath("$[0].status").value("PUBLISHED"))
 			.andExpect(jsonPath("$[0].presentationMode").value("DETAIL"))
 			.andExpect(jsonPath("$[0].featured").value(false))
@@ -266,7 +281,7 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 		this.mockMvc.perform(get("/api/v1/projects").queryParam("locale", "fr"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$[0].slug").value("portfolio-spring-angular"))
-			.andExpect(jsonPath("$[0].shortDescription").value(containsString("Application portfolio bilingue")))
+			.andExpect(jsonPath("$[0].shortDescription").value(containsString("Application portfolio multilingue")))
 			.andExpect(jsonPath("$[1].slug").value("blaze4"))
 			.andExpect(jsonPath("$[1].shortDescription")
 				.value("Application web de Puissance 4 en C#/.NET, construite autour d'une architecture N-tiers avec API REST ASP.NET Core, frontend Blazor WebAssembly et persistance via Entity Framework Core."))
@@ -368,7 +383,7 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 			.andExpect(jsonPath("$.slug").value("portfolio-spring-angular"))
 			.andExpect(jsonPath("$.title").value("Portfolio Spring Angular"))
 			.andExpect(jsonPath("$.shortDescription")
-				.value("Application portfolio bilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."))
+				.value("Application portfolio multilingue construite avec Angular SSR, Spring Boot, PostgreSQL et Flyway pour servir du contenu localisé et des études de projets structurées."))
 			.andExpect(jsonPath("$.detailedDescription").value(nullValue()))
 			.andExpect(jsonPath("$.sections[0].title").value("Contexte"))
 			.andExpect(jsonPath("$.sections[0].content")
@@ -381,7 +396,7 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 				.value("Les projets sont des entités gérées côté backend avec statut de publication, mode de présentation, traductions localisées, technologies ordonnées et sections de détail structurées. Le frontend Angular consomme des DTOs de liste compacts et des DTOs de détail enrichis via des resolvers de route."))
 			.andExpect(jsonPath("$.sections[3].title").value("SSR, SEO et accessibilité"))
 			.andExpect(jsonPath("$.sections[3].content")
-				.value("Les routes localisées /fr et /en sont rendues à la requête. Le frontend applique des métadonnées localisées, des URL canoniques, des alternates hreflang et le noindex pour les pages de détail indisponibles, tout en conservant une navigation sémantique et des actions accessibles au clavier."))
+				.value("Les routes localisées /fr, /en et /hu sont rendues à la requête. Le frontend applique des métadonnées localisées, des URL canoniques, des alternates hreflang et le noindex pour les pages de détail indisponibles, tout en conservant une navigation sémantique et des actions accessibles au clavier."))
 			.andExpect(jsonPath("$.status").value("PUBLISHED"))
 			.andExpect(jsonPath("$.presentationMode").value("DETAIL"))
 			.andExpect(jsonPath("$.logoMediaRef").value(nullValue()))
@@ -404,7 +419,7 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 		this.mockMvc.perform(get("/api/v1/projects/portfolio-spring-angular").queryParam("locale", "en"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.shortDescription")
-				.value("Bilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."))
+				.value("Multilingual portfolio application built with Angular SSR, Spring Boot, PostgreSQL and Flyway to serve localized content and structured project case studies."))
 			.andExpect(jsonPath("$.detailedDescription").value(nullValue()))
 			.andExpect(jsonPath("$.sections[0].title").value("Context"))
 			.andExpect(jsonPath("$.sections[0].content")
@@ -417,13 +432,13 @@ class PublicProjectSeedDataApiTests extends AbstractPostgresSpringTest {
 				.value("Projects are backend-managed entities with publication status, presentation mode, localized translations, ordered technologies and structured detail sections. The Angular frontend consumes compact list DTOs and richer detail DTOs through route resolvers."))
 			.andExpect(jsonPath("$.sections[3].title").value("SSR, SEO and accessibility"))
 			.andExpect(jsonPath("$.sections[3].content")
-				.value("Localized /fr and /en routes are rendered at request time. The frontend applies localized metadata, canonical URLs, hreflang alternates and noindex handling for unavailable project detail pages while keeping semantic navigation and keyboard-accessible actions."));
+				.value("Localized /fr, /en and /hu routes are rendered at request time. The frontend applies localized metadata, canonical URLs, hreflang alternates and noindex handling for unavailable project detail pages while keeping semantic navigation and keyboard-accessible actions."));
 	}
 
 	@Test
 	void localizedDetailForSeededCardOnlyProjectsBehavesAsNotFound() throws Exception {
 		for (String slug : new String[] { "beamng-drive-beepbeep-3", "frequensisa", "summercamp", "bot-discord-ir" }) {
-			for (String locale : new String[] { "fr", "en" }) {
+			for (String locale : new String[] { "fr", "en", "hu" }) {
 				this.mockMvc.perform(get("/api/v1/projects/{slug}", slug).queryParam("locale", locale))
 					.andExpect(status().isNotFound())
 					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

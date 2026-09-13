@@ -15,13 +15,58 @@
         {{ content.home.hero.name }}
       </h1>
       <p class="home-page__orientation">{{ content.home.hero.orientation }}</p>
-      <p class="home-page__stack-line">{{ content.home.hero.stackLine }}</p>
-
+      <ul class="home-page__primary-stack" [attr.aria-label]="content.home.primaryStackHeading">
+        @for (technology of content.home.primaryStack; track technology) {
+          <li class="badge badge-lg home-page__stack-badge">{{ technology }}</li>
+        }
+      </ul>
       <div class="home-page__intro">
         @for (paragraph of content.home.introduction; track paragraph) {
           <p>{{ paragraph }}</p>
         }
       </div>
+      <p class="home-page__availability">{{ t('home.availability') }}</p>
+
+      <div class="home-page__actions flex flex-wrap gap-3">
+        <a class="btn btn-primary" [href]="cvPath" download>{{ t('home.cv') }}</a>
+        <a
+          class="btn btn-outline"
+          [href]="navigation.sectionHref(locale, 'contact')"
+          (click)="navigation.navigateToSection($event, locale, 'contact')"
+          >{{ t('nav.contact') }}</a
+        >
+        <a
+          class="btn btn-outline"
+          [href]="profile.sameAs[0]"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><app-brand-icon brand="github" />GitHub<span class="sr-only">
+            ({{ t('github.opensInNewTab') }})</span
+          ></a
+        >
+        <a
+          class="btn btn-outline"
+          [href]="profile.sameAs[1]"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><app-brand-icon brand="linkedin" />LinkedIn<span class="sr-only">
+            ({{ t('github.opensInNewTab') }})</span
+          ></a
+        >
+      </div>
+      <ul
+        class="home-page__languages flex flex-wrap gap-2"
+        [attr.aria-label]="content.home.languagesHeading"
+      >
+        @for (language of content.languages; track language.id) {
+          <li class="badge badge-outline h-auto py-2 whitespace-normal">
+            {{ language.name }} · {{ language.level }}
+            @if (language.certification) {
+              · {{ language.certification }}
+            }
+          </li>
+        }
+      </ul>
     </div>
 
     <div class="home-page__portrait-slot" data-portrait-slot>
@@ -62,176 +107,4 @@
       </div>
     </div>
   </header>
-
-  <section class="home-page__section" aria-labelledby="home-stack-title">
-    <h2 id="home-stack-title">{{ content.home.primaryStackHeading }}</h2>
-    <ul class="home-page__primary-stack" aria-labelledby="home-stack-title">
-      @for (technology of content.home.primaryStack; track technology) {
-        <li class="badge badge-lg home-page__stack-badge">{{ technology }}</li>
-      }
-    </ul>
-  </section>
-
-  <section class="home-page__section" aria-labelledby="home-skills-title">
-    <div class="home-page__section-heading">
-      <h2 id="home-skills-title">{{ content.home.skillsHeading }}</h2>
-      <p>{{ content.home.skillsIntroduction }}</p>
-    </div>
-
-    <div class="home-page__skill-groups">
-      @for (group of content.skills; track group.id) {
-        <article [class]="skillGroupClass(group)" [attr.data-skill-importance]="group.importance">
-          <div class="card-body home-page__skill-group-body">
-            <h3 class="card-title">{{ group.title }}</h3>
-            @if (group.summary) {
-              <p>{{ group.summary }}</p>
-            }
-
-            <div class="home-page__skill-domains">
-              @for (domain of group.domains; track domain.title; let domainIndex = $index) {
-                <section
-                  [class]="skillDomainClass(domain)"
-                  [attr.aria-labelledby]="group.id + '-domain-' + domainIndex"
-                >
-                  <h4 [id]="group.id + '-domain-' + domainIndex">{{ domain.title }}</h4>
-                  <ul>
-                    @for (technology of domain.technologies; track technology.name) {
-                      <li [class]="skillTechnologyClass(technology)">
-                        <span class="badge badge-outline home-page__skill-badge">
-                          {{ technology.name }}
-                        </span>
-                        @if (technology.note) {
-                          <small>{{ technology.note }}</small>
-                        }
-                      </li>
-                    }
-                  </ul>
-                </section>
-              }
-            </div>
-          </div>
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="home-page__section" aria-labelledby="home-languages-title">
-    <div class="home-page__section-heading">
-      <h2 id="home-languages-title">{{ content.home.languagesHeading }}</h2>
-      <p>{{ content.home.languagesIntroduction }}</p>
-    </div>
-
-    <ul class="home-page__languages" aria-labelledby="home-languages-title">
-      @for (language of content.languages; track language.id) {
-        <li class="card card-border home-page__language-card">
-          <span class="home-page__language-name">{{ language.name }}</span>
-          <span class="home-page__language-level">{{ language.level }}</span>
-          @if (language.certification) {
-            <span class="badge badge-outline home-page__language-certification">
-              {{ language.certification }}
-            </span>
-          }
-        </li>
-      }
-    </ul>
-  </section>
-
-  @if (githubActivity; as activity) {
-    <section
-      class="home-page__section home-page__github"
-      data-github-activity
-      aria-labelledby="home-github-title"
-    >
-      <div class="home-page__github-heading">
-        <div class="home-page__section-heading">
-          <h2 id="home-github-title">{{ t('github.heading') }}</h2>
-          <p>
-            {{
-              t(
-                activity.contributionCalendar
-                  ? 'github.introduction'
-                  : 'github.introductionRepositories'
-              )
-            }}
-          </p>
-        </div>
-        <div class="home-page__github-controls">
-          @if (activity.stale) {
-            <span class="badge badge-outline badge-sm home-page__github-stale">
-              {{ t('github.cached') }}
-            </span>
-          }
-          <a
-            class="btn btn-sm btn-ghost home-page__github-profile-link"
-            [href]="activity.profileUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            [attr.aria-label]="profileLinkAria()"
-          >
-            {{ t('github.profileLink') }}
-            <span class="home-page__github-external-mark" aria-hidden="true"></span>
-          </a>
-        </div>
-      </div>
-
-      @if (activity.contributionCalendar; as contributionCalendar) {
-        <app-github-contribution-calendar [calendar]="contributionCalendar" [locale]="locale" />
-      }
-
-      @if (activity.repositories.length > 0) {
-        <h3 class="home-page__github-repositories-title">{{ t('github.repositories') }}</h3>
-        <ul class="home-page__github-grid" [attr.aria-label]="t('github.repositories')">
-          @for (repository of activity.repositories; track repository.url) {
-            <li>
-              <article class="card card-border card-sm home-page__github-card">
-                <div class="card-body home-page__github-card-body">
-                  <h4 class="card-title home-page__github-repository-name">
-                    <a
-                      [href]="repository.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      [attr.aria-label]="repositoryLinkAria(repository)"
-                    >
-                      {{ repository.name }}
-                      <span class="home-page__github-external-mark" aria-hidden="true"></span>
-                    </a>
-                  </h4>
-
-                  @if (repository.description) {
-                    <p class="home-page__github-description">{{ repository.description }}</p>
-                  }
-
-                  <div class="home-page__github-metadata">
-                    <div class="home-page__github-details">
-                      @if (repository.primaryLanguage) {
-                        <span class="badge badge-outline badge-sm home-page__github-language">
-                          {{ repository.primaryLanguage }}
-                        </span>
-                      }
-                      @if (repository.stars > 0) {
-                        <span
-                          class="badge badge-ghost badge-sm home-page__github-stars"
-                          [attr.aria-label]="starsAria(repository.stars)"
-                        >
-                          <span aria-hidden="true">★</span>
-                          {{ repository.stars }}
-                        </span>
-                      }
-                    </div>
-
-                    <p class="home-page__github-date">
-                      {{ t('github.lastActivity') }}
-                      <time [attr.datetime]="repository.lastActivityAt">
-                        {{ formatActivityDate(repository.lastActivityAt) }}
-                      </time>
-                    </p>
-                  </div>
-                </div>
-              </article>
-            </li>
-          }
-        </ul>
-      }
-    </section>
-  }
 </section>

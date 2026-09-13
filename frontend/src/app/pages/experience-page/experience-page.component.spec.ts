@@ -148,15 +148,15 @@ describe('ExperiencePageComponent', () => {
     expect(groupeIes?.textContent).toContain('July 2023');
     expect(groupeIes?.textContent).toContain('August 2023');
     expect(groupeIes?.textContent).toContain('2 months');
-    expect(groupeIes?.textContent).toContain('ASP.NET Blazor');
+    expect(groupeIes?.textContent).toContain('ASP.NET Core Blazor');
     expect(groupeIes?.textContent).toContain('VB.NET');
     expect(groupeIes?.querySelector<HTMLImageElement>('.timeline-page__logo')?.src).toContain(
       '/assets/logos/logo_groupe_ies.jpeg',
     );
 
-    expect(lif?.textContent).toContain('approximately April 2022');
+    expect(lif?.textContent).toContain('April 2022');
     expect(lif?.textContent).toContain('July 2022');
-    expect(lif?.textContent).toContain('approximately 3 months');
+    expect(lif?.textContent).not.toContain('approximately');
     expect(lif?.textContent).toContain('BeamNG.drive');
     expect(lif?.textContent).toContain('BeepBeep 3');
     expect(technologyLabelsByEntry(page, 'lif-uqac-internship')).toContain('Sockets');
@@ -164,8 +164,8 @@ describe('ExperiencePageComponent', () => {
     expect(lif?.querySelector<HTMLImageElement>('.timeline-page__logo')?.src).toContain(
       '/assets/logos/logo_lif.png',
     );
-    expect(lif?.querySelector('a.timeline-page__identity-link')).toBeNull();
-    expect(lif?.querySelector('a.timeline-page__logo-link')).toBeNull();
+    expect(lif?.querySelector('a.timeline-page__identity-link')).not.toBeNull();
+    expect(lif?.querySelector('a.timeline-page__logo-link')).not.toBeNull();
   });
 
   it('renders localized French experience content with the same factual entries', async () => {
@@ -188,7 +188,7 @@ describe('ExperiencePageComponent', () => {
     ]);
     expect(page.textContent).toContain('Alternant Développeur Power Platform');
     expect(page.textContent).toContain('sans développement ABAP');
-    expect(page.textContent).toContain('environ 3 mois');
+    expect(page.textContent).not.toContain('environ 3 mois');
   });
 
   it('uses semantic time elements for confirmed experience periods', async () => {
@@ -252,6 +252,8 @@ describe('ExperiencePageComponent', () => {
       'https://plansee-group.com/en',
       'https://www.plansee.com/',
       'https://www.bureauveritas.fr/',
+      'https://www.caresofts.com/',
+      'https://liflab.github.io/beepbeep-3/index.html',
     ]);
     expect(links.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(links.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(true);
@@ -262,6 +264,8 @@ describe('ExperiencePageComponent', () => {
       'https://plansee-group.com/en',
       'https://www.plansee.com/',
       'https://www.bureauveritas.fr/',
+      'https://www.caresofts.com/',
+      'https://liflab.github.io/beepbeep-3/index.html',
     ]);
     expect(logoLinks.every((link) => link.getAttribute('target') === '_blank')).toBe(true);
     expect(logoLinks.every((link) => link.getAttribute('rel') === 'noopener noreferrer')).toBe(
@@ -273,6 +277,8 @@ describe('ExperiencePageComponent', () => {
       '/assets/logos/logo_plansee.png',
       '/assets/logos/logo_plansee.png',
       '/assets/logos/logo_bureau_veritas.svg',
+      '/assets/logos/logo_groupe_ies.jpeg',
+      '/assets/logos/logo_lif.png',
     ]);
     expect(
       Array.from(page.querySelectorAll<HTMLImageElement>('.timeline-page__logo')).every(
@@ -282,7 +288,7 @@ describe('ExperiencePageComponent', () => {
     expect(page.querySelectorAll('.timeline-page__meta .timeline-page__logo').length).toBe(5);
     expect(
       entryArticleById(page, 'groupe-ies')?.querySelector('a.timeline-page__identity-link'),
-    ).toBeNull();
+    ).not.toBeNull();
     expect(
       entryArticleById(page, 'groupe-ies')
         ?.querySelector<HTMLImageElement>('.timeline-page__meta img.timeline-page__logo')

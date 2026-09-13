@@ -1,3 +1,4 @@
+import { BrandIconComponent } from '../../shared/brand-icon/brand-icon.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -24,7 +25,7 @@ import { NotFoundPageComponent } from '../not-found-page/not-found-page.componen
 
 @Component({
   selector: 'app-project-detail-page',
-  imports: [RouterLink, NotFoundPageComponent],
+  imports: [BrandIconComponent, RouterLink, NotFoundPageComponent],
   templateUrl: './project-detail-page.component.html',
   styleUrl: './project-detail-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

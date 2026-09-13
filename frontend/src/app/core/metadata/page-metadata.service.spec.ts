@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { PageMetadataService, absoluteUrl, serializeJsonLd } from './page-metadata.service';
 
-const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v1.png';
+const socialCardUrl = 'https://bwetterwald.fr/assets/social/baptiste-wetterwald-social-card-v2.jpg';
 const managedSocialMetadataSelector =
   'meta[data-managed-by="page-metadata-service:social-sharing"]';
 
@@ -65,7 +65,10 @@ describe('PageMetadataService', () => {
           'Baptiste Wetterwald, ingénieur logiciel orienté backend et full-stack autour de Java, Spring, .NET, TypeScript, Node.js et Angular.',
         jobTitle: 'Ingénieur logiciel',
         image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
-        sameAs: ['https://github.com/BaptisteWetterwald'],
+        sameAs: [
+          'https://github.com/BaptisteWetterwald',
+          'https://www.linkedin.com/in/baptiste-wetterwald/',
+        ],
       },
     });
   });
@@ -102,7 +105,10 @@ describe('PageMetadataService', () => {
           'Baptiste Wetterwald, Software Engineer focused on backend and full-stack development with Java, Spring, .NET, TypeScript, Node.js, and Angular.',
         jobTitle: 'Software Engineer',
         image: 'https://bwetterwald.fr/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp',
-        sameAs: ['https://github.com/BaptisteWetterwald'],
+        sameAs: [
+          'https://github.com/BaptisteWetterwald',
+          'https://www.linkedin.com/in/baptiste-wetterwald/',
+        ],
       },
     });
   });
@@ -180,7 +186,7 @@ describe('PageMetadataService', () => {
 
     expect(
       document.querySelectorAll('link[data-managed-by="page-metadata-service:link"]').length,
-    ).toBe(4);
+    ).toBe(5);
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
       'https://bwetterwald.fr/en/projects',
     );
@@ -369,7 +375,7 @@ function expectSocialSharingMetadata(expected: {
     ['property', 'og:image:alt', expected.imageAlt],
     ['property', 'og:image:width', '1200'],
     ['property', 'og:image:height', '630'],
-    ['property', 'og:image:type', 'image/png'],
+    ['property', 'og:image:type', 'image/jpeg'],
     ['property', 'og:site_name', 'Baptiste Wetterwald'],
     ['name', 'twitter:card', 'summary_large_image'],
     ['name', 'twitter:title', expected.title],
