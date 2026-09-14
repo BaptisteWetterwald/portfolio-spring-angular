@@ -12,6 +12,7 @@ import {
   computed,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -55,6 +56,14 @@ export class SonarNavigationComponent {
   @ViewChild('sonarFrame') private sonarFrame?: ElementRef<HTMLElement>;
 
   readonly variant = input<SonarNavigationVariant>('primary');
+  readonly closed = output<void>();
+
+  openFromKeyboard(): void {
+    this.#escapeCollapsedWhileFocused.set(false);
+    this.#syncMobilePlacement();
+    this.#isFloatingPinned.set(true);
+    this.compactButton?.nativeElement.focus({ preventScroll: true });
+  }
 
   protected readonly navPages = staticPageIds;
   protected readonly locale = inject(LocaleContextService).locale;
@@ -139,6 +148,28 @@ export class SonarNavigationComponent {
     if (activeElement && this.sonarFrame?.nativeElement.contains(activeElement)) {
       this.compactButton?.nativeElement.focus({ preventScroll: true });
     }
+    this.closed.emit();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected handleOutsidePointerDown(event: PointerEvent): void {
+    if (
+      !this.isFloatingExpanded() ||
+      this.sonarFrame?.nativeElement.contains(event.target as Node)
+    ) {
+      return;
+    }
+
+    this.#isFloatingPinned.set(false);
+    this.#isFloatingFocused.set(false);
+    const activeElement = this.#documentActiveElement();
+    if (
+      activeElement instanceof HTMLElement &&
+      this.sonarFrame?.nativeElement.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
+    this.closed.emit();
   }
 
   protected sectionHref(pageId: StaticPageId): string {
@@ -211,10 +242,14 @@ export class SonarNavigationComponent {
       (event.currentTarget as HTMLElement | null)?.blur();
       this.#isFloatingFocused.set(false);
     }
+    if (!this.#isFloatingPinned()) {
+      this.closed.emit();
+    }
   }
 
   protected closeFloatingNavigation(): void {
     this.#isFloatingPinned.set(false);
+    this.closed.emit();
   }
 
   #documentActiveElement(): Element | null {
@@ -480,9 +515,9 @@ export class SonarNavigationComponent {
         fallbackEdge,
       ),
       safeTop: fallbackTop,
-      safeBottom: positiveRectInset(
-        sonarHostRect ? height - sonarHostRect.bottom : undefined,
+      safeBottom: Math.max(
         fallbackBottom,
+        cssPixelValue(sonarStyles.getPropertyValue('--sonar-mobile-safe-bottom'), 0),
       ),
       expandedSize,
       surfaceScale: surfaceScale || 0.22,

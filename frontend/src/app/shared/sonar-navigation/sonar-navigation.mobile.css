@@ -1,5 +1,8 @@
 @media (max-width: 640px) {
   .sonar-nav--floating {
+    --sonar-mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .sonar-nav--floating {
     position: fixed;
     top: var(--sonar-mobile-panel-top, calc(50dvh - var(--sonar-size) / 2));
     bottom: auto;

@@ -3,11 +3,16 @@
   data-github-contribution-calendar
 >
   <div class="card-body github-contribution-calendar__body">
-    <div class="github-contribution-calendar__summary">
-      <p class="github-contribution-calendar__total">{{ totalLabel() }}</p>
-      <p class="github-contribution-calendar__range">{{ rangeLabel() }}</p>
+    <div class="stats bg-transparent github-contribution-calendar__summary">
+      <div class="stat p-0">
+        <p class="stat-value text-lg whitespace-normal github-contribution-calendar__total">
+          {{ totalLabel() }}
+        </p>
+        <p class="stat-desc whitespace-normal github-contribution-calendar__range">
+          {{ rangeLabel() }}
+        </p>
+      </div>
     </div>
-
     <p class="github-contribution-calendar__scroll-hint">{{ scrollHint() }}</p>
 
     <div

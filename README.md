@@ -1,8 +1,10 @@
 # Baptiste Wetterwald Portfolio
 
-Bilingual portfolio for Baptiste Wetterwald, positioned as a Software Engineer focused on backend and full-stack work.
+I’m Baptiste Wetterwald, a software engineer focused on backend and full-stack development. I built this portfolio to share my experience, education and projects in French, English and Hungarian.
 
-The approved baseline uses the single-page architecture described below. The application, local container stack, CI image publication, and repository-side M15 deployment automation are implemented. The new portfolio has not yet been commissioned or verified on the production homelab, and the legacy portfolio remains live.
+**[Visit my portfolio](https://bwetterwald.fr)** · [GitHub](https://github.com/BaptisteWetterwald) · [LinkedIn](https://www.linkedin.com/in/baptiste-wetterwald/)
+
+I run the site on my Fedora homelab using Angular SSR, Spring Boot and PostgreSQL. Production has been commissioned; the deployment of revision `fd1ad0861fea38c1b20d9bccc7aba5f652d82215` and its public routes were verified on 14 September 2026. GitHub Actions validates changes and publishes images; I deploy immutable revisions through the existing homelab deployment script.
 
 ## Current Architecture
 
@@ -12,23 +14,25 @@ backend/   Spring Boot public project API
 docs/      Product, architecture, content, and operations documentation
 ```
 
-- `/fr` and `/en` are the two canonical localized portfolio documents.
-- Home, Education, Experience, Projects, and Contact are composed into each document at `#home`, `#education`, `#experience`, `#projects`, and `#contact`.
+- `/fr`, `/en` and `/hu` are the canonical localized portfolio documents.
+- Each document follows this order: introduction → professional experience → education → projects → GitHub activity → contact. Navigation targets remain `#home`, `#experience`, `#education`, `#projects` and `#contact`.
 - Former localized section routes such as `/fr/formation` and `/en/projects` redirect to the matching fragment.
-- Public `DETAIL` projects keep dedicated localized routes at `/fr/projets/:slug` and `/en/projects/:slug`.
+- Public `DETAIL` projects keep dedicated localized routes at `/fr/projets/:slug`, `/en/projects/:slug` and `/hu/projektek/:slug`.
 - Public `CARD_ONLY` projects appear in the Projects section but have no public detail route.
 - Profile, skills, languages, education, and experience are typed, version-controlled frontend content. Projects are Spring Boot/PostgreSQL-owned content seeded through Flyway migrations.
 - Angular renders all public routes at request time. Project resolvers load API data before SSR completes.
-- Home renders a compact server-enriched GitHub activity block after Skills/Languages. Anonymous REST data supplies recent repositories; an optional backend token enables the contribution calendar. It is not a primary section or navigation target.
+- A server-enriched GitHub activity block follows Projects, with repository cards before the contribution calendar. Anonymous REST data supplies recent repositories; an optional backend token enables the contribution calendar. It is not a primary section or navigation target.
 - Contact is a localized typed reactive form in the existing `#contact` section. It posts to a backend-only delivery boundary; recipient, sender, SMTP credentials, and provider details never enter the Angular bundle or public response.
 
 ## Navigation and Visual Identity
 
-The header and footer provide conventional section links. On wide viewports, a compact floating sonar takes over contextual navigation after the header scrolls away; the handoff observes header visibility with hysteresis. On mobile, the sonar remains available as a draggable bubble that snaps to viewport edges and opens its panel inward within the viewport.
+The header and footer provide conventional section links. On wide viewports, a compact floating sonar takes over contextual navigation after the header scrolls away; the handoff observes header visibility with hysteresis. On mobile, the sonar remains available as a draggable bubble that snaps to viewport edges and opens its panel inward within the viewport. It can be dragged to the bottom of the screen, closes when I click outside it, and supports Escape. On a keyboard, two standalone taps on **Ctrl** within 450 ms open it, including while the header is visible. The shortcut ignores text fields and combinations such as Ctrl+C; the footer shows a daisyUI Kbd hint.
 
 A single persistent floating lighthouse controls the light/dark theme independently of the header/sonar handoff. Dark mode enables its native-CSS rotating beam. Reduced-motion preferences remove smooth or looping motion while preserving static state and navigation.
 
-The restrained maritime design uses dark navy and off-white surfaces, cyan navigation accents, signal red waypoints, a porthole portrait, route-style timelines, sonar feedback, anchor section permalinks, and daisyUI dividers between major sections. Decorative Home waves are not part of the current design.
+I chose a restrained maritime design with dark navy and off-white surfaces, cyan navigation accents, signal red waypoints, a porthole portrait, route-style timelines, sonar feedback, anchor section permalinks, and daisyUI dividers between major sections. A slow dual aura highlights the porthole; it stays static with reduced motion. The calendar uses a compact daisyUI Stat summary, contact feedback uses Alert, and the footer repeats my GitHub, LinkedIn and contact links.
+
+I keep important text and form labels visible. I have left rotating text, a recruitment countdown and 3D cards out of this iteration: the current content does not need them. Galleries, Diff and browser/phone mockups would be useful once I have project screenshots that demonstrate a product or a before/after change. The porthole and existing section dividers already serve their purpose.
 
 ## Stack
 
@@ -182,7 +186,7 @@ docker compose down
 | `backend`  | Eclipse Temurin Java 21 JRE | `127.0.0.1:8080` | Applies Flyway migrations and validates the schema.                    |
 | `frontend` | Node.js 24.19.0 Angular SSR | `127.0.0.1:4000` | Uses `BACKEND_INTERNAL_ORIGIN=http://backend:8080` and proxies `/api`. |
 
-These containers and their local Compose wiring are implemented. Production uses the separate `deploy/compose.prod.yaml`; it must not inherit these local defaults. Repository-side Nginx/HTTPS and SHA rollout artifacts exist, but no live deployment has been performed. Backups, restore drills, monitoring, and broader hardening remain M16.
+These containers and their local Compose wiring are implemented. Production uses the separate `deploy/compose.prod.yaml`; it must not inherit these local defaults. Production is commissioned and uses the existing Nginx/Cloudflare routing and immutable-SHA rollout tooling. Backups, restore drills, monitoring, and broader hardening remain M16.
 
 ## Continuous Integration
 
@@ -205,19 +209,29 @@ The workflow defaults to `contents: read`. Only the trusted `main` publication j
 
 ## Production Deployment
 
-Production targets the audited Fedora homelab. Cloudflare owns public DNS, HTTP-to-HTTPS behavior, and TLS; the existing Cloudflare Tunnel reaches host Nginx on `127.0.0.1:8008`. Nginx preserves `/wakommute/api/` and, after cutover, proxies portfolio traffic to the loopback-only Angular SSR container on `4000`. The SSR server remains the sole `/api` proxy to the private Spring backend, and PostgreSQL is reachable only on a private Docker network. See [Deployment architecture](docs/deployment-architecture.md) for the host audit, trust boundary, backup requirement, phased rollout, and rollback procedure.
+Production targets the audited Fedora homelab. Cloudflare owns public DNS, HTTP-to-HTTPS behavior, and TLS; the existing Cloudflare Tunnel reaches host Nginx on `127.0.0.1:8008`. Nginx preserves `/wakommute/api/` and proxies portfolio traffic to the loopback-only Angular SSR container on `4000`. The SSR server remains the sole `/api` proxy to the private Spring backend, and PostgreSQL is reachable only on a private Docker network. See [Deployment architecture](docs/deployment-architecture.md) for the host audit, trust boundary, backup requirement, phased rollout, and rollback procedure.
 
 Repository artifacts:
 
 ```text
 deploy/compose.prod.yaml                 GHCR SHA images and private service topology
 deploy/.env.production.example          safe production variable names/placeholders
-deploy/deploy.sh                         stage/local-verify/public-finalize operations
-deploy/backup-legacy.sh                  unexecuted legacy safety-backup command
+deploy/deploy.sh                         stage, finalize and post-commissioning deploy operations
+deploy/backup-legacy.sh                  legacy safety-backup command for commissioning
 deploy/nginx/bwetterwald.fr.conf.example Cloudflare-Tunnel origin/cutover candidate
 ```
 
-The first deployment uses `stage <sha>` while the legacy Java portfolio remains live on `8080`. Staging pulls exact images, waits for PostgreSQL and Flyway/backend health, starts frontend on loopback `4000`, and verifies localized SSR, API health, and a representative project without checking the public domain. After a separately approved Nginx cutover, `finalize <sha>` performs local and public checks before recording the SHA as deployed. Running the same process with a prior SHA is an application rollback only when that image is compatible with the current database schema; Flyway changes are not automatically reversed.
+For an already commissioned host, I first verify both GHCR image manifests, then run:
+
+```bash
+ssh homelab
+cd /srv/services/portfolio-spring-angular/deploy
+./deploy.sh deploy <full-git-sha>
+```
+
+I verify `current-sha`, container health, the three public languages, representative project pages, `/api/health`, GitHub activity/calendar, Nginx and Cloudflared. This normal rollout does not change Nginx, Cloudflare, secrets or the legacy portfolio. A deployment failure must be reported before any unrelated production change.
+
+For a new host only, the first deployment uses `stage <sha>` while the legacy Java portfolio remains live on `8080`. Staging pulls exact images, waits for PostgreSQL and Flyway/backend health, starts frontend on loopback `4000`, and verifies localized SSR, API health, and a representative project without checking the public domain. After a separately approved Nginx cutover, `finalize <sha>` performs local and public checks before recording the SHA as deployed. Running the same process with a prior SHA is an application rollback only when that image is compatible with the current database schema; Flyway changes are not automatically reversed.
 
 Before cutover, `backup-legacy.sh` must preserve `/srv/services/portfolio`, its Git/JAR/log state, the systemd unit, and the current Nginx file below `/opt/portfolio-backups`. The Cloudflare token is explicitly excluded. The current GHCR packages require authenticated pulls, so commissioning needs a package-read-only Docker credential. Production database, Contact, SMTP, optional GitHub, registry, Tunnel, and SSH secrets remain outside Git and chat. No remote operation or automation enablement is implied by these files.
 

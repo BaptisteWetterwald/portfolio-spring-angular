@@ -7,7 +7,7 @@
     (focusin)="handleSonarFocusIn()"
     (focusout)="handleSonarFocusOut($event)"
   >
-    <app-sonar-navigation variant="floating" />
+    <app-sonar-navigation variant="floating" (closed)="handleSonarClosed()" />
   </div>
 
   <div class="maritime-floating-controls__lighthouse">

@@ -6,6 +6,8 @@ import {
   TransferState,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { portfolioPublicProfile } from '../../core/content/portfolio-content';
+import { BrandIconComponent } from '../brand-icon/brand-icon.component';
 
 import { LocaleContextService } from '../../core/i18n/locale-context.service';
 import { TranslationService } from '../../core/i18n/translation.service';
@@ -16,12 +18,13 @@ export const siteFooterYearStateKey = makeStateKey<number>('site-footer-current-
 
 @Component({
   selector: 'app-site-footer',
-  imports: [RouterLink],
+  imports: [RouterLink, BrandIconComponent],
   templateUrl: './site-footer.component.html',
   styleUrl: './site-footer.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SiteFooterComponent {
+  protected readonly profile = portfolioPublicProfile;
   protected readonly navPages = staticPageIds;
   protected readonly currentYear = resolveCurrentYear(inject(TransferState));
   protected readonly locale = inject(LocaleContextService).locale;
