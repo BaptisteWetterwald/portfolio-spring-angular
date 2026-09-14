@@ -7,6 +7,45 @@
       <p class="site-footer__copyright">
         &copy; {{ currentYear }} {{ t('site.name') }}. {{ t('footer.copyright') }}
       </p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a
+          class="btn btn-ghost btn-sm"
+          [href]="profile.sameAs[0]"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><app-brand-icon brand="github" />GitHub<span class="sr-only">
+            ({{ t('github.opensInNewTab') }})</span
+          ></a
+        >
+        <a
+          class="btn btn-ghost btn-sm"
+          [href]="profile.sameAs[1]"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><app-brand-icon brand="linkedin" />LinkedIn<span class="sr-only">
+            ({{ t('github.opensInNewTab') }})</span
+          ></a
+        >
+        <a
+          class="btn btn-ghost btn-sm"
+          [href]="sectionHref('contact')"
+          (click)="navigateToSection($event, 'contact')"
+          ><svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            aria-hidden="true"
+          >
+            <path d="m21 3-7 18-4-7-7-4 18-7ZM10 14 21 3" /></svg
+          >{{ t('nav.contact') }}</a
+        >
+      </div>
+      <p class="site-footer__shortcut mt-3 text-sm">
+        {{ t('nav.sonarShortcut') }} <kbd class="kbd kbd-sm">Ctrl</kbd> × 2 ·
+        <kbd class="kbd kbd-sm">Esc</kbd> {{ t('nav.shortcutClose') }}
+      </p>
     </div>
 
     <nav class="site-footer__nav" [attr.aria-label]="t('nav.footer')">

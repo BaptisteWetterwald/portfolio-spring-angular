@@ -1,18 +1,15 @@
 # Deployment Architecture
 
-This document defines M15 against the audited production host `home-server-baptiste`. Repository artifacts are implemented, but no backup, homelab mutation, public cutover, or live deployment has occurred.
+This document describes the production host `home-server-baptiste` and its deployment tooling. The host is commissioned. A normal deployment of `fd1ad0861fea38c1b20d9bccc7aba5f652d82215` was publicly verified on 14 September 2026.
 
 ## Status
 
-| Capability                                           | Repository status                | Homelab status                     |
-| ---------------------------------------------------- | -------------------------------- | ---------------------------------- |
-| GHCR immutable-SHA images                            | Implemented and published by M14 | Not pulled for this portfolio      |
-| Homelab production Compose                           | Implemented                      | Not installed or started           |
-| Cloudflare/Nginx candidate configuration             | Implemented                      | Not installed                      |
-| Staging, local verification, and public finalization | Implemented                      | Not executed                       |
-| Legacy backup contract                               | Implemented                      | Backup not created                 |
-| CI-to-homelab deployment                             | Implemented, disabled by default | Dedicated identity not provisioned |
-| Backups policy, monitoring, and broader hardening    | M16                              | Not implemented                    |
+- Immutable frontend/backend GHCR images and production Compose are installed and in use.
+- Existing Nginx and Cloudflare Tunnel routing serve the public portfolio; both services were verified active.
+- `deploy.sh deploy <sha>` stages, health-checks and finalizes normal post-commissioning releases. Initial commissioning instructions below remain applicable to a new host only.
+- CI publishes validated images. CI-triggered SSH deployment remains disabled; normal rollouts can use `ssh homelab` and the installed tooling.
+- The legacy portfolio is retained and is outside routine rollout scope. Its backup was not re-audited during the post-commissioning deployment.
+- Scheduled backups, restore drills, monitoring and broader hardening remain separate M16 work.
 
 ## Audited Production Host
 
@@ -147,7 +144,7 @@ Run this only after a separately approved Nginx cutover. It requires the same lo
 
 ### `deploy <sha>`
 
-This runs `stage` followed by `finalize`. It exists only for future automation after the first manual backup, staging, Nginx cutover, and public verification have succeeded. It must not be used for initial commissioning.
+This runs `stage` followed by `finalize`. Use it for normal releases on the commissioned host after verifying both target GHCR images exist. It must not be used for initial commissioning.
 
 State is stored below `/var/lib/portfolio-spring-angular-deployment`. Container labels show the actual running SHA; `candidate-sha` shows the locally verified candidate; `current-sha` shows the last publicly verified SHA.
 

@@ -9,6 +9,39 @@ import { ProjectApiService } from '../../core/projects/project-api.service';
 import { themeCookieName, themeStorageKey } from '../../core/theme/theme-preference.service';
 
 describe('SonarNavigationComponent integration', () => {
+  it('closes a pinned sonar on an outside pointer press without navigating', async () => {
+    const harness = await createHarness('/en');
+    const button = floatingSonarNav(harness)?.querySelector('button');
+    button?.click();
+    await settleHarness(harness);
+    expect(button?.getAttribute('aria-expanded')).toBe('true');
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    await settleHarness(harness);
+    expect(button?.getAttribute('aria-expanded')).toBe('false');
+    expect(TestBed.inject(Router).url).toBe('/en');
+  });
+
+  it('opens with two standalone Control taps, ignores Ctrl combinations, and closes with Escape', async () => {
+    const harness = await createHarness('/en');
+    const button = floatingSonarNav(harness)?.querySelector('button');
+    const key = (type: string, key: string) =>
+      document.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true }));
+    key('keydown', 'Control');
+    key('keydown', 'c');
+    key('keyup', 'c');
+    key('keyup', 'Control');
+    key('keydown', 'Control');
+    key('keyup', 'Control');
+    await settleHarness(harness);
+    expect(button?.getAttribute('aria-expanded')).toBe('false');
+    key('keydown', 'Control');
+    key('keyup', 'Control');
+    await settleHarness(harness);
+    expect(button?.getAttribute('aria-expanded')).toBe('true');
+    key('keydown', 'Escape');
+    await settleHarness(harness);
+    expect(button?.getAttribute('aria-expanded')).toBe('false');
+  });
   const originalMatchMedia = globalThis.matchMedia;
 
   afterEach(() => {

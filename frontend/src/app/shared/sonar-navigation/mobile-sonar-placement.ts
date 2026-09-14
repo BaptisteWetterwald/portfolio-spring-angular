@@ -217,7 +217,9 @@ function transformOriginForBubble(
   const centerCoordinate = expandedSize / 2;
   const unscaledOrigin = (bubbleCoordinate - surfaceScale * centerCoordinate) / (1 - surfaceScale);
 
-  return clamp(unscaledOrigin, 0, expandedSize);
+  // The panel can move away from the lighthouse while the bubble follows the pointer.
+  // CSS accepts an origin outside the panel, preserving that exact collapsed position.
+  return unscaledOrigin;
 }
 
 function inflateRect(rect: MobileSonarRect, amount: number): MobileSonarRect {

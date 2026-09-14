@@ -69,41 +69,43 @@
       </ul>
     </div>
 
-    <div class="home-page__portrait-slot" data-portrait-slot>
-      <div class="home-page__portrait-photo-frame">
-        <picture>
-          <source
-            type="image/avif"
-            srcset="
-              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.avif 240w,
-              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.avif 480w
-            "
-            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
-          />
-          <source
-            type="image/webp"
-            srcset="
-              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
-              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
-            "
-            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
-          />
-          <img
-            class="home-page__portrait"
-            src="/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp"
-            srcset="
-              /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
-              /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
-            "
-            sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
-            width="480"
-            height="720"
-            [alt]="content.home.hero.portraitAlt"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-        </picture>
+    <div class="aura aura-dual aura-sm text-primary duration-[18000ms] home-page__portrait-aura">
+      <div class="home-page__portrait-slot" data-portrait-slot>
+        <div class="home-page__portrait-photo-frame">
+          <picture>
+            <source
+              type="image/avif"
+              srcset="
+                /assets/portrait/baptiste-wetterwald-portrait-v1-240w.avif 240w,
+                /assets/portrait/baptiste-wetterwald-portrait-v1-480w.avif 480w
+              "
+              sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+            />
+            <source
+              type="image/webp"
+              srcset="
+                /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
+                /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
+              "
+              sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+            />
+            <img
+              class="home-page__portrait"
+              src="/assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp"
+              srcset="
+                /assets/portrait/baptiste-wetterwald-portrait-v1-240w.webp 240w,
+                /assets/portrait/baptiste-wetterwald-portrait-v1-480w.webp 480w
+              "
+              sizes="(max-width: 360px) 88px, (max-width: 640px) 108px, 203px"
+              width="480"
+              height="720"
+              [alt]="content.home.hero.portraitAlt"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
+        </div>
       </div>
     </div>
   </header>

@@ -4,6 +4,8 @@ import { SupportedLocale } from './locales';
 const englishTranslations = {
   'home.availability': 'Luxembourg or Budapest · Available from December 2026',
   'home.cv': 'Download CV (English)',
+  'nav.sonarShortcut': 'Open sonar: press',
+  'nav.shortcutClose': 'to close',
   'site.name': 'Baptiste Wetterwald',
   'nav.primary': 'Primary navigation',
   'nav.visual': 'Sonar navigation',
@@ -145,6 +147,8 @@ export const translations: Record<SupportedLocale, Record<TranslationKey, string
   fr: {
     'home.availability': 'Luxembourg ou Budapest · Disponible à partir de décembre 2026',
     'home.cv': 'Télécharger le CV',
+    'nav.sonarShortcut': 'Ouvrir le sonar : appuyez sur',
+    'nav.shortcutClose': 'pour fermer',
     'site.name': 'Baptiste Wetterwald',
     'nav.primary': 'Navigation principale',
     'nav.visual': 'Navigation compas',

@@ -13,6 +13,22 @@ import {
 } from './mobile-sonar-placement';
 
 describe('mobile sonar placement', () => {
+  it('preserves the actual bubble position even when the panel avoids the lighthouse', () => {
+    const bounds = {
+      ...bounds390,
+      lighthouseSafeZone: { left: 336, right: 378, top: 401, bottom: 443 },
+    };
+    for (const y of [350, 422, 480, 760, 999]) {
+      const bubble = clampMobileSonarBubble({ x: 350, y }, 'right', bounds);
+      const placement = mobileSonarPlacementForBubble(bubble, bounds);
+      const renderedY =
+        placement.panelTop +
+        placement.transformOriginY * (1 - bounds.surfaceScale) +
+        (bounds.expandedSize / 2) * bounds.surfaceScale;
+      expect(renderedY).toBeCloseTo(bubble.y);
+      expectPanelInside(placement, bounds);
+    }
+  });
   it('keeps the expanded right-docked panel clear of a vertically centered lighthouse', () => {
     const bounds = {
       ...bounds390,

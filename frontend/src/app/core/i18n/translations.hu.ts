@@ -2,6 +2,8 @@ import type { TranslationKey } from './translations';
 
 export const hungarianTranslations: Record<TranslationKey, string> = {
   'home.availability': 'Luxemburg vagy Budapest · Munkakezdés 2026 decemberétől',
+  'nav.sonarShortcut': 'Szonár megnyitása:',
+  'nav.shortcutClose': 'bezárás',
   'home.cv': 'Önéletrajz letöltése (angol)',
   'site.name': 'Baptiste Wetterwald',
   'nav.primary': 'Fő navigáció',

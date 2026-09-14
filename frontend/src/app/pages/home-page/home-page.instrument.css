@@ -1,3 +1,9 @@
+.home-page__portrait-aura {
+  --aura-radius: 9999px;
+  width: clamp(218px, 24vw, 276px);
+  justify-self: end;
+}
+
 .home-page__portrait-slot {
   --portrait-ring-size: 20px;
   --portrait-ring-color: color-mix(in srgb, var(--color-neutral) 84%, #020617);
@@ -10,10 +16,10 @@
 
   position: relative;
   display: grid;
-  width: clamp(218px, 24vw, 276px);
+  width: 100%;
   aspect-ratio: 1;
   padding: var(--portrait-ring-size);
-  justify-self: end;
+
   border: 1px solid var(--portrait-cyan-line);
   border-radius: var(--radius-round);
   background:
@@ -61,7 +67,8 @@
 @media (max-width: 640px) {
   .home-page__portrait-slot {
     --portrait-ring-size: 10px;
-
+  }
+  .home-page__portrait-aura {
     grid-area: portrait;
     width: clamp(128px, 35vw, 145px);
     align-self: center;
@@ -73,9 +80,18 @@
 @media (max-width: 360px) {
   .home-page__portrait-slot {
     --portrait-ring-size: 9px;
-
+  }
+  .home-page__portrait-aura {
     width: clamp(108px, 34vw, 120px);
     justify-self: center;
     translate: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page__portrait-aura,
+  .home-page__portrait-aura::before,
+  .home-page__portrait-aura::after {
+    animation: none;
   }
 }

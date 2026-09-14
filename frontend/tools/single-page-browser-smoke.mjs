@@ -712,7 +712,40 @@ async function verifyMobile(client, width, height, navigateAllSections) {
   const buttonSelector = '.maritime-floating-controls .sonar-nav__compact-button';
   const initialButton = await rect(client, buttonSelector);
 
-  await drag(client, center(initialButton), [width - 34, Math.round(height * 0.5)]);
+  await drag(client, center(initialButton), [34, height - 45]);
+  await delay(450);
+  const bottomButton = await rect(client, buttonSelector);
+  assert(center(bottomButton)[1] > height - 100, 'mobile sonar could not reach the bottom');
+  await clickElement(client, buttonSelector);
+  await waitFor(
+    client,
+    `document.querySelector('${buttonSelector}').getAttribute('aria-expanded') === 'true'`,
+  );
+  await assertExpandedSonarSafe(client, width, height);
+  const previousHash = await value(client, 'location.hash');
+  for (const type of ['mousePressed', 'mouseReleased']) {
+    await client.send('Input.dispatchMouseEvent', {
+      type,
+      x: width / 2,
+      y: 10,
+      button: 'left',
+      clickCount: 1,
+    });
+  }
+  await waitFor(
+    client,
+    `document.querySelector('${buttonSelector}').getAttribute('aria-expanded') === 'false'`,
+  );
+  assert(
+    (await value(client, 'location.hash')) === previousHash,
+    'outside dismissal navigated to a section',
+  );
+  await delay(450);
+
+  await drag(client, center(await rect(client, buttonSelector)), [
+    width - 34,
+    Math.round(height * 0.5),
+  ]);
   await waitFor(
     client,
     `document.querySelector('.maritime-floating-controls .sonar-nav').dataset.sonarMobileDock === 'right'`,
@@ -783,7 +816,12 @@ async function assertContactPresentation(client, width, height, locale) {
   );
   await evaluate(
     client,
-    `document.querySelector('#contact button[type="submit"]').scrollIntoView({ behavior: 'instant', block: 'center' })`,
+    `(() => {
+      const button = document.querySelector('#contact button[type="submit"]');
+      button.scrollIntoView({ behavior: 'instant', block: 'end' });
+      // Both floating controls are intentionally centered; keep the submit action below them.
+      window.scrollBy({ top: button.getBoundingClientRect().top - innerHeight * 0.72, behavior: 'instant' });
+    })()`,
   );
   await delay(80);
 
