@@ -143,6 +143,7 @@ export interface EducationEntryFact {
 }
 
 export interface ExperienceEntryFact {
+  readonly recommendationUrl?: string;
   readonly id: ExperienceEntryId;
   readonly organization: string | Partial<Record<SupportedLocale, string>>;
   readonly location?: string;
@@ -211,6 +212,11 @@ export interface EducationEntry {
 }
 
 export interface ExperienceEntry {
+  readonly recommendation?: {
+    readonly href: string;
+    readonly label: string;
+    readonly summary: string;
+  };
   readonly id: ExperienceEntryId;
   readonly organization: string;
   readonly location?: string;

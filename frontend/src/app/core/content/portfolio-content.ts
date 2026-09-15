@@ -53,6 +53,7 @@ interface LocalizedEducationCopy {
 }
 
 interface LocalizedExperienceCopy {
+  readonly recommendation?: { readonly label: string; readonly summary: string };
   readonly role: string;
   readonly context?: string;
   readonly responsibilities?: readonly string[];
@@ -209,6 +210,7 @@ export const experienceEntryFacts: readonly ExperienceEntryFact[] = [
   },
   {
     id: 'bureau-veritas-laboratories',
+    recommendationUrl: '/assets/recommendations/bureau-veritas-baptiste-wetterwald-fr.pdf',
     organization: {
       en: 'Bureau Veritas Laboratories',
       fr: 'Bureau Veritas Laboratoires',
@@ -632,6 +634,11 @@ const experienceCopy: Record<
       ],
     },
     'bureau-veritas-laboratories': {
+      recommendation: {
+        label: 'Ajánlólevél (PDF, francia)',
+        summary:
+          'A mulhouse-i laboratórium vezetője az önálló munkavégzésemet, az alkalmazás éles üzembe állítását és a csapat kedvező visszajelzéseit emeli ki.',
+      },
       role: 'Power Platform-fejlesztő duális képzésben',
       periodLabels: {
         start: '2023. szeptember',
@@ -695,6 +702,11 @@ const experienceCopy: Record<
       ],
     },
     'bureau-veritas-laboratories': {
+      recommendation: {
+        label: 'Recommendation letter (PDF, French)',
+        summary:
+          "The head of the Mulhouse laboratory highlights my autonomy, delivery of the application to production and the team's positive feedback.",
+      },
       role: 'Power Platform Developer Apprentice',
       periodLabels: { start: 'September 2023', end: '30 September 2025' },
       context:
@@ -749,6 +761,11 @@ const experienceCopy: Record<
       ],
     },
     'bureau-veritas-laboratories': {
+      recommendation: {
+        label: 'Lettre de recommandation (PDF, français)',
+        summary:
+          'Le responsable du laboratoire de Mulhouse souligne mon autonomie, la livraison de l’application en production et les retours positifs de l’équipe.',
+      },
       role: 'Alternant Développeur Power Platform',
       periodLabels: { start: 'Septembre 2023', end: '30 septembre 2025' },
       context:
@@ -1252,6 +1269,10 @@ function experienceEntriesFor(locale: SupportedLocale): readonly ExperienceEntry
       duration: fact.duration?.[locale],
       context: copy.context,
       responsibilities: copy.responsibilities,
+      recommendation:
+        fact.recommendationUrl && copy.recommendation
+          ? { href: fact.recommendationUrl, ...copy.recommendation }
+          : undefined,
       technologies: fact.technologies,
       officialWebsiteUrl: fact.affiliation?.officialWebsiteUrl,
       logo: fact.affiliation?.logo,
