@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Allow: /api/v1/projects$
+Allow: /api/v1/projects?
+Allow: /api/v1/projects/
+Allow: /api/v1/github/activity$
+Allow: /api/v1/github/activity?
 
 Sitemap: https://bwetterwald.fr/sitemap.xml

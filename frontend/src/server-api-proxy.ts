@@ -42,12 +42,23 @@ export async function proxyBackendApiRequest(
   }
 
   try {
-    return await fetchBackend(createBackendRequestUrl(backendOrigin, request.originalUrl), {
-      method: request.method,
-      headers: toProxyHeaders(request.headers, request.protocol),
-      body: request.hasBody ? request.body : undefined,
-      duplex: request.hasBody ? 'half' : undefined,
-      redirect: 'manual',
+    const response = await fetchBackend(
+      createBackendRequestUrl(backendOrigin, request.originalUrl),
+      {
+        method: request.method,
+        headers: toProxyHeaders(request.headers, request.protocol),
+        body: request.hasBody ? request.body : undefined,
+        duplex: request.hasBody ? 'half' : undefined,
+        redirect: 'manual',
+      },
+    );
+    // Public JSON must be crawlable for page rendering, but is not a search document.
+    const headers = new Headers(response.headers);
+    headers.set('x-robots-tag', 'noindex');
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
     });
   } catch {
     return backendUnavailableResponse(502);
@@ -149,6 +160,7 @@ function backendUnavailableResponse(status: 502 | 503): Response {
     status,
     headers: {
       'cache-control': 'no-store',
+      'x-robots-tag': 'noindex',
     },
   });
 }

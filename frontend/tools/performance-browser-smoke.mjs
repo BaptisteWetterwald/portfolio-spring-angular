@@ -15,6 +15,18 @@ const backend = createServer((request, response) => {
 
   const url = new URL(request.url ?? '/', 'http://backend.test');
 
+  if (url.pathname === '/api/v1/projects/portfolio-spring-angular') {
+    response.end(
+      JSON.stringify({
+        ...project(url.searchParams.get('locale')),
+        detailedDescription: null,
+        sections: [{ title: 'Crawl fixture', content: 'Public project detail content.' }],
+        availableLocales: ['en', 'fr', 'hu'],
+      }),
+    );
+    return;
+  }
+
   if (url.pathname === '/api/v1/github/activity') {
     backendCounts.github += 1;
     response.end(JSON.stringify(githubActivity()));
@@ -62,6 +74,7 @@ async function runPerformanceSmoke() {
   try {
     await waitForHttp(`${frontendOrigin}/robots.txt`);
     console.log('Performance smoke SSR server ready');
+    await verifyCrawlPolicy(frontendOrigin);
     await verifyTransferredSsrState(frontendOrigin, internalOrigin);
     console.log('Performance smoke transfer state verified');
     resetBackendCounts();
@@ -248,6 +261,43 @@ async function verifyHydrationAndPortraitSelection(origin) {
       'post-stability browser requests did not reach the backend exactly once',
     );
 
+    browserRequests.length = 0;
+    await cdp.send('Page.navigate', { url: `${origin}/hu/projektek/portfolio-spring-angular` });
+    await waitFor(
+      cdp,
+      `document.readyState === 'complete' && document.querySelector('#project-title') !== null`,
+    );
+    await delay(1000);
+    assert(
+      await value(cdp, `document.querySelector('meta[name="robots"]')?.content === 'index,follow'`),
+      'Hungarian project hydration replaced indexable content with an error',
+    );
+    assert(
+      !browserRequests.some((url) => url.includes('/api/v1/projects/')),
+      'Hungarian project hydration duplicated its transferred detail request',
+    );
+    // Once stable, changing locale needs an API read: crawlers must be allowed to do it.
+    await evaluate(cdp, `document.querySelector('.locale-switcher__link[lang="fr"]').click()`);
+    await waitFor(
+      cdp,
+      `location.pathname === '/fr/projets/portfolio-spring-angular' && document.documentElement.lang === 'fr'`,
+    );
+    await delay(500);
+    assert(
+      await value(
+        cdp,
+        `document.querySelector('meta[name="robots"]')?.content === 'index,follow' && document.querySelector('#project-title') !== null`,
+      ),
+      'project locale navigation lost indexable content',
+    );
+    assert(
+      browserRequests.some((url) =>
+        url.includes('/api/v1/projects/portfolio-spring-angular?locale=fr'),
+      ),
+      'project locale navigation did not exercise the crawlable API',
+    );
+    console.log('Project detail hydration and post-stability locale navigation verified');
+
     console.log(
       JSON.stringify(
         {
@@ -281,6 +331,44 @@ function githubActivity() {
     lastRefreshedAt: '2026-09-12T00:00:00Z',
     stale: false,
   };
+}
+
+async function verifyCrawlPolicy(origin) {
+  const robots = await (await fetch(`${origin}/robots.txt`)).text();
+  const rules = [...robots.matchAll(/^(Allow|Disallow):\s*(\S+)/gm)].map(([, type, path]) => ({
+    type,
+    path,
+  }));
+  function allowed(path) {
+    const matches = rules.filter((rule) =>
+      rule.path.endsWith('$') ? path === rule.path.slice(0, -1) : path.startsWith(rule.path),
+    );
+    matches.sort((a, b) => b.path.length - a.path.length || a.type.localeCompare(b.type));
+    return matches[0]?.type !== 'Disallow';
+  }
+  for (const path of [
+    '/api/v1/projects',
+    '/api/v1/projects?locale=hu',
+    '/api/v1/projects/portfolio-spring-angular?locale=hu',
+    '/api/v1/github/activity',
+  ]) {
+    assert(allowed(path), `robots.txt blocks a rendering resource: ${path}`);
+  }
+  for (const path of ['/api/v1/contact', '/api/health', '/api/v1/projects-private']) {
+    assert(!allowed(path), `robots.txt unexpectedly allows ${path}`);
+  }
+  const response = await fetch(`${origin}/api/v1/projects/portfolio-spring-angular?locale=hu`);
+  assert(
+    response.status === 200 && response.headers.get('x-robots-tag') === 'noindex',
+    'public project JSON must be readable but not indexable',
+  );
+  const html = await (await fetch(`${origin}/hu/projektek/portfolio-spring-angular`)).text();
+  assert(
+    html.includes('Public project detail content.') &&
+      html.includes('name="robots" content="index,follow"'),
+    'Hungarian project must be indexable in SSR before JavaScript runs',
+  );
+  console.log('Crawl policy, JSON noindex and Hungarian detail SSR verified');
 }
 
 function project(locale) {

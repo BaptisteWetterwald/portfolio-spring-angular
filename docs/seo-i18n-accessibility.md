@@ -72,7 +72,7 @@ M12 structured data deliberately stops at `ProfilePage` plus `Person`. `Software
 
 ## Crawl Discovery
 
-The public `robots.txt` allows general site crawling, instructs compliant crawlers not to crawl `/api/`, and advertises the production sitemap URL. This policy is not access control and cannot by itself prevent API URLs from being discovered, indexed from other signals, or requested directly.
+The public `robots.txt` allows general site crawling and advertises the production sitemap URL. It excludes `/api/` except for the public project list/details and GitHub activity reads needed by JavaScript rendering. Those resources must remain crawlable even when hydration or client navigation needs a fresh request. The frontend API proxy sends `X-Robots-Tag: noindex` on JSON responses (including errors), keeping data endpoints out of search results without blocking their use in page rendering. Contact and health endpoints remain excluded from crawling. These directives are not access control.
 
 The SSR server generates `/sitemap.xml` from the backend-owned localized public project indexes. Generation requires `BACKEND_INTERNAL_ORIGIN` at runtime, and each of the parallel French and English backend requests has a five-second application-controlled timeout. The sitemap contains the canonical `/fr` and `/en` documents plus only localized `DETAIL` routes for `PUBLISHED` and `ARCHIVED` projects. It emits reciprocal `hreflang` entries for available localized project routes, excludes `CARD_ONLY` projects, and returns a plain-text, non-cacheable `503` rather than publishing an incomplete project index when the backend is unavailable or times out. Malformed individual project entries remain safely excluded without failing an otherwise valid localized index.
 

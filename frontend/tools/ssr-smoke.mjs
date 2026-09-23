@@ -63,6 +63,10 @@ const checks = [
     expectedBody: [
       'User-agent: *',
       'Disallow: /api/',
+      'Allow: /api/v1/projects$',
+      'Allow: /api/v1/projects?',
+      'Allow: /api/v1/projects/',
+      'Allow: /api/v1/github/activity$',
       'Sitemap: https://bwetterwald.fr/sitemap.xml',
     ],
   },

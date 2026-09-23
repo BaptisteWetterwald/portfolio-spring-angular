@@ -79,6 +79,7 @@ describe('server API proxy', () => {
     const capturedHeaders = capturedInit?.headers as Headers;
 
     expect(response.status).toBe(201);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
     expect(response.headers.get('x-upstream')).toBe('accepted');
     expect(capturedUrl?.href).toBe('http://backend:8080/api/health?probe=1');
     expect(capturedInit?.method).toBe('POST');
@@ -96,6 +97,7 @@ describe('server API proxy', () => {
     });
 
     expect(response.status).toBe(502);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
     await expect(response.json()).resolves.toEqual({
       status: 'DOWN',
       error: 'Backend service is unavailable.',
@@ -106,6 +108,7 @@ describe('server API proxy', () => {
     const response = await proxyBackendApiRequest(baseRequest, 'notaurl');
 
     expect(response.status).toBe(503);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
     await expect(response.json()).resolves.toEqual({
       status: 'DOWN',
       error: 'Backend service is unavailable.',
